@@ -60,6 +60,7 @@ func InitDB() {
 		"file://"+migrationsDir,
 		"sqlite3", driver,
 	)
+	
 	if err != nil {
 		log.Fatalf("failed to create migrate instance: %v", err)
 	}
