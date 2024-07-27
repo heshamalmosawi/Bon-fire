@@ -11,3 +11,43 @@ CREATE TABLE user (
     
     PRIMARY KEY (user_id)
 );
+
+-- CREATE TABLE public.user_activity (
+--     user_id TEXT NOT NULL DEFAULT (lower(hex(randomblob(16)))),
+--     post_id TEXT NOT NULL DEFAULT (lower(hex(randomblob(16)))),
+--     listing_id TEXT NOT NULL DEFAULT (lower(hex(randomblob(16))),
+--     PRIMARY KEY (listing_id),
+--     FOREIGN KEY (post_id) REFERENCES post(post_id),
+--     FOREIGN KEY (user_id) REFERENCES "user"(user_id)
+-- );
+
+CREATE TABLE user_follower (
+    user_id TEXT NOT NULL DEFAULT (lower(hex(randomblob(16)))),
+    follower_id TEXT NOT NULL DEFAULT (lower(hex(randomblob(16))),
+    listing_id TEXT NOT NULL DEFAULT (lower(hex(randomblob(16))),
+    PRIMARY KEY (listing_id),
+    FOREIGN KEY (follower_id) REFERENCES "user" (user_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES "user" (user_id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
+CREATE TABLE user_following (
+    user_id TEXT NOT NULL DEFAULT (hex(randomblob(16))),
+    following_id TEXT NOT NULL DEFAULT (hex(randomblob(16))),
+    listing_id TEXT NOT NULL DEFAULT (hex(randomblob(16)),
+    PRIMARY KEY (listing_id),
+    FOREIGN KEY (following_id) REFERENCES "user" (user_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES "user" (user_id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
+CREATE TABLE
+  user_notification (
+    noti_id TEXT PRIMARY KEY,
+    reciever_id TEXT,
+    noti_type TEXT,
+    noti_content TEXT,
+    noti_time TEXT,
+    noti_status TEXT DEFAULT 'unread',
+    FOREIGN KEY (reciever_id) REFERENCES "user" (user_id) ON UPDATE CASCADE ON DELETE CASCADE
+  );
