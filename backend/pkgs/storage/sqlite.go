@@ -2,24 +2,74 @@ package storage
 
 import (
 	"database/sql"
+	"log"
 	"os"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
-	dbFileName    = "../Bonfire.db"
-	migrationsDir = "../pkgs/storage/migrations"
+	// Path to the SQLite database file
+	dbFileName = "Bonfire.db"
+	// Directory containing migration files
+	migrationsDir = "pkgs/storage/migrations"
 )
 
+// DB holds the database connection
 var DB *sql.DB
 
 /*
-Create the DB file (if needed) and run all migrations
+InitDB initializes the database by creating the database file if it does not exist,
+setting up the database connection, and running all migrations.
+
+1. Checks if the database file exists, and creates it if necessary.
+2. Opens a connection to the SQLite database.
+3. Initializes the SQLite migration driver.
+4. Creates a new migrate instance for running migrations.
+5. Executes all up migrations to bring the database schema to the latest version.
+
+Logs fatal errors and exits the application if any issues are encountered.
 */
-func Initialize() {
-	if _, err := os.Stat(dbFileName); err != nil {
-		os.Remove(dbFileName)
+func InitDB() {
+	// Check if the database file exists; create it if it does not
+	if _, err := os.Stat(dbFileName); os.IsNotExist(err) {
+		_, err := os.Create(dbFileName)
+		if err != nil {
+			log.Fatalf("error creating DB file: %v", err)
+		}
+		log.Println("Created database file:", dbFileName)
 	}
+
+	// Open a new SQLite connection
+	db, err := sql.Open("sqlite3", dbFileName)
+	if err != nil {
+		log.Fatalf("error opening DB connection: %v", err)
+	}
+
+	// Initialize the migration driver
+	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
+	if err != nil {
+		log.Fatalf("failed to initialize sqlite3 migration driver: %v", err)
+	}
+
+	// Create a new migrate instance with the migration source and database driver
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://"+migrationsDir,
+		"sqlite3", driver,
+	)
+	if err != nil {
+		log.Fatalf("failed to create migrate instance: %v", err)
+	}
+
+	// Run all migrations
+	if err = m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatalf("failed to apply migrations: %v", err)
+	}
+	log.Println("Database migration completed successfully")
+
+	// Assign the database connection to the global variable
+	DB = db
 }
