@@ -1,3 +1,3 @@
-DROP TABLE comment_like;
+DROP TABLE IF EXISTS comment_like;
 
-DROP TABLE comment;
+DROP TABLE IF EXISTS comment;

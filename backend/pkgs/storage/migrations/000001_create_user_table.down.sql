@@ -1,9 +1,9 @@
-DROP TABLE user_follower;
+DROP TABLE IF EXISTS user_follower;
 
-DROP TABLE user_following;
+DROP TABLE IF EXISTS user_following;
 
-DROP TABLE user_notification;
+DROP TABLE IF EXISTS user_notification;
 
-DROP TABLE user_activity;
+DROP TABLE IF EXISTS user_activity;
 
-DROP TABLE user;
+DROP TABLE IF EXISTS user;
