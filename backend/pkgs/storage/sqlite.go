@@ -26,9 +26,13 @@ InitDB initializes the database by creating the database file if it does not exi
 setting up the database connection, and running all migrations.
 
 1. Checks if the database file exists, and creates it if necessary.
+
 2. Opens a connection to the SQLite database.
+
 3. Initializes the SQLite migration driver.
+
 4. Creates a new migrate instance for running migrations.
+
 5. Executes all up migrations to bring the database schema to the latest version.
 
 Logs fatal errors and exits the application if any issues are encountered.
@@ -60,7 +64,7 @@ func InitDB() {
 		"file://"+migrationsDir,
 		"sqlite3", driver,
 	)
-	
+
 	if err != nil {
 		log.Fatalf("failed to create migrate instance: %v", err)
 	}
@@ -73,4 +77,26 @@ func InitDB() {
 
 	// Assign the database connection to the global variable
 	DB = db
+}
+
+/*
+RedoMigrations deletes the database file and reruns the migrations by:
+
+1. Removing the existing database file if it exists.
+
+2. Reinitializing the database and running the migrations.
+
+Logs fatal errors and exits the application if any issues are encountered.
+*/
+func RedoMigrations() {
+	// Check if the database file exists; delete it if it does
+	if _, err := os.Stat(dbFileName); err == nil {
+		if err := os.Remove(dbFileName); err != nil {
+			log.Fatalf("Error deleting DB file: %v", err)
+		}
+		log.Println("Deleted database file:", dbFileName)
+	}
+
+	// Reinitialize the database and run the migrations
+	InitDB()
 }

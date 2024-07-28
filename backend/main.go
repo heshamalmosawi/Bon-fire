@@ -2,10 +2,15 @@ package main
 
 import (
 	"bonfire/pkgs/storage"
-	"fmt"
+	"os"
 )
 
 func main() {
-	fmt.Println("let's go live!")
-	storage.InitDB()
+	if len(os.Args[1:]) > 0 {
+		if os.Args[1] == "migrate" {
+			storage.RedoMigrations()
+		}
+	} else {
+		storage.InitDB()
+	}
 }
