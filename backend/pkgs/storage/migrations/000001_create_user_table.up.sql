@@ -11,6 +11,15 @@ CREATE TABLE user (
   PRIMARY KEY (user_id)
 );
 
+CREATE TABLE user_activity (
+  listing_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  post_id TEXT NOT NULL,
+  PRIMARY KEY (listing_id),
+  FOREIGN KEY (post_id) REFERENCES post(post_id),
+  FOREIGN KEY (user_id) REFERENCES user(user_id)
+);
+
 CREATE TABLE user_follower (
   user_id TEXT NOT NULL,
   follower_id TEXT NOT NULL,

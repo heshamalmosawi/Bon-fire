@@ -12,11 +12,20 @@ CREATE TABLE post (
     FOREIGN KEY (group_id) REFERENCES "group" (group_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE user_activity (
+CREATE TABLE post_like (
+    listing_id TEXT NOT NULL,
+    post_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    PRIMARY KEY (listing_id),
+    FOREIGN KEY (post_id) REFERENCES post (post_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user (user_id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE post_view (
     listing_id TEXT NOT NULL,
     user_id TEXT NOT NULL,
     post_id TEXT NOT NULL,
     PRIMARY KEY (listing_id),
-    FOREIGN KEY (post_id) REFERENCES post(post_id),
-    FOREIGN KEY (user_id) REFERENCES user(user_id)
+    FOREIGN KEY (post_id) REFERENCES post (post_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user (user_id) ON UPDATE CASCADE ON DELETE CASCADE
 );

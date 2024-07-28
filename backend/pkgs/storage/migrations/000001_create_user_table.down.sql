@@ -4,4 +4,6 @@ DROP TABLE user_following;
 
 DROP TABLE user_notification;
 
+DROP TABLE user_activity;
+
 DROP TABLE user;

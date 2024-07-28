@@ -1,3 +1,5 @@
-DROP TABLE user_activity;
-
 DROP TABLE post;
+
+DROP TABLE post_like;
+
+DROP TABLE post_view;
