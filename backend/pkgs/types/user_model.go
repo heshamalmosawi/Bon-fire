@@ -50,3 +50,18 @@ func UpdateUser(user *UserModel) error {
 	_, err := storage.DB.Exec(query, user.UserEmail, user.UserPassword, user.UserFirstName, user.UserLastName, user.UserDOB, user.UserAvatarPath, user.UserNickname, user.UserBio, user.UserID)
 	return err
 }
+
+// get User function
+func GetUserByEmail(email string) (*UserModel, error) {
+	query := `SELECT user_id, user_email, user_password, user_fname, user_lname, user_dob, user_avatar_path, user_nickname, user_bio FROM users WHERE user_email = ?`
+
+	row := storage.DB.QueryRow(query, email)
+
+	var user UserModel
+	err := row.Scan(&user.UserID, &user.UserEmail, &user.UserPassword, &user.UserFirstName, &user.UserLastName, &user.UserDOB, &user.UserAvatarPath, &user.UserNickname, &user.UserBio)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
