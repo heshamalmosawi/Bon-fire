@@ -1,4 +1,4 @@
-CREATE TABLE group (
+CREATE TABLE "group" (
   group_id TEXT PRIMARY KEY,
   owner_id TEXT,
   group_name TEXT NOT NULL,
@@ -37,23 +37,14 @@ CREATE TABLE group_interactions (
   FOREIGN KEY (user_id) REFERENCES "user" (user_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE group_message (
-  message_id TEXT PRIMARY KEY,
-  sender_id TEXT NOT NULL,
-  group_id TEXT,
-  message_content TEXT,
-  message_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (group_id) REFERENCES "group" (group_id) ON UPDATE CASCADE ON DELETE CASCADE,
-  FOREIGN KEY (sender_id) REFERENCES group_user (member_id) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
 CREATE TABLE group_notification (
   noti_id TEXT PRIMARY KEY,
   group_id TEXT,
   noti_type TEXT,
   noti_content TEXT,
   noti_time TIMESTAMP,
-  noti_status TEXT DEFAULT 'unread'
+  noti_status TEXT DEFAULT 'unread',
+  FOREIGN KEY (group_id) REFERENCES "group" (group_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE group_user (
