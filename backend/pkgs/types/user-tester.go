@@ -27,12 +27,7 @@ func TestCreateUser() {
 }
 
 func TestUserDelete(){
-
-
-	
 	DeleteUser("test@example.com")
-
-
 }
 
 
