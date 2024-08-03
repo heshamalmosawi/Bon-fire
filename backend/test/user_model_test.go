@@ -21,15 +21,17 @@ func TestUserCRUD(t *testing.T) {
 		ProfileExposure: "Private",
 	}
 
-	err := models.CreateUser(&user)
-
-	if err != nil {
+	if err := user.Save(); err != nil {
 		t.Fatal("error creating user:", err)
 	}
 
-	err = models.DeleteUser("test@example.com")
+	user.UserNickname = "testuserii"
 
-	if err != nil {
+	if err := user.Update(); err != nil {
+		t.Fatal("error updating user:", err)
+	}
+
+	if err := user.Del(); err != nil {
 		t.Fatal("error deleting user:", err)
 	}
 
