@@ -8,9 +8,9 @@ import (
 func main() {
 	if len(os.Args[1:]) > 0 {
 		if os.Args[1] == "migrate" {
-			storage.RedoMigrations()
+			storage.RedoMigrations("prod")
 		}
 	} else {
-		storage.InitDB()
+		storage.InitDB("prod")
 	}
 }

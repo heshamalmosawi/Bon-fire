@@ -13,9 +13,12 @@ import (
 
 const (
 	// Path to the SQLite database file
-	dbFileName = "Bonfire.db"
+	dbFileName     = "Bonfire.db"
+	testDbFileName = "test.db"
 	// Directory containing migration files
 	migrationsDir = "pkgs/storage/migrations"
+	// Directory refrence for testing
+	testmigrationsdir = "../pkgs/storage/migrations"
 )
 
 // DB holds the database connection
@@ -24,6 +27,8 @@ var DB *sql.DB
 /*
 InitDB initializes the database by creating the database file if it does not exist,
 setting up the database connection, and running all migrations.
+
+It accepts a param `mode` that can be specified to be "test" to change refrence to migration directory
 
 1. Checks if the database file exists, and creates it if necessary.
 
@@ -37,18 +42,26 @@ setting up the database connection, and running all migrations.
 
 Logs fatal errors and exits the application if any issues are encountered.
 */
-func InitDB() {
+func InitDB(mode string) {
+	var dbFname string
+
+	if mode == "test" {
+		dbFname = testDbFileName
+	} else {
+		dbFname = dbFileName
+	}
+
 	// Check if the database file exists; create it if it does not
-	if _, err := os.Stat(dbFileName); os.IsNotExist(err) {
-		_, err := os.Create(dbFileName)
+	if _, err := os.Stat(dbFname); os.IsNotExist(err) {
+		_, err := os.Create(dbFname)
 		if err != nil {
 			log.Fatalf("error creating DB file: %v", err)
 		}
-		log.Println("Created database file:", dbFileName)
+		log.Println("Created database file:", dbFname)
 	}
 
 	// Open a new SQLite connection
-	db, err := sql.Open("sqlite3", dbFileName)
+	db, err := sql.Open("sqlite3", dbFname)
 	if err != nil {
 		log.Fatalf("error opening DB connection: %v", err)
 	}
@@ -59,9 +72,17 @@ func InitDB() {
 		log.Fatalf("failed to initialize sqlite3 migration driver: %v", err)
 	}
 
+	var migrations string
+
+	if mode == "test" {
+		migrations = testmigrationsdir
+	} else {
+		migrations = migrationsDir
+	}
+
 	// Create a new migrate instance with the migration source and database driver
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://"+migrationsDir,
+		"file://"+migrations,
 		"sqlite3", driver,
 	)
 
@@ -82,13 +103,15 @@ func InitDB() {
 /*
 RedoMigrations deletes the database file and reruns the migrations by:
 
+It accepts a param `mode` that can be specified to be "test" to change refrence to migration directory
+
 1. Removing the existing database file if it exists.
 
 2. Reinitializing the database and running the migrations.
 
 Logs fatal errors and exits the application if any issues are encountered.
 */
-func RedoMigrations() {
+func RedoMigrations(mode string) {
 	// Check if the database file exists; delete it if it does
 	if _, err := os.Stat(dbFileName); err == nil {
 		if err := os.Remove(dbFileName); err != nil {
@@ -98,5 +121,5 @@ func RedoMigrations() {
 	}
 
 	// Reinitialize the database and run the migrations
-	InitDB()
+	InitDB(mode)
 }
