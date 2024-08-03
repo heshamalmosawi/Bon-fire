@@ -3,12 +3,10 @@ package models
 import (
 	"bonfire/pkgs/storage"
 	"time"
-
-	"github.com/gofrs/uuid"
 )
 
 type UserModel struct {
-	UserID         uuid.UUID `json:"user_id"`
+	UserID         string    `json:"user_id"`
 	UserEmail      string    `json:"user_email"`
 	UserPassword   string    `json:"user_password"`
 	UserFirstName  string    `json:"user_fname"`
@@ -19,45 +17,37 @@ type UserModel struct {
 	UserBio        string    `json:"user_bio"`
 }
 
-//CRUD Operations
+// CRUD Operations
 
 // Function to create user
 func CreateUser(user *UserModel) error {
-	query := `INSERT INTO users (user_id, user_email, user_password, user_fname, user_lname, user_dob, user_avatar_path, user_nickname, user_bio)
-	          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO user (user_email, user_password, user_fname, user_lname, user_dob, user_avatar_path, user_nickname, user_bio)
+	          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
-	uid, err := uuid.NewV4()
-	if err != nil {
-		return err
-	}
-
-	user.UserID = uid
-
-	_, err = storage.DB.Exec(query, user.UserID, user.UserEmail, user.UserPassword, user.UserFirstName, user.UserLastName, user.UserDOB, user.UserAvatarPath, user.UserNickname, user.UserBio)
+	_, err := storage.DB.Exec(query, user.UserEmail, user.UserPassword, user.UserFirstName, user.UserLastName, user.UserDOB, user.UserAvatarPath, user.UserNickname, user.UserBio)
 	return err
 }
 
-// function to delete
-func DeleteUser(userID uuid.UUID) error {
-	query := `DELETE FROM users WHERE user_id = ?`
+// Function to delete user by email
+func DeleteUser(email string) error {
+	query := `DELETE FROM user WHERE user_email = ?`
 
-	_, err := storage.DB.Exec(query, userID)
+	_, err := storage.DB.Exec(query, email)
 	return err
 }
 
-// function to update - alternative would be to update directly form the object type
-// TODO : discuss
+// Function to update user
 func UpdateUser(user *UserModel) error {
-	query := `UPDATE users SET user_email = ?, user_password = ?, user_fname = ?, user_lname = ?, user_dob = ?, user_avatar_path = ?, user_nickname = ?, user_bio = ?
+	query := `UPDATE user SET user_email = ?, user_password = ?, user_fname = ?, user_lname = ?, user_dob = ?, user_avatar_path = ?, user_nickname = ?, user_bio = ?
 	          WHERE user_id = ?`
 
 	_, err := storage.DB.Exec(query, user.UserEmail, user.UserPassword, user.UserFirstName, user.UserLastName, user.UserDOB, user.UserAvatarPath, user.UserNickname, user.UserBio, user.UserID)
 	return err
 }
 
-// get User function
+// Function to get user by email
 func GetUserByEmail(email string) (*UserModel, error) {
-	query := `SELECT user_id, user_email, user_password, user_fname, user_lname, user_dob, user_avatar_path, user_nickname, user_bio FROM users WHERE user_email = ?`
+	query := `SELECT user_id, user_email, user_password, user_fname, user_lname, user_dob, user_avatar_path, user_nickname, user_bio FROM user WHERE user_email = ?`
 
 	row := storage.DB.QueryRow(query, email)
 
