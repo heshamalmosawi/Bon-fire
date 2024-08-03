@@ -1,6 +1,7 @@
 CREATE TABLE user (
   user_id TEXT NOT NULL,
   user_email TEXT NOT NULL,
+  user_password TEXT NOT NULL,
   user_fname TEXT NOT NULL,
   user_lname TEXT NOT NULL,
   user_dob TEXT NOT NULL,
