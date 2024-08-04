@@ -1,7 +1,8 @@
 package models
 
 import (
-	"bonfire/pkgs/storage"
+	"bonfire/pkgs/utils"
+
 	"github.com/gofrs/uuid"
 )
 
@@ -21,48 +22,63 @@ type UserModel struct {
 // CRUD Operations
 
 // Function to create user
-func CreateUser(user *UserModel) error {
-	query := `INSERT INTO user (user_id, user_email, user_password ,user_fname, user_lname, user_dob, user_avatar_path, user_nickname, user_about, profile_exposure)
-	          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	uid, err := uuid.NewV4()
-	if err != nil {
-		return err
+func (u *UserModel) Save() error {
+	if u.UserID == uuid.Nil {
+		uid, err := uuid.NewV4()
+		if err != nil {
+			return err
+		}
+		u.UserID = uid
 	}
 
-	user.UserID = uid
+	columns := []string{"user_id", "user_email", "user_password", "user_fname", "user_lname", "user_dob", "user_avatar_path", "user_nickname", "user_about", "profile_exposure"}
+	values := []interface{}{u.UserID, u.UserEmail, u.UserPassword, u.UserFirstName, u.UserLastName, u.UserDOB, u.UserAvatarPath, u.UserNickname, u.UserBio, u.ProfileExposure}
 
-	_, err = storage.DB.Exec(query, user.UserID, user.UserEmail, user.UserPassword, user.UserFirstName, user.UserLastName, user.UserDOB, user.UserAvatarPath, user.UserNickname, user.UserBio, user.ProfileExposure)
+	_, err := utils.Create("user", columns, values)
 	return err
 }
 
-// Function to delete user by email
-func DeleteUser(email string) error {
-	query := `DELETE FROM user WHERE user_email = ?`
-
-	_, err := storage.DB.Exec(query, email)
+// Method to delete the user
+func (u *UserModel) Del() error {
+	condition := "user_email = ?"
+	_, err := utils.Delete("user", condition, u.UserEmail)
 	return err
 }
 
-// Function to update user
-func UpdateUser(user *UserModel) error {
-	query := `UPDATE user SET user_email = ?, user_fname = ?, user_lname = ?, user_dob = ?, user_avatar_path = ?, user_nickname = ?, user_about = ?, profile_exposure = ?
-	          WHERE user_id = ?`
-
-	_, err := storage.DB.Exec(query, user.UserEmail, user.UserFirstName, user.UserLastName, user.UserDOB, user.UserAvatarPath, user.UserNickname, user.UserBio, user.ProfileExposure, user.UserID)
+// Method to update the user instance in the database
+func (u *UserModel) Update() error {
+	updates := map[string]interface{}{
+		"user_email":       u.UserEmail,
+		"user_fname":       u.UserFirstName,
+		"user_lname":       u.UserLastName,
+		"user_dob":         u.UserDOB,
+		"user_avatar_path": u.UserAvatarPath,
+		"user_nickname":    u.UserNickname,
+		"user_about":       u.UserBio,
+		"profile_exposure": u.ProfileExposure,
+	}
+	condition := "user_id = ?"
+	_, err := utils.Update("user", updates, condition, u.UserID)
 	return err
 }
 
 // Function to get user by email
 func GetUserByEmail(email string) (*UserModel, error) {
-	query := `SELECT user_id, user_email, user_fname, user_lname, user_dob, user_avatar_path, user_nickname, user_about, profile_exposure FROM user WHERE user_email = ?`
-
-	row := storage.DB.QueryRow(query, email)
-
-	var user UserModel
-	err := row.Scan(&user.UserID, &user.UserEmail, &user.UserFirstName, &user.UserLastName, &user.UserDOB, &user.UserAvatarPath, &user.UserNickname, &user.UserBio, &user.ProfileExposure)
+	columns := []string{"user_id", "user_email", "user_fname", "user_lname", "user_dob", "user_avatar_path", "user_nickname", "user_about", "profile_exposure"}
+	condition := "user_email = ?"
+	rows, err := utils.Read("user", columns, condition, email)
 	if err != nil {
 		return nil, err
+	}
+	defer rows.Close()
+
+	var user UserModel
+	if rows.Next() {
+		err := rows.Scan(&user.UserID, &user.UserEmail, &user.UserFirstName, &user.UserLastName, &user.UserDOB, &user.UserAvatarPath, &user.UserNickname, &user.UserBio, &user.ProfileExposure)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &user, nil
