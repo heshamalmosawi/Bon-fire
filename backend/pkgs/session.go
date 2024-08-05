@@ -1,4 +1,4 @@
-package main
+package pkgs
 
 import (
 	"bonfire/pkgs/models"
@@ -80,3 +80,5 @@ func (sm *SessionManager) CleanupExpiredSessions() {
 		return true
 	})
 }
+
+var MainSessionManager = NewSessionManager(time.Hour * 24)
