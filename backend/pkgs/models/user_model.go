@@ -4,6 +4,7 @@ import (
 	"bonfire/pkgs/utils"
 
 	"github.com/gofrs/uuid"
+	"github.com/mattn/go-sqlite3"
 )
 
 type UserModel struct {
@@ -76,6 +77,9 @@ func GetUserByEmail(email string) (*UserModel, error) {
 	condition := "user_email = ?"
 	rows, err := utils.Read("user", columns, condition, email)
 	if err != nil {
+		if err == sqlite3.ErrNotFound {
+			return nil, utils.ErrUserNotFound
+		}
 		return nil, err
 	}
 	defer rows.Close()
