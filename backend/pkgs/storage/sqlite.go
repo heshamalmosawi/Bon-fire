@@ -17,8 +17,8 @@ const (
 	testDbFileName = "test.db"
 	// Directory containing migration files
 	migrationsDir = "pkgs/storage/migrations"
-	// Directory refrence for testing
-	testmigrationsdir = "../pkgs/storage/migrations"
+	// Directory reference for testing
+	testMigrationsDir = "../pkgs/storage/migrations"
 )
 
 // DB holds the database connection
@@ -28,34 +28,34 @@ var DB *sql.DB
 InitDB initializes the database by creating the database file if it does not exist,
 setting up the database connection, and running all migrations.
 
-It accepts a param `mode` that can be specified to be "test" to change refrence to migration directory
+It accepts a parameter `mode` that can be specified as "test" to change the reference to the migration directory.
 
+Steps:
 1. Checks if the database file exists, and creates it if necessary.
-
 2. Opens a connection to the SQLite database.
-
 3. Initializes the SQLite migration driver.
-
 4. Creates a new migrate instance for running migrations.
-
 5. Executes all up migrations to bring the database schema to the latest version.
 
 Logs fatal errors and exits the application if any issues are encountered.
 */
 func InitDB(mode string) {
 	var dbFname string
+	var migrations string
 
 	if mode == "test" {
 		dbFname = testDbFileName
+		migrations = testMigrationsDir
 	} else {
 		dbFname = dbFileName
+		migrations = migrationsDir
 	}
 
 	// Check if the database file exists; create it if it does not
 	if _, err := os.Stat(dbFname); os.IsNotExist(err) {
 		_, err := os.Create(dbFname)
 		if err != nil {
-			log.Fatalf("error creating DB file: %v", err)
+			log.Fatalf("Error creating DB file: %v", err)
 		}
 		log.Println("Created database file:", dbFname)
 	}
@@ -63,21 +63,18 @@ func InitDB(mode string) {
 	// Open a new SQLite connection
 	db, err := sql.Open("sqlite3", dbFname)
 	if err != nil {
-		log.Fatalf("error opening DB connection: %v", err)
+		log.Fatalf("Error opening DB connection: %v", err)
+	}
+
+	// Check the connection
+	if err := db.Ping(); err != nil {
+		log.Fatalf("DB connection pinging failed: %v", err)
 	}
 
 	// Initialize the migration driver
 	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
 	if err != nil {
-		log.Fatalf("failed to initialize sqlite3 migration driver: %v", err)
-	}
-
-	var migrations string
-
-	if mode == "test" {
-		migrations = testmigrationsdir
-	} else {
-		migrations = migrationsDir
+		log.Fatalf("Failed to initialize sqlite3 migration driver: %v", err)
 	}
 
 	// Create a new migrate instance with the migration source and database driver
@@ -85,14 +82,13 @@ func InitDB(mode string) {
 		"file://"+migrations,
 		"sqlite3", driver,
 	)
-
 	if err != nil {
-		log.Fatalf("failed to create migrate instance: %v", err)
+		log.Fatalf("Failed to create migrate instance: %v", err)
 	}
 
 	// Run all migrations
 	if err = m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("failed to apply migrations: %v", err)
+		log.Fatalf("Failed to apply migrations: %v", err)
 	}
 	log.Println("Database migration completed successfully")
 
@@ -101,23 +97,31 @@ func InitDB(mode string) {
 }
 
 /*
-RedoMigrations deletes the database file and reruns the migrations by:
+RedoMigrations deletes the database file and reruns the migrations.
 
-It accepts a param `mode` that can be specified to be "test" to change refrence to migration directory
+It accepts a parameter `mode` that can be specified as "test" to change the reference to the migration directory.
 
-1. Removing the existing database file if it exists.
-
-2. Reinitializing the database and running the migrations.
+Steps:
+1. Removes the existing database file if it exists.
+2. Reinitializes the database and runs the migrations.
 
 Logs fatal errors and exits the application if any issues are encountered.
 */
 func RedoMigrations(mode string) {
+	var dbFname string
+
+	if mode == "test" {
+		dbFname = testDbFileName
+	} else {
+		dbFname = dbFileName
+	}
+
 	// Check if the database file exists; delete it if it does
-	if _, err := os.Stat(dbFileName); err == nil {
-		if err := os.Remove(dbFileName); err != nil {
+	if _, err := os.Stat(dbFname); err == nil {
+		if err := os.Remove(dbFname); err != nil {
 			log.Fatalf("Error deleting DB file: %v", err)
 		}
-		log.Println("Deleted database file:", dbFileName)
+		log.Println("Deleted database file:", dbFname)
 	}
 
 	// Reinitialize the database and run the migrations
