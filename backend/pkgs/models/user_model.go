@@ -32,10 +32,17 @@ func (u *UserModel) Save() error {
 		u.UserID = uid
 	}
 
+	hashed_password, err := utils.HashPassword(u.UserPassword)
+	if err != nil {
+		return err
+	}
+
+	u.UserPassword = hashed_password
+
 	columns := []string{"user_id", "user_email", "user_password", "user_fname", "user_lname", "user_dob", "user_avatar_path", "user_nickname", "user_about", "profile_exposure"}
 	values := []interface{}{u.UserID, u.UserEmail, u.UserPassword, u.UserFirstName, u.UserLastName, u.UserDOB, u.UserAvatarPath, u.UserNickname, u.UserBio, u.ProfileExposure}
 
-	_, err := utils.Create("user", columns, values)
+	_, err = utils.Create("user", columns, values)
 	return err
 }
 
