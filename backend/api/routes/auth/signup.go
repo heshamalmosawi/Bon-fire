@@ -8,9 +8,8 @@ import (
 )
 
 /*
-Signup handles user registration by decoding the JSON payload, hashing the user's password,
-and saving the user information to the database. It responds with the appropriate HTTP status
-code based on the success or failure of these operations.
+Signup handles user registration by decoding the JSON payload, saving the user information to the database. 
+It responds with the appropriate HTTP status code based on the success or failure of these operations.
 
 Steps:
 
