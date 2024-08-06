@@ -42,7 +42,7 @@ func (sm *SessionManager) CreateSession(user *models.UserModel) (*Session, error
 		ExpiresAt: time.Now().Add(sm.ttl),
 	}
 
-	sm.sessions.Store(sessionID, session)
+	sm.sessions.Store(sessionID.String(), session)
 	return session, nil
 }
 
