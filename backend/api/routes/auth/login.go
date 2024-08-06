@@ -16,7 +16,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}{}
 
-	if err := utils.DecodeJSON(r, AuthRequest); err != nil {
+	if err := utils.DecodeJSON(r, &AuthRequest); err != nil {
 		log.Println("Error decoding JSON in login:", err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
