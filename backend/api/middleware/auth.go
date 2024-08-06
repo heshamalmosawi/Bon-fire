@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"bonfire/pkgs"
 	"net/http"
 
 	"log/slog"
@@ -18,14 +19,20 @@ import (
 func AuthenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check for the "user_id" cookie
-		_, err := r.Cookie("session_id")
+		session_id, err := r.Cookie("session_id")
 		if err != nil {
-			slog.Warn("Request came in with no user_id cookie")
+			slog.Warn("Request came in with no session_id cookie")
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
 
-		// Call the next handler if the "user_id" cookie is found
+		if _, err = pkgs.MainSessionManager.GetSession(session_id.Value); err != nil {
+			slog.Warn("error getting associated session: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+
+		// Call the next handler if the "session_id" cookie is found
 		next.ServeHTTP(w, r)
 	})
 }
