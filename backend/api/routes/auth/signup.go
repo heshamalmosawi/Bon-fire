@@ -22,7 +22,7 @@ Steps:
 4. Respond with HTTP status code.
 
 If an error occurs at any step, the function logs the error and responds with an appropriate
-HTTP error status code.
+HTTP error status code. (frontend validation might be needed!)
 
 Example usage:
 
@@ -43,7 +43,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	var user models.UserModel
 
 	// Decode the JSON payload
-	if err := utils.DecodeJSON(r, user); err != nil {
+	if err := utils.DecodeJSON(r, &user); err != nil {
 		log.Println("Error decoding JSON in signup:", err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
