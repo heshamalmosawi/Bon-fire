@@ -2,6 +2,7 @@ package models
 
 import (
 	"bonfire/pkgs/utils"
+
 	"github.com/gofrs/uuid"
 )
 
