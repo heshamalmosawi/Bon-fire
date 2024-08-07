@@ -1,10 +1,11 @@
 package test
 
 import (
-	"bonfire/pkgs/utils"
 	"testing"
 
 	"golang.org/x/crypto/bcrypt"
+
+	"bonfire/pkgs/utils"
 )
 
 func TestHashing(t *testing.T) {
