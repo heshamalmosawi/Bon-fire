@@ -16,8 +16,6 @@ import (
  * all the fuctions should be POST requests.
 */
 
-// TODO: Implement the logout functions then fix the decumentation based on the implementation.
-
 // Login handles user authentication by verifying email and password.
 // It creates a session and sets a session cookie upon successful authentication.
 func HandleLogin(w http.ResponseWriter, r *http.Request) {

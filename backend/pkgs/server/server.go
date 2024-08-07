@@ -5,19 +5,23 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"bonfire/api/middleware"
 )
 
+// TODO: Implement the default function then fix the decumentation based on the implementation.
 
-
-
+// Routers sets up the HTTP server routes and starts the server.
+// It creates a new HTTP server multiplexer, registers the route handlers,
+// and starts the server on the specified port.
 func Routers() {
-
 	mux := http.NewServeMux()
 
+	// the default route handler
 	mux.HandleFunc("GET /", HandleDefault)
-	mux.HandleFunc("POST /login", HandleLogin)
-	mux.HandleFunc("POST /signup", HandleSignup)
-	mux.HandleFunc("GET /logout", HandleLogout)
+	mux.HandleFunc("POST /login", HandleLogin) // ✅
+	mux.HandleFunc("POST /signup", HandleSignup) // ✅
+	mux.HandleFunc("GET /logout", HandleLogout) // ✅
 	mux.HandleFunc("GET /profile/{id}", HandleProfile)
 	mux.HandleFunc("UPDATE /profile/update", HandleProfileUpdate)
 	mux.HandleFunc("POST /follow", HandleFollow)
@@ -36,21 +40,11 @@ func Routers() {
 	mux.HandleFunc("DELETE /group/delete", HandleGroupDelete)
 	mux.HandleFunc("POST /group/event_respose", HandleGroupEventResponse)
 	mux.HandleFunc("GET /group/requests", HandleGroupRequests)
-	        //! THIS IS TO TEST AUTHENTICATION, PLS DELETE AFTERWARDS
-	// 		authentication_test_mux := http.NewServeMux()
 
-	// 		authentication_test_mux.HandleFunc("POST /signup", auth.Signup)
-	// 		authentication_test_mux.HandleFunc("POST /login", auth.Login)
-	// 		authentication_test_mux.Handle("GET /test", middleware.AuthenticationMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	// 			w.Write([]byte("Test Access Authorized!"))
-	// 		})))
-	
-	// 		log.Println("auth mux listens and serves on :8080")
-	
-	// 		http.ListenAndServe(":8080", authentication_test_mux)
-	// 	}
-	// }
-
+	// testing for the authentication middleware.
+	mux.Handle("GET /test", middleware.AuthenticationMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Test Access Authorized!"))
+	})))
 	port := "8080"
 	fmt.Println("HTTP server is listening on http://localhost:" + port)
 	if err := http.ListenAndServe(":"+port, mux); err != nil {
@@ -59,22 +53,22 @@ func Routers() {
 	}
 }
 
-
 // example of how to add the Handle function to the router
 // func HandleMessage1(w http.ResponseWriter, r *http.Request) {
 // 	  fmt.Println("Handling message1")
-//    -- the correct way of serving the json. 
+//    -- the correct way of serving the json.
 //    w.Header().Set("Content-Type", "application/json")
 //    json.NewEncoder(w).Encode(map[string]string{"response": "Message1 Handled"})
 // }
 
-
 func HandleDefault(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling default message")
-	// w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(map[string]string{"response": "Default message Handled"})
-	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte("<html><body><h1>hello</h1></body></html>"))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"response": "Default message Handled"})
+
+	// for testing.
+	// w.Header().Set("Content-Type", "text/html")
+	// w.Write([]byte("<html><body><h1>hello</h1></body></html>"))
 }
 func HandleError(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling error")
