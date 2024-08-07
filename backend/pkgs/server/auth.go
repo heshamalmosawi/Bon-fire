@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -14,7 +15,7 @@ import (
 /**
  * This file handles the user authentication requests.
  * all the fuctions should be POST requests.
-*/
+ */
 
 // Login handles user authentication by verifying email and password.
 // It creates a session and sets a session cookie upon successful authentication.
@@ -147,8 +148,7 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
         Name:     "session_id",
         Value:    "",
         Path:     "/",
-        MaxAge:   -1, // Delete the cookie
-        HttpOnly: true,
+        Expires: time.Unix(0, 0), // expire cookie immediately
     }
     http.SetCookie(w, cookie)
 
