@@ -1,8 +1,6 @@
 package server
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -131,9 +129,31 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-// HandleLogout handles the logout request...
+
+// HandleLogout handles the logout request by deleting the user's session.
 func HandleLogout(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling logout")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "User logout"})
+    // Assuming the session ID is stored in a cookie named "session_id"
+    cookie, err := r.Cookie("session_id")
+    if err != nil {
+        http.Error(w, "Session not found", http.StatusUnauthorized)
+        return
+    }
+
+    sessionID := cookie.Value
+
+    // Delete the session
+    pkgs.MainSessionManager.DeleteSession(sessionID)
+
+    // Clear the session cookie
+    cookie = &http.Cookie{
+        Name:     "session_id",
+        Value:    "",
+        Path:     "/",
+        MaxAge:   -1, // Delete the cookie
+        HttpOnly: true,
+    }
+    http.SetCookie(w, cookie)
+
+    log.Println("User logged out successfully")
+    w.WriteHeader(http.StatusOK)
 }
