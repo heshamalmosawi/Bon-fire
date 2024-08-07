@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	// "os"
+
+	// "bonfire/pkgs/models"
 )
 
 /**
@@ -20,38 +21,42 @@ import (
 func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling profile")
 
-	// this line will get the section cookie so we can know if the user is logged in or not
-	// those lines will be replaced by the call of the session validation function to follow the good practice needed
+	// Get the session cookie to check if the user is logged in
 	sessionUser, err := r.Cookie("session_id")
 	if err != nil || sessionUser == nil {
 		log.Println("Error getting session cookie:", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// get the user here
-	// if sessionUser != nil {
-	// 	  User := &models.UserModel{
-	// 		UserNickname:  "xlvk",
-	// 		UserFirstName: "Fatima",
-	// 		UserLastName:  "El-Hajjaji",
-	// 		UserAvatarPath:  imageIdToUrl(sessionUser.ImageId),
-	//    }
+	// Retrieve the user based on the session information
+	// user, err := models.GetUserBySessionID(sessionUser.Value)
+	// if err != nil {
+	// 	log.Println("Error retrieving user:", err)
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	return
 	// }
 
-	// get the user posts, comments, likes, etc.
+	// Retrieve user-related data based on the query parameter
+	var response interface{}
 	switch r.URL.Query().Get("q") {
-		case "comments":
-		// get comments only (TODO)
-		case "likes":
-		// get liked posts/comments (TODO)
-		default:
-		// user posts (TODO)
+	case "comments":
+		// Retrieve user comments (TODO)
+		response = []string{} // Placeholder for comments
+	case "likes":
+		// Retrieve liked posts/comments (TODO)
+		response = []string{} // Placeholder for likes
+	default:
+		// Retrieve user posts (TODO)
+		response = []string{} // Placeholder for posts
 	}
 
-	// the JSON of the user profile should be served at the end.
+	// Serve the JSON of the user profile
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Profile"})
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"user":     "user",
+		"response": response,
+	})
 }
 
 // HandleProfileUpdate handles the HTTP request for updating a user's profile.
@@ -62,7 +67,6 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Profile Update"})
 }
-
 
 // HandleFollow handles the HTTP request for following a user.
 // It expects the user to be followed to be provided in the request body in JSON format.
