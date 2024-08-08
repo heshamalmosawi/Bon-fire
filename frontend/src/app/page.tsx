@@ -1,6 +1,29 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect } from "react";
 
 export default function Home() {
+  useEffect(() => {
+    fetch("http://localhost:8080/signup", {
+      method: "POST",
+      body: JSON.stringify({
+        user_email: "akhaledlarus@gmail.com",
+        user_password: "123123",
+        user_fname: "Abdulrahman",
+        user_lname: "Idrees",
+        user_dob: "2004-10-21",
+        user_nickname: "akhaled",
+        user_about: "Cool as it can get!",
+        profile_exposure: "public",
+      }),
+    })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
