@@ -18,10 +18,11 @@ func Routers() {
 	mux := http.NewServeMux()
 
 	// the default route handler
+	// TODO: tidy this up
 	mux.HandleFunc("GET /", HandleDefault)
-	mux.HandleFunc("POST /login", HandleLogin) // ✅
+	mux.HandleFunc("POST /login", HandleLogin)   // ✅
 	mux.HandleFunc("POST /signup", HandleSignup) // ✅
-	mux.HandleFunc("GET /logout", HandleLogout) // ✅
+	mux.HandleFunc("GET /logout", HandleLogout)  // ✅
 	mux.HandleFunc("GET /profile/{id}", HandleProfile)
 	mux.HandleFunc("PUT /profile/update", HandleProfileUpdate)
 	mux.HandleFunc("POST /follow", HandleFollow)
@@ -41,13 +42,12 @@ func Routers() {
 	mux.HandleFunc("POST /group/event_respose", HandleGroupEventResponse)
 	mux.HandleFunc("GET /group/requests", HandleGroupRequests)
 
-	// testing for the authentication middleware.
-	mux.Handle("GET /test", middleware.AuthenticationMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Test Access Authorized!"))
-	})))
-	port := "8080"
-	fmt.Println("HTTP server is listening on http://localhost:" + port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	// handle cors
+	cors_mux := middleware.CORS(mux)
+
+	log.Println("HTTP server is listening on http://localhost:8080")
+
+	if err := http.ListenAndServe(":8080", cors_mux); err != nil {
 		fmt.Println("Error starting server:", err)
 		log.Fatal(err.Error())
 	}
