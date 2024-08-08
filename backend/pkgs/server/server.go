@@ -70,6 +70,7 @@ func HandleDefault(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("Content-Type", "text/html")
 	// w.Write([]byte("<html><body><h1>hello</h1></body></html>"))
 }
+
 func HandleError(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling error")
 	w.Header().Set("Content-Type", "application/json")
