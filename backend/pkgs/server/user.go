@@ -179,8 +179,9 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 	// updating keys to trim and removing old ones from map
 	for key := range inputData {
 		trimmedKey := strings.TrimSpace(key)
+		value := inputData[key]
 		delete(inputData, key)
-		inputData[trimmedKey] = strings.TrimSpace(inputData[key])
+		inputData[trimmedKey] = strings.TrimSpace(value)
 	}
 
 	/*------------------------------------- IF x-www-form-urlencoded && NOT JSON, reverse comments and comment JSON parts ---------------------------------*/
