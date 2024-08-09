@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
-	// "bonfire/pkgs/models"
+	"bonfire/pkgs"
 )
 
 /**
@@ -18,31 +19,37 @@ import (
 // HandleProfile handles the HTTP request for retrieving a user's profile.
 // It requires a valid session cookie to be present in the request.
 // The user's profile information, including posts, comments, likes, etc., is returned in JSON format.
+
+var sessionManager = pkgs.NewSessionManager(time.Hour * 24)
+
 func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling profile")
 
 	// Get the session cookie to check if the user is logged in
-	sessionUser, err := r.Cookie("session_id")
-	if err != nil || sessionUser == nil {
+	session_id, err := r.Cookie("session_id")
+	if err != nil || session_id == nil {
 		log.Println("Error getting session cookie:", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	// Retrieve the user based on the session information
-	// user, err := models.GetUserBySessionID(sessionUser.Value)
-	// if err != nil {
-	// 	log.Println("Error retrieving user:", err)
-	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	// 	return
-	// }
+	session, err := sessionManager.GetSession(session_id.Value)
+	if err != nil || session == nil {
+		log.Println("Error getting session:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	user := session.User
 
 	// Retrieve user-related data based on the query parameter
 	var response interface{}
 	switch r.URL.Query().Get("q") {
-	case "comments":
-		// Retrieve user comments (TODO)
-		response = []string{} // Placeholder for comments
+	// we don't have any comments models in the database?.
+	// case "comments":
+	// 	// Retrieve user comments (TODO)
+		// response = []string{} // Placeholder for comments
 	case "likes":
 		// Retrieve liked posts/comments (TODO)
 		response = []string{} // Placeholder for likes
@@ -54,7 +61,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Serve the JSON of the user profile
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"user":     "user",
+		"user":     user,
 		"response": response,
 	})
 }
