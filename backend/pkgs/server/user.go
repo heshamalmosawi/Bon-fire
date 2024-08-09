@@ -6,22 +6,26 @@ import (
 	"log"
 	"net/http"
 	"reflect"
-	"time"
 
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
+	"bonfire/pkgs/utils"
 )
 
 /**
- * This file handles the user related requests.
+ * @file user.go
+ * @brief This file handles the user-related HTTP requests.
+ *
+ * This file contains the handlers for various user-related operations such as
+ * retrieving user profiles, updating user profiles, following users, and responding
+ * to follow requests. Each handler function processes the HTTP request, interacts
+ * with the session and model layers, and returns the appropriate JSON response.
  */
 
-// TODO: Implement the user functions then fix the decumentation based on the implementation.
-
-// sessionManager is the session manager for the server
-var sessionManager = pkgs.NewSessionManager(time.Hour * 24)
-
-// HandleLogin handles the HTTP request for logging in a user.
+// HandleProfile handles the profile request and returns user-related data based on the query parameter.
+// It checks if the user is logged in by retrieving the session cookie and verifies the session information.
+// The user's profile data is retrieved based on the session information and the query parameter.
+// The response is encoded as JSON and sent back to the client.
 func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling profile")
 
@@ -34,7 +38,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Retrieve the user based on the session information
-	session, err := sessionManager.GetSession(session_id.Value)
+	session, err := pkgs.MainSessionManager.GetSession(session_id.Value)
 	if err != nil || session == nil {
 		log.Println("HandleProfile: Error getting session", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -52,7 +56,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for followers
 	case "followers":
 		user_followers, err := models.GetFollowersByUserID(user.UserID)
-		if err != nil || user_followers == nil {
+		if err != nil {
 			log.Println("HandleProfile: Error getting followers by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
@@ -62,7 +66,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for followings
 	case "followings":
 		user_followings, err := models.GetFollowingsByUserID(user.UserID)
-		if err != nil || user_followings == nil {
+		if err != nil {
 			log.Println("HandleProfile: Error getting followings by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
@@ -72,7 +76,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for comments
 	case "comments":
 		user_comments, err := models.GetCommentsByUserID(user.UserID)
-		if err != nil || user_comments == nil {
+		if err != nil {
 			log.Println("HandleProfile: Error getting comments by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
@@ -100,7 +104,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			posts = append(posts, *post)
 		}
 
-		response = posts 
+		response = posts
 
 	// Placeholder for posts liked
 	case "comments_liked":
@@ -127,7 +131,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for posts
 	default:
 		user_posts, err := models.GetPostsByAuthorID(user.UserID)
-		if err != nil || user_posts == nil {
+		if err != nil {
 			log.Println("HandleProfile: Error getting posts by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
@@ -137,8 +141,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Serve the JSON of the user profile
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	utils.EncodeJSON(w, map[string]interface{}{
 		"user":     user,
 		"response": response,
 	})
@@ -156,7 +159,7 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := sessionManager.GetSession(session_id.Value)
+	session, err := pkgs.MainSessionManager.GetSession(session_id.Value)
 	if err != nil || session == nil {
 		log.Println("HandleProfileUpdate: Error getting session", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
