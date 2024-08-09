@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"bonfire/api/middleware"
+	"bonfire/pkgs/utils"
 )
 
 // TODO: Implement the default function then fix the decumentation based on the implementation.
@@ -45,7 +46,7 @@ func Routers() {
 	// handle cors
 	cors_mux := middleware.CORS(mux)
 
-	log.Println("HTTP server is listening on http://localhost:8080")
+	utils.BonfireLogger.Info("HTTP server is listening on http://localhost:8080")
 
 	if err := http.ListenAndServe(":8080", cors_mux); err != nil {
 		fmt.Println("Error starting server:", err)
