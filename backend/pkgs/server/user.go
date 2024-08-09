@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"bonfire/pkgs"
+	"bonfire/pkgs/models"
 )
 
 /**
@@ -17,12 +18,10 @@ import (
 
 // TODO: Implement the user functions then fix the decumentation based on the implementation.
 
-// HandleProfile handles the HTTP request for retrieving a user's profile.
-// It requires a valid session cookie to be present in the request.
-// The user's profile information, including posts, comments, likes, etc., is returned in JSON format.
-
+// sessionManager is the session manager for the server
 var sessionManager = pkgs.NewSessionManager(time.Hour * 24)
 
+// HandleLogin handles the HTTP request for logging in a user.
 func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling profile")
 
@@ -42,21 +41,99 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get the user from the session
 	user := session.User
 
 	// Retrieve user-related data based on the query parameter
 	var response interface{}
+
 	switch r.URL.Query().Get("q") {
-	// we don't have any comments models in the database?.
-	// case "comments":
-	// 	// Retrieve user comments (TODO)
-		// response = []string{} // Placeholder for comments
-	case "likes":
-		// Retrieve liked posts/comments (TODO)
-		response = []string{} // Placeholder for likes
+
+	// Placeholder for followers
+	case "followers":
+		user_followers, err := models.GetFollowersByUserID(user.UserID)
+		if err != nil || user_followers == nil {
+			log.Println("HandleProfile: Error getting followers by user ID", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		response = user_followers
+
+	// Placeholder for followings
+	case "followings":
+		user_followings, err := models.GetFollowingsByUserID(user.UserID)
+		if err != nil || user_followings == nil {
+			log.Println("HandleProfile: Error getting followings by user ID", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		response = user_followings
+
+	// Placeholder for comments
+	case "comments":
+		user_comments, err := models.GetCommentsByUserID(user.UserID)
+		if err != nil || user_comments == nil {
+			log.Println("HandleProfile: Error getting comments by user ID", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		response = user_comments
+
+	// Placeholder for posts liked
+	case "post_likes":
+		user_posts_likes, err := models.GetLikesByUserID(user.UserID)
+		if err != nil {
+			log.Println("HandleProfile: Error getting likes by user ID", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		var posts []models.PostModel
+
+		for _, like := range user_posts_likes {
+			post, err := models.GetPostByPostID(like.PostID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting post by ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			posts = append(posts, *post)
+		}
+
+		response = posts 
+
+	// Placeholder for posts liked
+	case "comments_liked":
+		user_posts_comments, err := models.GetLikeByUserID(user.UserID)
+		if err != nil {
+			log.Println("HandleProfile: Error getting comments by user ID", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		var comments []models.Comment
+
+		for _, like := range user_posts_comments {
+			comment, err := models.GetCommentByCommentID(like.CommentID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting post by ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			comments = append(comments, *comment)
+		}
+		response = comments
+
+	// Placeholder for posts
 	default:
-		// Retrieve user posts (TODO)
-		response = []string{} // Placeholder for posts
+		user_posts, err := models.GetPostsByAuthorID(user.UserID)
+		if err != nil || user_posts == nil {
+			log.Println("HandleProfile: Error getting posts by user ID", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		response = user_posts
 	}
 
 	// Serve the JSON of the user profile
