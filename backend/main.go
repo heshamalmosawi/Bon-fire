@@ -1,8 +1,10 @@
 package main
 
 import (
-	"bonfire/pkgs/storage"
 	"os"
+
+	"bonfire/pkgs/server"
+	"bonfire/pkgs/storage"
 )
 
 func main() {
@@ -12,5 +14,6 @@ func main() {
 		}
 	} else {
 		storage.InitDB("prod")
+		server.Routers()
 	}
 }
