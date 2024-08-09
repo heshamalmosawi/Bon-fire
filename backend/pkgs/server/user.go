@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"strings"
 	"time"
 
 	"bonfire/pkgs"
@@ -100,7 +101,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			posts = append(posts, *post)
 		}
 
-		response = posts 
+		response = posts
 
 	// Placeholder for posts liked
 	case "comments_liked":
@@ -156,27 +157,45 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := sessionManager.GetSession(session_id.Value)
+	session, err := pkgs.MainSessionManager.GetSession(session_id.Value)
 	if err != nil || session == nil {
 		log.Println("HandleProfileUpdate: Error getting session", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// Parse form data
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Could not parse form data", http.StatusBadRequest)
-		log.Println("HandleProfileUpdate: Could not parse form data:", err)
+	inputData := make(map[string]string)
+	err = json.NewDecoder(r.Body).Decode(&inputData)
+	if err != nil {
+		http.Error(w, "Could not parse JSON data", http.StatusBadRequest)
+		log.Print("Could not parse JSON data: ", err)
 		return
 	}
 
-	user := session.User
-	// writing for flexibility, as front end is not yet started
-	inputData := make(map[string]string)
-	for key, value := range r.Form {
-		log.Println("HandleProfileUpdate: Received update request for ", key)
-		inputData[key] = value[0] // assuming no input will take in a number of values
+	// updating keys to trim and removing old ones from map
+	for key := range inputData {
+		trimmedKey := strings.TrimSpace(key)
+		delete(inputData, key)
+		inputData[trimmedKey] = strings.TrimSpace(inputData[key])
 	}
+
+	/*------------------------------------- IF x-www-form-urlencoded && NOT JSON, reverse comments and comment JSON parts ---------------------------------*/
+	// Parse form data
+	// if err := r.ParseForm(); err != nil {
+	// 	http.Error(w, "Could not parse form data", http.StatusBadRequest)
+	// 	log.Println("HandleProfileUpdate: Could not parse form data:", err)
+	// 	return
+	// }
+
+	user := session.User
+	// // writing for flexibility, as front end is not yet started
+	// for key, value := range r.Form {
+	// 	log.Println("HandleProfileUpdate: Received update request for ", key)
+	// 	in_value := strings.TrimSpace(value[0])
+	// 	if in_value != "" {
+	// 		inputData[key] = in_value // assuming no input will take in a number of values
+	// 	}
+	// }
 
 	// Dynamically change the values in the user through what is sent to this function
 	v := reflect.ValueOf(user).Elem()
@@ -193,7 +212,7 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Handling profile update")
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Profile Update"})
+	json.NewEncoder(w).Encode(map[string]string{"response": "Profile updated successfully"})
 }
 
 // HandleFollow handles the HTTP request for following a user.
