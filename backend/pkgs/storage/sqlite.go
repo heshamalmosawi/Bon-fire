@@ -90,8 +90,6 @@ func InitDB(mode string) {
 	if err = m.Up(); err != nil && err != migrate.ErrNoChange {
 		log.Fatalf("Failed to apply migrations: %v", err)
 	}
-	log.Println("Database migration completed successfully")
-
 	// Assign the database connection to the global variable
 	DB = db
 }
