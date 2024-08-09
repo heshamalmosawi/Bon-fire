@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
@@ -22,10 +23,9 @@ import (
  * with the session and model layers, and returns the appropriate JSON response.
  */
 
-// HandleProfile handles the profile request and returns user-related data based on the query parameter.
-// It checks if the user is logged in by retrieving the session cookie and verifies the session information.
-// The user's profile data is retrieved based on the session information and the query parameter.
-// The response is encoded as JSON and sent back to the client.
+//  This function checks if the user is logged in by retrieving the session cookie and verifying the session information.
+//  The user's profile data is retrieved based on the session information and the query parameter.
+//  The response is encoded as JSON and sent back to the client.
 func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling profile")
 
@@ -148,8 +148,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// HandleProfileUpdate handles the HTTP request for updating a user's profile.
-// It expects the updated profile information to be provided in the request body in JSON format.
+// This function expects the updated profile information to be provided in the request body in JSON format.
 // The updated profile information is returned in JSON format.
 func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 	// Get the session cookie to check if the user is logged in
@@ -160,7 +159,7 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := pkgs.MainSessionManager.GetSession(session_id.Value)
+	// Retrieve the user based on the session information
 	session, err := pkgs.MainSessionManager.GetSession(session_id.Value)
 	if err != nil || session == nil {
 		log.Println("HandleProfileUpdate: Error getting session", err)
@@ -168,6 +167,7 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get the user from the session
 	inputData := make(map[string]string)
 	err = json.NewDecoder(r.Body).Decode(&inputData)
 	if err != nil {
@@ -218,6 +218,8 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Profile updated successfully"})
 }
+
+
 
 // HandleFollow handles the HTTP request for following a user.
 // It expects the user to be followed to be provided in the request body in JSON format.
