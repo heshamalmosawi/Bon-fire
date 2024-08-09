@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"reflect"
 	"time"
 
 	"bonfire/pkgs"
@@ -28,7 +29,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Get the session cookie to check if the user is logged in
 	session_id, err := r.Cookie("session_id")
 	if err != nil || session_id == nil {
-		log.Println("Error getting session cookie:", err)
+		log.Println("HandleProfile: Error getting session cookie", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -36,7 +37,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the user based on the session information
 	session, err := sessionManager.GetSession(session_id.Value)
 	if err != nil || session == nil {
-		log.Println("Error getting session:", err)
+		log.Println("HandleProfile: Error getting session", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -70,6 +71,49 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 // It expects the updated profile information to be provided in the request body in JSON format.
 // The updated profile information is returned in JSON format.
 func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
+	// Get the session cookie to check if the user is logged in
+	session_id, err := r.Cookie("session_id")
+	if err != nil || session_id == nil {
+		log.Println("HandleProfileUpdate: Error getting session cookie:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	session, err := sessionManager.GetSession(session_id.Value)
+	if err != nil || session == nil {
+		log.Println("HandleProfileUpdate: Error getting session", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Parse form data
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Could not parse form data", http.StatusBadRequest)
+		log.Println("HandleProfileUpdate: Could not parse form data:", err)
+		return
+	}
+
+	user := session.User
+	// writing for flexibility, as front end is not yet started
+	inputData := make(map[string]string)
+	for key, value := range r.Form {
+		log.Println("HandleProfileUpdate: Received update request for ", key)
+		inputData[key] = value[0] // assuming no input will take in a number of values
+	}
+
+	// Dynamically change the values in the user through what is sent to this function
+	v := reflect.ValueOf(user).Elem()
+	for field, info := range inputData {
+		fieldValue := v.FieldByName(field)
+		if fieldValue.IsValid() && fieldValue.CanSet() {
+			fieldValue.SetString(info)
+		} else {
+			log.Printf("HandleProfileUpdate: Unsupported field type for field %s", field)
+		}
+	}
+
+	session.User.Update()
+
 	fmt.Println("Handling profile update")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Profile Update"})
