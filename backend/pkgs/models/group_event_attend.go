@@ -24,13 +24,13 @@ func (ga *GroupEventAttend) Save() error {
 	columns := []string{"attendance_id","event_id","attendee_id","response_Type"}
 	values := []interface{}{ga.AttendID,ga.EventID,ga.AttendeeID,ga.ResponseType}
 
-	_, err := utils.Create("group", columns, values)
+	_, err := utils.Create("group_event_attendance", columns, values)
 	return err
 }
 
 func (ga *GroupEventAttend) Del() error {
 	condition := "attendance_id = ?"
-	_, err := utils.Delete("group", condition, ga.AttendID)
+	_, err := utils.Delete("group_event_attendance", condition, ga.AttendID)
 	return err
 }
 
@@ -42,14 +42,14 @@ func (ga *GroupEventAttend) Update() error {
 		"response_Type" : ga.ResponseType,
 	}
 	condition := "attendance_id = ?"
-	_, err := utils.Update("group", updates, condition, ga.AttendID)
+	_, err := utils.Update("group_event_attendance", updates, condition, ga.AttendID)
 	return err
 }
 
 func GetAttendeeByGroup(attendeeID string) (*GroupEventAttend, error) {
 	columns := []string{"attendance_id","event_id","attendee_id","response_Type"}
 	condition := "attendee_id = ?"
-	rows, err := utils.Read("group", columns, condition, attendeeID)
+	rows, err := utils.Read("group_event_attendance", columns, condition, attendeeID)
 	if err != nil {
 		return nil, err
 	}

@@ -27,13 +27,13 @@ func (u *GroupEvent) Save() error {
 	columns := []string{"event_id", "group_id", "creator_id", "event_title", "event_description", "event_timestamp"}
 	values := []interface{}{u.EventID, u.GroupID, u.CreatorID, u.EventTitle, u.EventDescrip, u.EventTime}
 
-	_, err := utils.Create("group", columns, values)
+	_, err := utils.Create("group_event", columns, values)
 	return err
 }
 
 func (u *GroupEvent) Del() error {
 	condition := "event_id = ?"
-	_, err := utils.Delete("group", condition, u.EventID)
+	_, err := utils.Delete("group_event", condition, u.EventID)
 	return err
 }
 
@@ -44,14 +44,14 @@ func (u *GroupEvent) Update() error {
 		"event_timestamp":   u.EventTime,
 	}
 	condition := "event_id = ?"
-	_, err := utils.Update("group", updates, condition, u.EventID)
+	_, err := utils.Update("group_event", updates, condition, u.EventID)
 	return err
 }
 
 func GetEventByGroup(groupID string) (*GroupEvent, error) {
 	columns := []string{"event_id", "group_id", "creator_id", "event_title", "event_description", "event_timestamp"}
 	condition := "group_id = ?"
-	rows, err := utils.Read("group", columns, condition, groupID)
+	rows, err := utils.Read("group_event", columns, condition, groupID)
 	if err != nil {
 		return nil, err
 	}

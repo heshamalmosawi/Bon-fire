@@ -28,13 +28,13 @@ func (gn *GroupNotification) Save() error {
 	columns := []string{"noti_id","group_id","noti_type","noti_content","noti_time","noti_status"}
 	values := []interface{}{gn.NotificationID, gn.GroupID, gn.NotifiactionType, gn.NotificationContent, gn.NotificationTime, gn.NotificationStatus}
 
-	_, err := utils.Create("group", columns, values)
+	_, err := utils.Create("group_notification", columns, values)
 	return err
 }
 
 func (gn *GroupNotification) Del() error {
 	condition := "noti_id = ?"
-	_, err := utils.Delete("group", condition, gn.NotificationID)
+	_, err := utils.Delete("group_notification", condition, gn.NotificationID)
 	return err
 }
 
@@ -48,14 +48,14 @@ func (gn *GroupNotification) Update() error {
 	"noti_status" : gn.NotificationStatus,
 	}
 	condition := "noti_id = ?"
-	_, err := utils.Update("group", updates, condition, gn.NotificationID)
+	_, err := utils.Update("group_notification", updates, condition, gn.NotificationID)
 	return err
 }
 
 func GetNotificationByGroup(notificationID string) (*GroupNotification, error) {
 	columns := []string{"noti_id","group_id","noti_type","noti_content","noti_time","noti_status"}
 	condition := " noti_id = ?"
-	rows, err := utils.Read("group", columns, condition, notificationID)
+	rows, err := utils.Read("group_notification", columns, condition, notificationID)
 	if err != nil {
 		return nil, err
 	}

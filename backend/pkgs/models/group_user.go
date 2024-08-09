@@ -23,13 +23,13 @@ func (gu *GroupUser) Save() error {
 	columns := []string{"member_id","user_id","group_id"}
 	values := []interface{}{gu.MemberID,gu.UserID,gu.GroupID}
 
-	_, err := utils.Create("group", columns, values)
+	_, err := utils.Create("group_user", columns, values)
 	return err
 }
 
 func (gu *GroupUser) Del() error {
 	condition := "member_id = ?"
-	_, err := utils.Delete("group", condition, gu.MemberID)
+	_, err := utils.Delete("group_user", condition, gu.MemberID)
 	return err
 }
 
@@ -41,14 +41,14 @@ func (gu *GroupUser) Update() error {
 	
 	}
 	condition := "attendance_id = ?"
-	_, err := utils.Update("group", updates, condition, gu.MemberID)
+	_, err := utils.Update("group_user", updates, condition, gu.MemberID)
 	return err
 }
 
 func GetMemberUserByGroup(memberID string) (*GroupUser, error) {
 	columns := []string{"member_id","user_id","group_id"}
 	condition := "member_id = ?"
-	rows, err := utils.Read("group", columns, condition, memberID)
+	rows, err := utils.Read("group_user", columns, condition, memberID)
 	if err != nil {
 		return nil, err
 	}

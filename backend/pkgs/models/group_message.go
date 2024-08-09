@@ -27,13 +27,13 @@ func (gm *GroupMessage) Save() error {
 	columns := []string{"message_id","sender_id","message_id", "message_content", "message_timestamp"}
 	values := []interface{}{gm.MessageID, gm.SenderID, gm.GroupID, gm.MessageContent, gm.MessageTime}
 
-	_, err := utils.Create("message", columns, values)
+	_, err := utils.Create("group_message", columns, values)
 	return err
 }
 
 func (gm *GroupMessage) Del() error {
 	condition := "message_id = ?"
-	_, err := utils.Delete("message", condition, gm.MessageID)
+	_, err := utils.Delete("group_message", condition, gm.MessageID)
 	return err
 }
 
@@ -47,14 +47,14 @@ func (pm *GroupMessage) Update() error {
 	
 	}
 	condition := "message_id = ?"
-	_, err := utils.Update("message", updates, condition, pm.MessageID)
+	_, err := utils.Update("group_message", updates, condition, pm.MessageID)
 	return err
 }
 
 func GetMessageBySenderOfGroup(messageID string) (*GroupMessage, error) {
 	columns := []string{"message_id","sender_id","group_id", "message_content", "message_timestamp"}
 	condition := "message_id = ?"
-	rows, err := utils.Read("message", columns, condition, messageID)
+	rows, err := utils.Read("group_message", columns, condition, messageID)
 	if err != nil {
 		return nil, err
 	}
