@@ -103,3 +103,23 @@ func GetPostsByGroupID(groupID uuid.UUID) ([]PostModel, error) {
 
 	return posts, nil
 }
+
+func GetPostsByID(postID uuid.UUID) (*PostModel, error) {
+	columns := []string{"post_id", "post_content", "post_image_path", "post_exposure", "group_id", "post_likecount", "created_at", "author_id"}
+	condition := "post_id = ?"
+	rows, err := utils.Read("post", columns, condition, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var post PostModel
+	if rows.Next() {
+		err := rows.Scan(&post.PostID, &post.PostContent, &post.PostImagePath, &post.PostExposure, &post.GroupID, &post.PostLikeCount, &post.CreatedAt, &post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &post, nil
+}
