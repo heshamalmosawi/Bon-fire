@@ -24,8 +24,8 @@ func Routers() {
 	mux.HandleFunc("POST /login", HandleLogin)   // ✅
 	mux.HandleFunc("POST /signup", HandleSignup) // ✅
 	mux.HandleFunc("GET /logout", HandleLogout)  // ✅
-	mux.HandleFunc("GET /profile/{id}", HandleProfile)
-	mux.HandleFunc("PUT /profile/update", HandleProfileUpdate)
+	mux.HandleFunc("GET /profile/{id}", HandleProfile) // ✅
+	mux.HandleFunc("PUT /profile/update", HandleProfileUpdate) // ✅
 	mux.HandleFunc("POST /follow", HandleFollow)
 	mux.HandleFunc("POST /follow_response", HandleFollowResponse)
 	mux.HandleFunc("GET /post/{id}", HandlePosts)
