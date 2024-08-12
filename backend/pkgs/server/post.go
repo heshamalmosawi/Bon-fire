@@ -6,31 +6,34 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gofrs/uuid"
+
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
-
-	"github.com/gofrs/uuid"
 )
 
 /**
  * This file handles the post requests.
  */
 
-//  TODO: Implement the post functions then fix the decumentation based on the implementation.
+//  TODO: Implement the like post function then write the decumantation based on the implementation.
 
 // HandlePosts handles the HTTP request for retrieving a post.
 // It requires a valid post ID to be present in the request.
 func HandlePosts(w http.ResponseWriter, r *http.Request) {
 
+	/// Get the post ID from the query parameters
 	groupIDStr := r.URL.Query().Get("group_id")
 
 	// Get the session cookie to check if the user is logged in
 	session_id, err1 := r.Cookie("session_id")
+
 	var session *pkgs.Session
 	var err2 error
 	err2 = nil
 
+	// Check if the user is logged in
 	if err1 == nil && session_id != nil {
 		// Retrieve the user based on the session information
 		session, err2 = pkgs.MainSessionManager.GetSession(session_id.Value)
@@ -39,6 +42,7 @@ func HandlePosts(w http.ResponseWriter, r *http.Request) {
 	var posts []models.PostModel
 	var err error
 
+	/// Check if the group ID is provided in the query parameters
 	if groupIDStr != "" {
 		groupID, err := uuid.FromString(groupIDStr)
 		if err != nil {
@@ -46,26 +50,26 @@ func HandlePosts(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		posts, err = models.GetPostsByGroupID(groupID)
+		if err != nil {
+			http.Error(w, "Error retrieving posts", http.StatusInternalServerError)
+			return
+		}
 	} else if session != nil && err2 == nil {
-
 		// Get the user from the session
 		user := session.User
+		// Get the user's posts
 		posts, err = models.GetViewablePosts(user.UserID)
 		if err != nil {
 			http.Error(w, "Error retrieving posts", http.StatusInternalServerError)
 			return
 		}
-
 	} else {
-		posts, err = models.GetAllPostsForNonLoggedInUsers()
+		// Get all public posts in case the user wasn't logged in
+		posts, err = models.GetAllPublicPosts()
 		if err != nil {
 			http.Error(w, "Error retrieving posts", http.StatusInternalServerError)
 			return
 		}
-	}
-	if err != nil {
-		http.Error(w, "Error retrieving posts", http.StatusInternalServerError)
-		return
 	}
 
 	utils.EncodeJSON(w, map[string]interface{}{
