@@ -29,7 +29,7 @@ func Routers() {
 	mux.HandleFunc("POST /follow", HandleFollow)
 	mux.HandleFunc("POST /follow_response", HandleFollowResponse)
 	mux.HandleFunc("GET /post/{id}", HandlePosts)
-	mux.HandleFunc("POST /post/create", HandleCreatePosts)
+	mux.Handle("POST /post/create", middleware.AuthenticationMiddleware(http.HandlerFunc(HandleCreatePosts)))
 	mux.HandleFunc("POST /like_post", HandleLikePost)
 	mux.HandleFunc("GET /comment/{id}", HandleComment)
 	mux.HandleFunc("POST /comment/create", HandleCreateComment)

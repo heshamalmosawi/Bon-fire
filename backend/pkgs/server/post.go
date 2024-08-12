@@ -35,11 +35,7 @@ func HandleCreatePosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the session from the session manager
-	session, err := pkgs.MainSessionManager.GetSession(sessionIDCookie.Value)
-	if err != nil {
-		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
-		return
-	}
+	session, _ := pkgs.MainSessionManager.GetSession(sessionIDCookie.Value)
 
 	// Extract the user ID from the session
 	authorID := session.User.UserID
@@ -71,7 +67,6 @@ func HandleCreatePosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the current time in GMT+3
 	location, _ := time.LoadLocation("Etc/GMT-3")
 	createdAt := time.Now().In(location).Format(time.RFC3339)
 
