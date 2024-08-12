@@ -51,3 +51,24 @@ func GetFollowersByUserID(userID uuid.UUID) ([]UserFollowerModel, error) {
 
 	return followers, nil
 }
+
+// Function to get single user following
+func GetFollowerUser(user uuid.UUID, follower uuid.UUID) (UserFollowerModel, error) {
+	columns := []string{"user_id", "follower_id"}
+	condition := "user_id = ? AND follower_id = ?"
+	rows, err := utils.Read("user_follower", columns, condition, user, follower)
+	if err != nil {
+		return UserFollowerModel{}, err
+	}
+	defer rows.Close()
+
+	var followerUser UserFollowerModel
+	for rows.Next() {
+		err := rows.Scan(&followerUser.UserID, &followerUser.FollowerID)
+		if err != nil {
+			return UserFollowerModel{}, err
+		}
+	}
+
+	return followerUser, nil
+}

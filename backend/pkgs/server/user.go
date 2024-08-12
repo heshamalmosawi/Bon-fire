@@ -11,6 +11,8 @@ import (
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
+
+	"github.com/gofrs/uuid"
 )
 
 /**
@@ -23,9 +25,9 @@ import (
  * with the session and model layers, and returns the appropriate JSON response.
  */
 
-//  This function checks if the user is logged in by retrieving the session cookie and verifying the session information.
-//  The user's profile data is retrieved based on the session information and the query parameter.
-//  The response is encoded as JSON and sent back to the client.
+// This function checks if the user is logged in by retrieving the session cookie and verifying the session information.
+// The user's profile data is retrieved based on the session information and the query parameter.
+// The response is encoded as JSON and sent back to the client.
 func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling profile")
 
@@ -219,13 +221,70 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"response": "Profile updated successfully"})
 }
 
-
-
 // HandleFollow handles the HTTP request for following a user.
 // It expects the user to be followed to be provided in the request body in JSON format.
 // The response is returned in JSON format.
 func HandleFollow(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling follow")
+
+	session_id, err := r.Cookie("session_id")
+	if err != nil || session_id == nil {
+		log.Println("HandleProfileUpdate: Error getting session cookie:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Retrieve the user based on the session information
+	session, err := pkgs.MainSessionManager.GetSession(session_id.Value)
+	if err != nil || session == nil {
+		log.Println("HandleProfileUpdate: Error getting session", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Parse form data
+	if err := r.ParseForm(); err != nil {
+		log.Println("HandleFollow: Could not parse form data:", err)
+		http.Error(w, "Could not parse form data", http.StatusBadRequest)
+		return
+	}
+
+	// Convert user id to uuid type
+	uid, err := uuid.FromString(r.FormValue("user_id"))
+	if err != nil {
+		log.Println("HandleFollow: Error converting user id to UUID:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Check if follow relationship already exists
+	followercheck, err := models.GetFollowerUser(uid, session.User.UserID)
+	if err == nil{
+		log.Println("HandleFollow: Follower relationship already exists, Deleting follow")
+		followercheck.Del()
+		followingcheck, err := models.GetFollowingUser(session.User.UserID, uid)
+		if err != nil {
+			log.Println("HandleFollow: Error getting following user when follower exists:", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		} else {
+			followingcheck.Del()
+		}
+	}
+
+	// Populate user_follower & user_following model
+	follower := models.UserFollowerModel{
+		UserID:     uid,
+		FollowerID: session.User.UserID,
+	}
+	follower.Save()
+
+	following := models.UserFollowingModel{
+		UserID:      session.User.UserID,
+		FollowingID: uid,
+	}
+	following.Save()
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Follow"})
 }
