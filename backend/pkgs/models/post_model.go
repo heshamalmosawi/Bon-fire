@@ -1,9 +1,9 @@
 package models
 
 import (
-	"bonfire/pkgs/utils"
-
 	"github.com/gofrs/uuid"
+
+	"bonfire/pkgs/utils"
 )
 
 // PostModel represents the structure of the post table
@@ -64,29 +64,6 @@ func GetPostsByAuthorID(authorID uuid.UUID) ([]PostModel, error) {
 	columns := []string{"post_id", "post_content", "post_image_path", "post_exposure", "group_id", "post_likecount", "created_at", "author_id"}
 	condition := "author_id = ?"
 	rows, err := utils.Read("post", columns, condition, authorID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var posts []PostModel
-	for rows.Next() {
-		var post PostModel
-		err := rows.Scan(&post.PostID, &post.PostContent, &post.PostImagePath, &post.PostExposure, &post.GroupID, &post.PostLikeCount, &post.CreatedAt, &post.AuthorID)
-		if err != nil {
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-
-	return posts, nil
-}
-
-// Function to get posts by group ID
-func GetPostsByGroupID(groupID uuid.UUID) ([]PostModel, error) {
-	columns := []string{"post_id", "post_content", "post_image_path", "post_exposure", "group_id", "post_likecount", "created_at", "author_id"}
-	condition := "group_id = ?"
-	rows, err := utils.Read("post", columns, condition, groupID)
 	if err != nil {
 		return nil, err
 	}

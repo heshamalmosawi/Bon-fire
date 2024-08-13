@@ -105,7 +105,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response = posts
-		response = posts
 
 	// Placeholder for posts liked
 	case "comments_liked":
