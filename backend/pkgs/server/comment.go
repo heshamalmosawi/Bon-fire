@@ -13,11 +13,15 @@ import (
 )
 
 /**
- * This file handles the user authentication requests.
+ * This file handles the comments API endpoints.
+ * It includes structures and methods for creating, managing, and displaying comments.
+ which includes:
+	- HandleComment: to retrieve a all the comments for a post
+	- HandleCreateComment: to create a comment
+	- HandleLikeComment: to like a comment and update the like count
  */
 
 // HandleComment handles the HTTP request for retrieving a comment.
-// It requires a valid comment ID to be present in the request.
 func HandleComment(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling comment retrieval")
 
