@@ -1,8 +1,9 @@
 package models
 
 import (
-	"bonfire/pkgs/storage"
 	"github.com/gofrs/uuid"
+
+	"bonfire/pkgs/storage"
 )
 
 // Function to get all viewable posts that can be seen on feed, arranged by newest date
@@ -61,7 +62,6 @@ func GetAllPublicPosts() ([]PostModel, error) {
 	}
 	return posts, nil
 }
-
 
 func GetPostsByGroupID(groupID uuid.UUID) ([]PostModel, error) {
 	query := `
