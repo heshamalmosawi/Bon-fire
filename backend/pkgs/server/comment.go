@@ -46,7 +46,10 @@ func HandleComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return the comment as JSON
-	json.NewEncoder(w).Encode(comments)
+	utils.EncodeJSON(w, map[string]interface{}{
+		"message":    "Comment retrieved successfully",
+		"comments": comments,
+	})
 }
 
 // HandleCreateComment handles the HTTP request for creating a comment.
@@ -81,7 +84,7 @@ func HandleCreateComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return a success response
-	json.NewEncoder(w).Encode(map[string]string{"response": "Comment created"})
+	utils.EncodeJSON(w, map[string]interface{}{"response": "Comment created"})
 }
 
 // HandleLikeComment handles the HTTP request for liking a comment.
@@ -148,6 +151,7 @@ func HandleLikeComment(w http.ResponseWriter, r *http.Request) {
 
 	// Return a success response
 	utils.EncodeJSON(w, map[string]interface{}{
+		"message":    "Comment liked successfully",
 		"like_count": likeCount,
 	})
 }
