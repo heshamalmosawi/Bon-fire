@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
-
 	"github.com/gofrs/uuid"
 )
 
@@ -94,7 +94,51 @@ func HandleCreatePosts(w http.ResponseWriter, r *http.Request) {
 
 // HandleLikePost handles the HTTP request for liking a post.
 func HandleLikePost(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling post like")
+	sessionIDCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Session ID cookie not found", http.StatusUnauthorized)
+		return
+	}
+	session, err := pkgs.MainSessionManager.GetSession(sessionIDCookie.Value)
+	if err != nil {
+		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
+		return
+	}
+
+	//get user id
+	userID := session.User.UserID
+
+	//getpostID
+	pathParts := strings.Split(r.URL.Path, "/")
+	if len(pathParts) < 3 {
+		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
+	postIDStr := pathParts[len(pathParts)-1]
+	postID, err := uuid.FromString(postIDStr)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	err = models.ToggleLike(postID, userID)
+	if err != nil {
+		http.Error(w, "Failed to toggle like", http.StatusInternalServerError)
+		return
+	}
+
+	// Get the updated number of likes for the post
+	likeCount, err := models.GetNumberOfLikesByPostID(postID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve like count", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with a success message and updated like count
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Post liked"})
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"response":   "Like toggled successfully",
+		"like_count": likeCount,
+	})
 }
