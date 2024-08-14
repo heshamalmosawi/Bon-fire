@@ -29,3 +29,23 @@ CREATE TABLE post_view (
     FOREIGN KEY (post_id) REFERENCES post (post_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user (user_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+-- on update
+CREATE TRIGGER updateLikeUp
+AFTER INSERT ON post_like
+FOR EACH ROW
+BEGIN
+    UPDATE post
+    SET post_likecount = post_likecount + 1
+    WHERE post_id = NEW.post_id;
+END;
+
+-- on delete 
+CREATE TRIGGER updateLikeDown
+AFTER DELETE ON post_like
+FOR EACH ROW
+BEGIN
+    UPDATE post
+    SET post_likecount = post_likecount - 1
+    WHERE post_id = OLD.post_id;
+END;

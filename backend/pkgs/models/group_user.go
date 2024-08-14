@@ -64,3 +64,10 @@ func GetMemberUserByGroup(memberID string) (*GroupUser, error) {
 
 	return &groupUser, nil
 }
+
+// DeleteUserFromGroup removes a user from a group by deleting the record from the group_user table
+func DeleteUserFromGroup(userID, groupID uuid.UUID) error {
+	condition := "user_id = ? AND group_id = ?"
+	_, err := utils.Delete("group_user", condition, userID, groupID)
+	return err
+}
