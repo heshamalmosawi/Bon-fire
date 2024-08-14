@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CheckMimeType } from "../utils";
+import { HandleFileUpload } from "../handleFileUpload";
 
 export const signupSchema = z
   .object({
@@ -13,7 +14,7 @@ export const signupSchema = z
       .instanceof(File)
       .refine((file) => CheckMimeType(file), "mime type of file unacceptable") // this ensures user uplaods correct file type only
       .optional(),
-    isPrivate: z.boolean().default(true),
+    isPrivate: z.string().default("public"),
   })
   .superRefine(({ confirmPassword, password }, ctx) => {
     if (confirmPassword !== password) {
@@ -24,3 +25,15 @@ export const signupSchema = z
       });
     }
   });
+
+export const HandleSignupSubmission = async (
+  values: z.infer<typeof signupSchema>
+) => {
+  // check if there is an image, and then upload and take the url instead
+  const payload = {
+    avatar: values.avatar ? await HandleFileUpload(values.avatar) : "",
+    ...values,
+  };
+
+  
+};
