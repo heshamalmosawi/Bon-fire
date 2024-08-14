@@ -85,7 +85,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for posts liked
 	case "post_likes":
-		user_posts_likes, err := models.GetLikesByUserID(user.UserID)
+		user_posts_likes, err := models.GetPostLikesByUserID(user.UserID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting likes by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -108,7 +108,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for posts liked
 	case "comments_liked":
-		user_posts_comments, err := models.GetLikeByUserID(user.UserID)
+		user_posts_comments, err := models.GetCommentLikeByUserID(user.UserID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting comments by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)

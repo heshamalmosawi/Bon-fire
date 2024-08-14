@@ -174,7 +174,7 @@ func HandleLikePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = models.ToggleLike(postID, userID)
+	err = models.TogglePostLike(postID, userID)
 	if err != nil {
 		http.Error(w, "Failed to toggle like", http.StatusInternalServerError)
 		return

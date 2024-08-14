@@ -65,7 +65,7 @@ func GetLikesByPostID(postID uuid.UUID) ([]LikeModel, error) {
 }
 
 // Function to get likes by user ID
-func GetLikesByUserID(userID uuid.UUID) ([]LikeModel, error) {
+func GetPostLikesByUserID(userID uuid.UUID) ([]LikeModel, error) {
 	columns := []string{"like_id", "post_id", "user_id"}
 	condition := "user_id = ?"
 	rows, err := utils.Read("likes", columns, condition, userID)
@@ -88,7 +88,7 @@ func GetLikesByUserID(userID uuid.UUID) ([]LikeModel, error) {
 }
 
 // Function to toggle like
-func ToggleLike(postID, userID uuid.UUID) error {
+func TogglePostLike(postID, userID uuid.UUID) error {
 	like, err := GetLikeByPostAndUser(postID, userID)
 	if err != nil {
 		return err
@@ -191,7 +191,7 @@ func GetLikeByCommentAndUser(commentID, userID uuid.UUID) (*LikeModel, error) {
 }
 
 // GetLikesByCommentID retrieves likes by user ID
-func GetLikeByUserID(userID uuid.UUID) ([]LikeModel, error) {
+func GetCommentLikeByUserID(userID uuid.UUID) ([]LikeModel, error) {
 	columns := []string{"like_id", "comment_id", "user_id"}
 	condition := "user_id = ?"
 	rows, err := utils.Read("likes", columns, condition, userID)
