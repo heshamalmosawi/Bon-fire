@@ -123,9 +123,9 @@ func TestPostVisibility(t *testing.T) {
 	}
 
 	// User1 follows user2
-	follow := models.UserFollowingModel{
-		UserID:      user1ID,
-		FollowingID: user2ID,
+	follow := models.UserFollowModel{
+		UserID:      user2ID,
+		FollowerID: user1ID,
 	}
 	if err := follow.Save(); err != nil {
 		t.Fatal("error creating follow relationship:", err)
@@ -137,7 +137,7 @@ func TestPostVisibility(t *testing.T) {
 		t.Fatal("error getting viewable posts for user1:", err)
 	}
 	if len(posts) != 3 {
-		t.Fatalf("expected 3 posts for user1, got %d", len(posts))
+		t.Fatalf("expected 3 posts for user1, got %d %v", len(posts), posts)		
 	}
 
 	// Test for user2 visibility
