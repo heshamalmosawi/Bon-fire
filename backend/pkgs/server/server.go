@@ -21,26 +21,26 @@ func Routers() {
 	// the default route handler
 	// TODO: tidy this up
 	mux.HandleFunc("GET /", HandleDefault)
-	mux.HandleFunc("POST /login", HandleLogin)   // ✅
-	mux.HandleFunc("POST /signup", HandleSignup) // ✅
-	mux.HandleFunc("GET /logout", HandleLogout)  // ✅
-	mux.HandleFunc("GET /profile/{id}", HandleProfile) // ✅
+	mux.HandleFunc("POST /login", HandleLogin)                 // ✅
+	mux.HandleFunc("POST /signup", HandleSignup)               // ✅
+	mux.HandleFunc("GET /logout", HandleLogout)                // ✅
+	mux.HandleFunc("GET /profile/{id}", HandleProfile)         // ✅
 	mux.HandleFunc("PUT /profile/update", HandleProfileUpdate) // ✅
 	mux.HandleFunc("POST /follow", HandleFollow)
 	mux.HandleFunc("POST /follow_response", HandleFollowResponse)
-	mux.HandleFunc("GET /post/{id}", HandlePosts)
-	mux.Handle("POST /post/create", middleware.AuthenticationMiddleware(http.HandlerFunc(HandleCreatePosts)))
-	mux.HandleFunc("POST /like_post", HandleLikePost)
-	mux.HandleFunc("GET /comment/{id}", HandleComment)
-	mux.HandleFunc("POST /comment/create", HandleCreateComment)
-	mux.HandleFunc("POST /like_comment", HandleLikeComment)
+	mux.HandleFunc("GET /post/{id}", HandlePosts)               // ✅
+	mux.HandleFunc("POST /post/create", HandleCreatePosts)      // ✅
+	mux.HandleFunc("POST /like_post/{id}", HandleLikePost)      // ✅
+	mux.HandleFunc("GET /comment/{id}", HandleComment)          // ✅
+	mux.HandleFunc("POST /comment/create", HandleCreateComment) // ✅
+	mux.HandleFunc("POST /like_comment", HandleLikeComment)     // ✅
 	mux.HandleFunc("GET /group/{id}", HandleGroup)
 	mux.HandleFunc("POST /group/create", HandleGroupCreate)
 	mux.HandleFunc("POST /group/invite", HandleGroupInvite)
 	mux.HandleFunc("POST /group/join", HandleGroupJoin)
 	mux.HandleFunc("POST /group/leave", HandleGroupLeave)
 	mux.HandleFunc("DELETE /group/delete", HandleGroupDelete)
-	mux.HandleFunc("POST /group/event_respose", HandleGroupEventResponse)
+	mux.HandleFunc("POST /group/event_response", HandleGroupEventResponse)
 	mux.HandleFunc("GET /group/requests", HandleGroupRequests)
 
 	// handle cors

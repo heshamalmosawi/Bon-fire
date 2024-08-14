@@ -46,3 +46,13 @@ CREATE TABLE user_notification (
   noti_status TEXT DEFAULT 'unread',
   FOREIGN KEY (reciever_id) REFERENCES user(user_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+CREATE TABLE
+  follow_request (
+    request_id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    requester_id TEXT NOT NULL,
+    request_status TEXT NOT NULL DEFAULT 'pending',
+    FOREIGN KEY (requester_id) REFERENCES "user" (user_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES "user" (user_id)
+  );

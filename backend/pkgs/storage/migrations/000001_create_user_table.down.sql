@@ -7,3 +7,5 @@ DROP TABLE IF EXISTS user_notification;
 DROP TABLE IF EXISTS user_activity;
 
 DROP TABLE IF EXISTS user;
+
+DROP TABLE IF EXISTS follow_request;
