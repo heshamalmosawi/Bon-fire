@@ -1,12 +1,14 @@
 package server
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"reflect"
 	"strings"
+	"time"
 
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
@@ -87,7 +89,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for posts liked
 	case "post_likes":
-		user_posts_likes, err := models.GetLikesByUserID(user.UserID)
+		user_posts_likes, err := models.GetPostLikesByUserID(user.UserID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting likes by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -110,7 +112,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for posts liked
 	case "comments_liked":
-		user_posts_comments, err := models.GetLikeByUserID(user.UserID)
+		user_posts_comments, err := models.GetCommentLikeByUserID(user.UserID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting comments by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -257,36 +259,48 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if follow relationship already exists
-	followercheck, err := models.GetFollowerUser(uid, session.User.UserID)
-	if err == nil{
-		log.Println("HandleFollow: Follower relationship already exists, Deleting follow")
-		followercheck.Del()
-		followingcheck, err := models.GetFollowingUser(session.User.UserID, uid)
-		if err != nil {
-			log.Println("HandleFollow: Error getting following user when follower exists:", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		} else {
-			followingcheck.Del()
+	// Check if follow  already exists, delete if it does
+	followingcheck, err := models.GetFollowingUser(session.User.UserID, uid)
+	if err != nil && err != sql.ErrNoRows {
+		log.Println("HandleFollow: Error getting following user:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	} else if err == nil {
+		followingcheck.Del()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"response": "Unfollow"})
+		return
+	}
+
+	// if uid is private accoutn
+	user, err := models.GetUserByID(uid)
+	if err != nil {
+		log.Println("HandleFollow: Error getting user to follow by ID:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if user.ProfileExposure != "Public" {
+		notification := models.UserNotificationModel{
+			ReceiverID:  uid,
+			NotiType:    "follow_request",
+			NotiContent: session.User.UserNickname + " has requested to follow your account!", //discuss later
+			NotiTime:    time.Now().Format(time.RFC3339),
+			NotiStatus:  "unread",
 		}
+		notification.Save()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"response": "Follow Request Sent"})
+	} else {
+		// Populate user_follower & user_following model
+		follow := models.UserFollowModel{
+			UserID:     uid,
+			FollowerID: session.User.UserID,
+		}
+		follow.Save()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"response": "Follow"})
 	}
-
-	// Populate user_follower & user_following model
-	follower := models.UserFollowerModel{
-		UserID:     uid,
-		FollowerID: session.User.UserID,
-	}
-	follower.Save()
-
-	following := models.UserFollowingModel{
-		UserID:      session.User.UserID,
-		FollowingID: uid,
-	}
-	following.Save()
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Follow"})
 }
 
 // HandleFollowResponse handles the HTTP request for responding to a follow request.
