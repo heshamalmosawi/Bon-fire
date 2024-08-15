@@ -7,9 +7,9 @@ import (
 )
 
 type FollowRequestModel struct {
-	RequestID    uuid.UUID `json:"group_id"`
-	UserID       uuid.UUID `json:"owner_id"`
-	RequesterID  uuid.UUID `json:"request_id"`
+	RequestID     uuid.UUID `json:"request_id"`
+	UserID        uuid.UUID `json:"user_id"`
+	RequesterID   uuid.UUID `json:"requester_id"`
 	RequestStatus string    `json:"request_type"`
 }
 
@@ -33,9 +33,9 @@ func (f *FollowRequestModel) Del() error {
 // Function to update a follow request
 func (f *FollowRequestModel) Update() error {
 	updates := map[string]interface{}{
-		"user_id" : f.UserID,
-		"requester_id" : f.RequesterID,
-		"request_status" : f.RequestStatus,
+		"user_id":        f.UserID,
+		"requester_id":   f.RequesterID,
+		"request_status": f.RequestStatus,
 	}
 	condition := "request_id = ?"
 	_, err := utils.Update("follow_request", updates, condition, f.RequestID)
@@ -88,7 +88,7 @@ func GetRequestByRequesterID(requesterID uuid.UUID) ([]FollowRequestModel, error
 	return requests, nil
 }
 
-//  GetRequestByRequestID retrieves a follow request by its ID.
+// GetRequestByRequestID retrieves a follow request by its ID.
 func GetRequestByRequestID(requestID uuid.UUID) (*FollowRequestModel, error) {
 	columns := []string{"request_id", "user_id", "requester_id", "request_status"}
 	condition := "request_id = ?"
@@ -106,5 +106,25 @@ func GetRequestByRequestID(requestID uuid.UUID) (*FollowRequestModel, error) {
 		}
 	}
 
+	return &request, nil
+}
+
+// GetPendingRequest retrieves a follow request by the user's ID and the requester's ID.
+func GetPendingRequest(userID uuid.UUID, requesterID uuid.UUID) (*FollowRequestModel, error) {
+	columns := []string{"request_id", "user_id", "requester_id", "request_status"}
+	condition := "user_id = ? AND requester_id = ? AND request_status = 'pending'"
+	rows, err := utils.Read("follow_request", columns, condition, userID, requesterID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var request FollowRequestModel
+	if rows.Next() {
+		err := rows.Scan(&request.RequestID, &request.UserID, &request.RequesterID, &request.RequestStatus)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return &request, nil
 }
