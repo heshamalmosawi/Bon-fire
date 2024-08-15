@@ -281,34 +281,110 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	noti, notiType, resp := "", "", ""
+	// if user is private, send follow request
 	if user.ProfileExposure != "Public" {
-		notification := models.UserNotificationModel{
-			ReceiverID:  uid,
-			NotiType:    "follow_request",
-			NotiContent: session.User.UserNickname + " has requested to follow your account!", //discuss later
-			NotiTime:    time.Now().Format(time.RFC3339),
-			NotiStatus:  "unread",
+		followrequest := models.FollowRequestModel{
+			RequestID:     uuid.Must(uuid.NewV4()),
+			UserID:        uid,
+			RequesterID:   session.User.UserID,
+			RequestStatus: "pending",
 		}
-		notification.Save()
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"response": "Follow Request Sent"})
+		followrequest.Save()
+		noti = session.User.UserNickname + " has requested to follow your account!"
+		notiType = "follow_request"
+		resp = "Follow Request Sent"
 	} else {
-		// Populate user_follower & user_following model
+		// Populate user_follow model
 		follow := models.UserFollowModel{
 			UserID:     uid,
 			FollowerID: session.User.UserID,
 		}
 		follow.Save()
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"response": "Follow"})
+		noti = session.User.UserNickname + " has followed your account!"
+		notiType = "follow"
+		resp = "Follow"
 	}
+
+	notification := models.UserNotificationModel{
+		ReceiverID:  uid,
+		NotiType:    notiType,
+		NotiContent: noti,
+		NotiTime:    time.Now().Format(time.RFC3339),
+		NotiStatus:  "unread",
+	}
+	notification.Save()
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"response": resp})
 }
 
-// HandleFollowResponse handles the HTTP request for responding to a follow request.
+// HandleFollowRequest handles the HTTP request for responding to a follow request.
 // It expects the follow request to be responded to be provided in the request body in JSON format.
 // The response is returned in JSON format.
-func HandleFollowResponse(w http.ResponseWriter, r *http.Request) {
+func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling follow response")
+
+	// Authenticate the user
+	_, err := middleware.Auth(r)
+	if err != nil {
+		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
+		return
+	}
+
+	// Get data from the request body
+	var followreq_response models.FollowRequestModel
+	err = json.NewDecoder(r.Body).Decode(&followreq_response)
+	if err != nil {
+		http.Error(w, "Could not parse JSON data", http.StatusBadRequest)
+		log.Print("Could not parse JSON data: ", err)
+		return
+	}
+
+	// Get the follow request from the database
+	followreq, err := models.GetPendingRequest(followreq_response.UserID, followreq_response.RequesterID)
+	if err != nil {
+		log.Println("HandleFollowResponse: Error getting follow request by ID", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if followreq_response.RequestStatus == "accept" {
+		// Populate user_follow model
+		follow := models.UserFollowModel{
+			UserID:     followreq.UserID,
+			FollowerID: followreq.RequesterID,
+		}
+		follow.Save()
+
+		// Update the follow request
+		followreq.RequestStatus = "accept"
+		followreq.Update()
+
+		// Send notification to the user who sent the follow request
+		notification := models.UserNotificationModel{
+			ReceiverID:  followreq.RequesterID,
+			NotiType:    "follow_response",
+			NotiContent: followreq.UserID.String() + " has accepted your follow request!",
+			NotiTime:    time.Now().Format(time.RFC3339),
+			NotiStatus:  "unread",
+		}
+		notification.Save()
+
+		// Send notification to the user who sent the follow request
+		notification = models.UserNotificationModel{
+			ReceiverID:  followreq.UserID,
+			NotiType:    "follow",
+			NotiContent: followreq.UserID.String() + " has followed your account!",
+			NotiTime:    time.Now().Format(time.RFC3339),
+			NotiStatus:  "unread",
+		}
+		notification.Save()
+	} else {
+		// Update the follow request
+		followreq.RequestStatus = "reject"
+		followreq.Update()
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Follow Response"})
 }
