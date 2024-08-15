@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"bonfire/api/middleware"
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
