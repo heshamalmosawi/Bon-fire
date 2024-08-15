@@ -109,7 +109,7 @@ func TestPostLikeToggle(t *testing.T) {
 	}
 
 	// Toggle like on the post
-	if err := models.ToggleLike(postID, userID); err != nil {
+	if err := models.TogglePostLike(postID, userID); err != nil {
 		t.Fatal("error toggling like:", err)
 	}
 
@@ -123,7 +123,7 @@ func TestPostLikeToggle(t *testing.T) {
 	}
 
 	// Toggle like again to remove it
-	if err := models.ToggleLike(postID, userID); err != nil {
+	if err := models.TogglePostLike(postID, userID); err != nil {
 		t.Fatal("error toggling like:", err)
 	}
 

@@ -14,7 +14,7 @@ func GetViewablePosts(userID uuid.UUID) ([]PostModel, error) {
 	WHERE (group_id IS NULL OR group_id = ?)
 	AND (
 		post_exposure = 'public'
-		OR (post_exposure = 'private' AND author_id IN (SELECT following_id FROM user_following WHERE user_id = ?))
+		OR (post_exposure = 'private' AND author_id IN (SELECT user_id FROM user_follow WHERE follower_id = ?))
 		OR (post_exposure = 'custom' AND post_id IN (SELECT post_id FROM post_view WHERE user_id = ?))
 	)
 	ORDER BY created_at DESC`
