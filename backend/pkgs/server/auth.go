@@ -54,7 +54,12 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create a new session for the authenticated user
+	// remove old session of user if any
+	if prev_session, err := pkgs.MainSessionManager.GetSessionByUser(user); err == nil {
+		pkgs.MainSessionManager.DeleteSession(prev_session.ID)
+	}
+
+	// create new session
 	session, err := pkgs.MainSessionManager.CreateSession(user)
 	if err != nil {
 		log.Printf("Error creating session for user: %s, error: %v", user.UserEmail, err)
@@ -75,8 +80,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Authentication successful!"))
 }
 
-
-// Signup handles user registration by decoding the JSON payload, saving the user information to the database. 
+// Signup handles user registration by decoding the JSON payload, saving the user information to the database.
 // It responds with the appropriate HTTP status code based on the success or failure of these operations.
 
 // Steps:
@@ -128,30 +132,29 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-
 // HandleLogout handles the logout request by deleting the user's session.
 func HandleLogout(w http.ResponseWriter, r *http.Request) {
-    // Assuming the session ID is stored in a cookie named "session_id"
-    cookie, err := r.Cookie("session_id")
-    if err != nil {
-        http.Error(w, "Session not found", http.StatusUnauthorized)
-        return
-    }
+	// Assuming the session ID is stored in a cookie named "session_id"
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Session not found", http.StatusUnauthorized)
+		return
+	}
 
-    sessionID := cookie.Value
+	sessionID := cookie.Value
 
-    // Delete the session
-    pkgs.MainSessionManager.DeleteSession(sessionID)
+	// Delete the session
+	pkgs.MainSessionManager.DeleteSession(sessionID)
 
-    // Clear the session cookie
-    cookie = &http.Cookie{
-        Name:     "session_id",
-        Value:    "",
-        Path:     "/",
-        Expires: time.Unix(0, 0), // expire cookie immediately
-    }
-    http.SetCookie(w, cookie)
+	// Clear the session cookie
+	cookie = &http.Cookie{
+		Name:    "session_id",
+		Value:   "",
+		Path:    "/",
+		Expires: time.Unix(0, 0), // expire cookie immediately
+	}
+	http.SetCookie(w, cookie)
 
-    log.Println("User logged out successfully")
-    w.WriteHeader(http.StatusOK)
+	log.Println("User logged out successfully")
+	w.WriteHeader(http.StatusOK)
 }

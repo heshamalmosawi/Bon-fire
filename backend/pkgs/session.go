@@ -16,7 +16,7 @@ type Session struct {
 	ExpiresAt time.Time
 }
 
-// SessionManager manages user sessions
+// SessionManager manages user sessions in memeory
 type SessionManager struct {
 	sessions sync.Map
 	ttl      time.Duration
@@ -62,6 +62,28 @@ func (sm *SessionManager) GetSession(sessionID string) (*Session, error) {
 	}
 
 	return session, nil
+}
+
+// GetSessionByUser retrieves a session by the user model, will return error if no session found
+func (sm *SessionManager) GetSessionByUser(user *models.UserModel) (*Session, error) {
+	var foundSession *Session
+	sm.sessions.Range(func(_, value interface{}) bool {
+		session := value.(*Session)
+		if session.User.UserID == user.UserID {
+			if session.ExpiresAt.After(time.Now()) {
+				foundSession = session
+				return false // Stop iteration as we found the session
+			} else {
+				sm.sessions.Delete(session.ID) // Cleanup expired session
+			}
+		}
+		return true // Continue iteration
+	})
+
+	if foundSession == nil {
+		return nil, errors.New("session not found or expired")
+	}
+	return foundSession, nil
 }
 
 // DeleteSession deletes a session by its ID
