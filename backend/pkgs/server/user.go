@@ -363,6 +363,13 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// if it is not pending then no need to respond!
+	if followreq.RequestStatus != "pending" {
+		log.Println("HandleFollowResponse: Follow request is not pending")
+		http.Error(w, "Follow request is not pending", http.StatusBadRequest)
+		return
+	}
+
 	if followreq_response.RequestStatus == "accept" {
 		// Populate user_follow model
 		follow := models.UserFollowModel{
