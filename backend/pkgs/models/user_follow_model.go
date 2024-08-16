@@ -2,6 +2,7 @@ package models
 
 import (
 	"bonfire/pkgs/utils"
+	"database/sql"
 
 	"github.com/gofrs/uuid"
 )
@@ -91,6 +92,10 @@ func GetFollowingUser(user uuid.UUID, following uuid.UUID) (UserFollowModel, err
 		if err != nil {
 			return UserFollowModel{}, err
 		}
+	}
+	// if no rows are returned
+	if followingUser.UserID == uuid.Nil {
+		return UserFollowModel{}, sql.ErrNoRows
 	}
 
 	return followingUser, nil

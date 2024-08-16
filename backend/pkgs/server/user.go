@@ -255,21 +255,22 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 	// Convert user id to uuid type
 	uid, err := uuid.FromString(r.FormValue("user_id"))
 	if err != nil {
-		log.Println("HandleFollow: Error converting user id to UUID:", err)
+		log.Println("HandleFollow: Error converting user id to UUID:", err, r.FormValue("user_id"))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	// Check if follow  already exists, delete if it does
 	followingcheck, err := models.GetFollowingUser(session.User.UserID, uid)
-	if err != nil && err != sql.ErrNoRows {
-		log.Println("HandleFollow: Error getting following user:", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	} else if err == nil {
+	if err == nil {
 		followingcheck.Del()
+		log.Println("HandleFollow: Unfollowed user, found model", followingcheck)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"response": "Unfollow"})
+		return
+	} else if err != sql.ErrNoRows {
+		log.Println("HandleFollow: Error getting following user:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
