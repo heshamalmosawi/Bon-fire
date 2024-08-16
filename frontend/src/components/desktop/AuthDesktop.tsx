@@ -17,12 +17,11 @@ import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
 
 const AuthDesktop: FC = () => {
+  const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
   });
-
-  const { toast } = useToast();
-  const router = useRouter();
 
   //* we wrap submission handlers around this for UI friendly errors, and redirection handling
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
