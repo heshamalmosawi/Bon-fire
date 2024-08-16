@@ -117,18 +117,15 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validating that all user fields except id are not empty or whitespaces
+	// Validating that all *required* user fields except id are not empty or whitespaces
 	user.UserEmail = strings.TrimSpace(user.UserEmail)
 	user.UserPassword = strings.TrimSpace(user.UserPassword)
 	user.UserFirstName = strings.TrimSpace(user.UserFirstName)
 	user.UserLastName = strings.TrimSpace(user.UserLastName)
 	user.UserDOB = strings.TrimSpace(user.UserDOB)
-	user.UserAvatarPath = strings.TrimSpace(user.UserAvatarPath)
-	user.UserNickname = strings.TrimSpace(user.UserNickname)
-	user.UserBio = strings.TrimSpace(user.UserBio)
 	user.ProfileExposure = strings.TrimSpace(user.ProfileExposure)
 
-	if user.UserEmail == "" || user.UserPassword == "" || user.UserFirstName == "" || user.UserLastName == "" || user.UserDOB == "" || user.UserAvatarPath == "" || user.UserNickname == "" || user.UserBio == "" || user.ProfileExposure == "" {
+	if user.UserEmail == "" || user.UserPassword == "" || user.UserFirstName == "" || user.UserLastName == "" || user.UserDOB == "" || user.ProfileExposure == "" {
 		log.Println("Error: Missing required fields in user data.")
 		http.Error(w, "HandleSignup: Missing required fields in user data.", http.StatusBadRequest)
 		return
