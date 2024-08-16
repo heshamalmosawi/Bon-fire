@@ -18,7 +18,7 @@ func TestUserCRUD(t *testing.T) {
 		UserAvatarPath:  "/path/to/avatar",
 		UserNickname:    "testuser",
 		UserBio:         "This is a test user",
-		ProfileExposure: "Private",
+		ProfileExposure: "private",
 	}
 
 	if err := user.Save(); err != nil {

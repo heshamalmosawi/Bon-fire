@@ -27,7 +27,7 @@ func TestHandleProfileUpdate(t *testing.T) {
 		UserAvatarPath:  "/path/to/avatar",
 		UserNickname:    "testuser",
 		UserBio:         "This is a test user",
-		ProfileExposure: "Private",
+		ProfileExposure: "private",
 	}
 
 	if err := user.Save(); err != nil {
@@ -45,7 +45,7 @@ func TestHandleProfileUpdate(t *testing.T) {
 
 	// Create the payload for the PUT request
 	payload := map[string]string{
-		"ProfileExposure": "Public",
+		"ProfileExposure": "public",
 	}
 
 	p_bytes, err := json.Marshal(payload)
@@ -96,8 +96,8 @@ func TestHandleProfileUpdate(t *testing.T) {
 
 	if new_user.UserID != user.UserID {
 		t.Fatal("FAIL: new user has different UserID")
-	} else if new_user.ProfileExposure != "Public" {
-		t.Fatalf("FAIL: unexpected profile exposure: got %v want 'Public'", new_user.ProfileExposure)
+	} else if new_user.ProfileExposure != "public" {
+		t.Fatalf("FAIL: unexpected profile exposure: got %v want 'public'", new_user.ProfileExposure)
 	}
 
 	if err := os.Remove("test.db"); err != nil {
