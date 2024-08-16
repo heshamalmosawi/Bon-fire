@@ -9,7 +9,9 @@ import "golang.org/x/crypto/bcrypt"
 // - plaintext: The plaintext password to be hashed.
 //
 // Returns:
+//
 // - string: The hashed password.
+//
 // - error: An error if hashing the password fails.
 func HashPassword(plaintext string) (string, error) {
     // Generate a bcrypt hash from the plaintext password with a cost of 11
