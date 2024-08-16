@@ -1,8 +1,10 @@
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckMimeType } from "../utils";
 import { HandleFileUpload } from "../handleFileUpload";
+import { useForm } from "react-hook-form";
 
-export const signupSchema = z
+const signupSchema = z
   .object({
     firstName: z.string(),
     lastName: z.string(),
@@ -26,7 +28,7 @@ export const signupSchema = z
     }
   });
 
-export const HandleSignupSubmission = async (
+const HandleSignupSubmission = async (
   values: z.infer<typeof signupSchema>
 ) => {
   // check if there is an image, and then upload and take the url instead
@@ -35,5 +37,5 @@ export const HandleSignupSubmission = async (
     ...values,
   };
 
-  
+  //TODO: continue with the rest here
 };
