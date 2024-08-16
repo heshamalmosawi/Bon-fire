@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -75,8 +76,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Authentication successful!"))
 }
 
-
-// Signup handles user registration by decoding the JSON payload, saving the user information to the database. 
+// Signup handles user registration by decoding the JSON payload, saving the user information to the database.
 // It responds with the appropriate HTTP status code based on the success or failure of these operations.
 
 // Steps:
@@ -117,6 +117,23 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validating that all user fields except id are not empty or whitespaces
+	user.UserEmail = strings.TrimSpace(user.UserEmail)
+	user.UserPassword = strings.TrimSpace(user.UserPassword)
+	user.UserFirstName = strings.TrimSpace(user.UserFirstName)
+	user.UserLastName = strings.TrimSpace(user.UserLastName)
+	user.UserDOB = strings.TrimSpace(user.UserDOB)
+	user.UserAvatarPath = strings.TrimSpace(user.UserAvatarPath)
+	user.UserNickname = strings.TrimSpace(user.UserNickname)
+	user.UserBio = strings.TrimSpace(user.UserBio)
+	user.ProfileExposure = strings.TrimSpace(user.ProfileExposure)
+
+	if user.UserEmail == "" || user.UserPassword == "" || user.UserFirstName == "" || user.UserLastName == "" || user.UserDOB == "" || user.UserAvatarPath == "" || user.UserNickname == "" || user.UserBio == "" || user.ProfileExposure == "" {
+		log.Println("Error: Missing required fields in user data.")
+		http.Error(w, "HandleSignup: Missing required fields in user data.", http.StatusBadRequest)
+		return
+	}
+
 	// Save the user information into the database
 	if err := user.Save(); err != nil {
 		log.Println("Error saving user into DB:", err)
@@ -128,30 +145,29 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-
 // HandleLogout handles the logout request by deleting the user's session.
 func HandleLogout(w http.ResponseWriter, r *http.Request) {
-    // Assuming the session ID is stored in a cookie named "session_id"
-    cookie, err := r.Cookie("session_id")
-    if err != nil {
-        http.Error(w, "Session not found", http.StatusUnauthorized)
-        return
-    }
+	// Assuming the session ID is stored in a cookie named "session_id"
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Session not found", http.StatusUnauthorized)
+		return
+	}
 
-    sessionID := cookie.Value
+	sessionID := cookie.Value
 
-    // Delete the session
-    pkgs.MainSessionManager.DeleteSession(sessionID)
+	// Delete the session
+	pkgs.MainSessionManager.DeleteSession(sessionID)
 
-    // Clear the session cookie
-    cookie = &http.Cookie{
-        Name:     "session_id",
-        Value:    "",
-        Path:     "/",
-        Expires: time.Unix(0, 0), // expire cookie immediately
-    }
-    http.SetCookie(w, cookie)
+	// Clear the session cookie
+	cookie = &http.Cookie{
+		Name:    "session_id",
+		Value:   "",
+		Path:    "/",
+		Expires: time.Unix(0, 0), // expire cookie immediately
+	}
+	http.SetCookie(w, cookie)
 
-    log.Println("User logged out successfully")
-    w.WriteHeader(http.StatusOK)
+	log.Println("User logged out successfully")
+	w.WriteHeader(http.StatusOK)
 }
