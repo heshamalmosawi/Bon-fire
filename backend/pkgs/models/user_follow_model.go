@@ -88,7 +88,7 @@ func GetFollowingUser(user uuid.UUID, following uuid.UUID) (UserFollowModel, err
 
 	var followingUser UserFollowModel
 	for rows.Next() {
-		err := rows.Scan(&followingUser.FollowerID, &followingUser.UserID)
+		err := rows.Scan(&followingUser.UserID, &followingUser.FollowerID)
 		if err != nil {
 			return UserFollowModel{}, err
 		}

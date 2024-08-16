@@ -230,18 +230,11 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 func HandleFollow(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling follow")
 
-	session_id, err := r.Cookie("session_id")
-	if err != nil || session_id == nil {
-		log.Println("HandleProfileUpdate: Error getting session cookie:", err)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Retrieve the user based on the session information
-	session, err := pkgs.MainSessionManager.GetSession(session_id.Value)
-	if err != nil || session == nil {
-		log.Println("HandleProfileUpdate: Error getting session", err)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	// Authenticate the user
+	session, err := middleware.Auth(r)
+	if err != nil {
+		log.Println("HandleFollow: Error authenticating user:", err)
+		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
 		return
 	}
 
@@ -260,11 +253,16 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if uid == session.User.UserID {
+		log.Println("HandleFollow: Cannot follow yourself")
+		http.Error(w, "Cannot follow yourself", http.StatusBadRequest)
+		return
+	}
 	// Check if follow  already exists, delete if it does
 	followingcheck, err := models.GetFollowingUser(session.User.UserID, uid)
-	if err == nil {
+	if err == nil && followingcheck.UserID != uuid.Nil {
 		followingcheck.Del()
-		log.Println("HandleFollow: Unfollowed user, found model", followingcheck)
+		log.Println("HandleFollow: Unfollowed user")
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"response": "Unfollow"})
 		return
@@ -274,7 +272,6 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if uid is private accoutn
 	user, err := models.GetUserByID(uid)
 	if err != nil {
 		log.Println("HandleFollow: Error getting user to follow by ID:", err)
@@ -284,7 +281,20 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 
 	noti, notiType, resp := "", "", ""
 	// if user is private, send follow request
-	if user.ProfileExposure != "Public" {
+	if user.ProfileExposure != "public" {
+
+		// check if follow request already exists
+		followrequestcheck, err := models.GetPendingRequest(uid, session.User.UserID)
+		if followrequestcheck.RequestID != uuid.Nil {
+			log.Println("HandleFollow: Follow request already exists")
+			http.Error(w, "Follow Request Already Exists", http.StatusBadRequest)
+			return
+		} else if err != nil && err != sql.ErrNoRows {
+			log.Println("HandleFollow: Error getting follow request:", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
 		followrequest := models.FollowRequestModel{
 			RequestID:     uuid.Must(uuid.NewV4()),
 			UserID:        uid,
@@ -314,7 +324,11 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 		NotiTime:    time.Now().Format(time.RFC3339),
 		NotiStatus:  "unread",
 	}
-	notification.Save()
+	if err := notification.Save(); err != nil {
+		log.Println("HandleFollow: Error saving notification:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": resp})
 }
