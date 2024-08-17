@@ -6,36 +6,36 @@ import (
 	"bonfire/pkgs/utils"
 )
 
-type follow_request struct {
-	RequestID    uuid.UUID `json:"group_id"`
-	UserID       uuid.UUID `json:"owner_id"`
-	RequesterID  uuid.UUID `json:"request_id"`
-	RequestStaus string    `json:"request_type"`
+type FollowRequestModel struct {
+	RequestID     uuid.UUID `json:"request_id"`
+	UserID        uuid.UUID `json:"user_id"`
+	RequesterID   uuid.UUID `json:"requester_id"`
+	RequestStatus string    `json:"request_type"`
 }
 
 // CRUD Operations
 
 // Function to create a follow request
-func (f *follow_request) Save() error {
+func (f *FollowRequestModel) Save() error {
 	columns := []string{"request_id", "user_id", "requester_id", "request_status"}
-	values := []interface{}{f.RequestID, f.UserID, f.RequesterID, f.RequestStaus}
+	values := []interface{}{f.RequestID, f.UserID, f.RequesterID, f.RequestStatus}
 	_, err := utils.Create("follow_request", columns, values)
 	return err
 }
 
 // Function to delete a follow request
-func (f *follow_request) Del() error {
+func (f *FollowRequestModel) Del() error {
 	condition := "request_id = ?"
 	_, err := utils.Delete("follow_request", condition, f.RequestID)
 	return err
 }
 
 // Function to update a follow request
-func (f *follow_request) Update() error {
+func (f *FollowRequestModel) Update() error {
 	updates := map[string]interface{}{
-		"user_id" : f.UserID,
-		"requester_id" : f.RequesterID,
-		"request_status" : f.RequestStaus,
+		"user_id":        f.UserID,
+		"requester_id":   f.RequesterID,
+		"request_status": f.RequestStatus,
 	}
 	condition := "request_id = ?"
 	_, err := utils.Update("follow_request", updates, condition, f.RequestID)
@@ -43,7 +43,7 @@ func (f *follow_request) Update() error {
 }
 
 // GetRequestByUserID retrieves follow requests by the user's ID.
-func GetRequestByUserID(userID uuid.UUID) ([]follow_request, error) {
+func GetRequestByUserID(userID uuid.UUID) ([]FollowRequestModel, error) {
 	columns := []string{"request_id", "user_id", "requester_id", "request_status"}
 	condition := "user_id = ?"
 	rows, err := utils.Read("follow_request", columns, condition, userID)
@@ -52,10 +52,10 @@ func GetRequestByUserID(userID uuid.UUID) ([]follow_request, error) {
 	}
 	defer rows.Close()
 
-	var requests []follow_request
+	var requests []FollowRequestModel
 	for rows.Next() {
-		var request follow_request
-		err := rows.Scan(&request.RequestID, &request.UserID, &request.RequesterID, &request.RequestStaus)
+		var request FollowRequestModel
+		err := rows.Scan(&request.RequestID, &request.UserID, &request.RequesterID, &request.RequestStatus)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func GetRequestByUserID(userID uuid.UUID) ([]follow_request, error) {
 }
 
 // GetRequestByRequesterID retrieves follow requests by the requester's ID.
-func GetRequestByRequesterID(requesterID uuid.UUID) ([]follow_request, error) {
+func GetRequestByRequesterID(requesterID uuid.UUID) ([]FollowRequestModel, error) {
 	columns := []string{"request_id", "user_id", "requester_id", "request_status"}
 	condition := "requester_id = ?"
 	rows, err := utils.Read("follow_request", columns, condition, requesterID)
@@ -75,10 +75,10 @@ func GetRequestByRequesterID(requesterID uuid.UUID) ([]follow_request, error) {
 	}
 	defer rows.Close()
 
-	var requests []follow_request
+	var requests []FollowRequestModel
 	for rows.Next() {
-		var request follow_request
-		err := rows.Scan(&request.RequestID, &request.UserID, &request.RequesterID, &request.RequestStaus)
+		var request FollowRequestModel
+		err := rows.Scan(&request.RequestID, &request.UserID, &request.RequesterID, &request.RequestStatus)
 		if err != nil {
 			return nil, err
 		}
@@ -88,8 +88,8 @@ func GetRequestByRequesterID(requesterID uuid.UUID) ([]follow_request, error) {
 	return requests, nil
 }
 
-//  GetRequestByRequestID retrieves a follow request by its ID.
-func GetRequestByRequestID(requestID uuid.UUID) (*follow_request, error) {
+// GetRequestByRequestID retrieves a follow request by its ID.
+func GetRequestByRequestID(requestID uuid.UUID) (*FollowRequestModel, error) {
 	columns := []string{"request_id", "user_id", "requester_id", "request_status"}
 	condition := "request_id = ?"
 	rows, err := utils.Read("follow_request", columns, condition, requestID)
@@ -98,13 +98,33 @@ func GetRequestByRequestID(requestID uuid.UUID) (*follow_request, error) {
 	}
 	defer rows.Close()
 
-	var request follow_request
+	var request FollowRequestModel
 	if rows.Next() {
-		err := rows.Scan(&request.RequestID, &request.UserID, &request.RequesterID, &request.RequestStaus)
+		err := rows.Scan(&request.RequestID, &request.UserID, &request.RequesterID, &request.RequestStatus)
 		if err != nil {
 			return nil, err
 		}
 	}
 
+	return &request, nil
+}
+
+// GetPendingRequest retrieves a follow request by the user's ID and the requester's ID.
+func GetPendingRequest(userID uuid.UUID, requesterID uuid.UUID) (*FollowRequestModel, error) {
+	columns := []string{"request_id", "user_id", "requester_id", "request_status"}
+	condition := "user_id = ? AND requester_id = ? AND request_status = 'pending'"
+	rows, err := utils.Read("follow_request", columns, condition, userID, requesterID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var request FollowRequestModel
+	if rows.Next() {
+		err := rows.Scan(&request.RequestID, &request.UserID, &request.RequesterID, &request.RequestStatus)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return &request, nil
 }

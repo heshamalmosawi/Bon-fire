@@ -73,7 +73,7 @@ func (u *UserModel) Update() error {
 
 // Function to get user by email
 func GetUserByEmail(email string) (*UserModel, error) {
-	columns := []string{"user_id", "user_email", "user_password" ,"user_fname", "user_lname", "user_dob", "user_avatar_path", "user_nickname", "user_about", "profile_exposure"}
+	columns := []string{"user_id", "user_email", "user_password", "user_fname", "user_lname", "user_dob", "user_avatar_path", "user_nickname", "user_about", "profile_exposure"}
 	condition := "user_email = ?"
 	rows, err := utils.Read("user", columns, condition, email)
 	if err != nil {
@@ -86,11 +86,34 @@ func GetUserByEmail(email string) (*UserModel, error) {
 
 	var user UserModel
 	if rows.Next() {
-		err := rows.Scan(&user.UserID, &user.UserEmail, &user.UserPassword ,&user.UserFirstName, &user.UserLastName, &user.UserDOB, &user.UserAvatarPath, &user.UserNickname, &user.UserBio, &user.ProfileExposure)
+		err := rows.Scan(&user.UserID, &user.UserEmail, &user.UserPassword, &user.UserFirstName, &user.UserLastName, &user.UserDOB, &user.UserAvatarPath, &user.UserNickname, &user.UserBio, &user.ProfileExposure)
 		if err != nil {
 			return nil, err
 		}
 	}
 
+	return &user, nil
+}
+
+// This function gets the user by user UUID
+func GetUserByID(uid uuid.UUID) (*UserModel, error) {
+	columns := []string{"user_id", "user_email", "user_fname", "user_lname", "user_dob", "user_avatar_path", "user_nickname", "user_about", "profile_exposure"}
+	condition := "user_id = ?"
+	rows, err := utils.Read("user", columns, condition, uid)
+	if err != nil {
+		if err == sqlite3.ErrNotFound {
+			return nil, utils.ErrUserNotFound
+		}
+		return nil, err
+	}
+	defer rows.Close()
+
+	var user UserModel
+	if rows.Next() {
+		err := rows.Scan(&user.UserID, &user.UserEmail, &user.UserFirstName, &user.UserLastName, &user.UserDOB, &user.UserAvatarPath, &user.UserNickname, &user.UserBio, &user.ProfileExposure)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return &user, nil
 }

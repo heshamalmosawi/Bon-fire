@@ -39,12 +39,12 @@ CREATE TABLE user_following (
 
 CREATE TABLE user_notification (
   noti_id TEXT PRIMARY KEY,
-  reciever_id TEXT,
+  receiver_id TEXT,
   noti_type TEXT,
   noti_content TEXT,
   noti_time TEXT,
   noti_status TEXT DEFAULT 'unread',
-  FOREIGN KEY (reciever_id) REFERENCES user(user_id) ON UPDATE CASCADE ON DELETE CASCADE
+  FOREIGN KEY (receiver_id) REFERENCES user(user_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE
