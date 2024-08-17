@@ -55,7 +55,12 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create a new session for the authenticated user
+	// remove old session of user if any
+	if prev_session, err := pkgs.MainSessionManager.GetSessionByUser(user); err == nil {
+		pkgs.MainSessionManager.DeleteSession(prev_session.ID)
+	}
+
+	// create new session
 	session, err := pkgs.MainSessionManager.CreateSession(user)
 	if err != nil {
 		log.Printf("Error creating session for user: %s, error: %v", user.UserEmail, err)

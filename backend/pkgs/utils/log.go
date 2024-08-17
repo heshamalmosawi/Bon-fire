@@ -3,7 +3,6 @@ package utils
 import (
 	"log"
 	"os"
-	_ "log"
 )
 
 // LogLevel defines the logging levels
