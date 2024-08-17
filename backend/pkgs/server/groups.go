@@ -16,6 +16,11 @@ type GroupRequest struct {
 	GroupID string `json:"group_id"`
 }
 
+type GroupJoin struct {
+	GroupID string `json:"group_id"`
+	UserID  string `json:"user_id"`
+}
+
 /**
  * This file handles the group related requests.
  */
@@ -45,7 +50,138 @@ func HandleGroupInvite(w http.ResponseWriter, r *http.Request) {
 
 // HandleGroupJoin handles the request for joining a group.
 func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
-	// Decode the request body 
+	// Decode the request body to get the group ID and user ID
+	var req GroupJoin
+	if err := utils.DecodeJSON(r, &req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Convert group ID and user ID from string to UUID
+	groupID, err := uuid.FromString(req.GroupID)
+	if err != nil {
+		http.Error(w, "Invalid group ID", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := uuid.FromString(req.UserID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	// Get the group details to ensure it exists
+	group, err := models.GetGroupByID(groupID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve group details", http.StatusInternalServerError)
+		return
+	}
+	if group == nil {
+		http.Error(w, "Group not found", http.StatusNotFound)
+		return
+	}
+
+	// Create a new GroupUser model
+	groupUser := &models.GroupUser{
+		UserID:  userID,
+		GroupID: groupID,
+	}
+
+	// Save the user to the group_user table
+	if err := groupUser.Save(); err != nil {
+		http.Error(w, "Failed to join group", http.StatusInternalServerError)
+		return
+	}
+
+	//create a group notification that will be displayed in chat 
+	notification := models.GroupNotificationModel{
+		GroupID:  group.GroupID,
+		NotiType:    "group_join",
+		NotiContent: "User " + req.UserID + " has joined your group.",
+		NotiTime:    time.Now(),
+		NotiStatus:  "unread",
+	}
+
+	// Save the notification to the database
+	if err := notification.Save(); err != nil {
+		http.Error(w, "Failed to send notification to group admin", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with a success message
+	response := map[string]string{"response": "Successfully joined the group"}
+	if err := utils.EncodeJSON(w, response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func HandleGroupLeave(w http.ResponseWriter, r *http.Request) {
+	// Decode the request body to get the group ID
+	var req GroupRequest
+	if err := utils.DecodeJSON(r, &req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	// Convert group ID from string to UUID
+	groupID, err := uuid.FromString(req.GroupID)
+	if err != nil {
+		http.Error(w, "Invalid group ID", http.StatusBadRequest)
+		return
+	}
+	// Retrieve session ID from the cookie
+	sessionIDCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Session ID cookie not found", http.StatusUnauthorized)
+		return
+	}
+	// Get the session from the session manager
+	session, err := pkgs.MainSessionManager.GetSession(sessionIDCookie.Value)
+	if err != nil {
+		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
+		return
+	}
+	// Extract the user ID from the session
+	userID := session.User.UserID
+	// Get the group details to find the group owner
+	group, err := models.GetGroupByID(groupID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve group details", http.StatusInternalServerError)
+		return
+	}
+	if group == nil {
+		http.Error(w, "Group not found", http.StatusNotFound)
+		return
+	}
+	// Delete the user from the group_user table
+	err = models.DeleteUserFromGroup(userID, groupID)
+	if err != nil {
+		http.Error(w, "Failed to leave the group", http.StatusInternalServerError)
+		return
+	}
+	// Respond with a success message
+	response := map[string]string{"response": "Successfully left the group"}
+	if err := utils.EncodeJSON(w, response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+}
+// HandleGroupDelete handles the request for deleting a group.
+func HandleGroupDelete(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Handling error")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
+}
+
+// HandleGroupEventResponse handles the request for responding to a group event.
+func HandleGroupEventResponse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Handling error")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
+}
+
+// HandleGroupRequests handles the request for managing group requests.
+func HandleGroupRequests(w http.ResponseWriter, r *http.Request) {
 	var req GroupRequest
 	if err := utils.DecodeJSON(r, &req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -122,75 +258,4 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
-}
-
-func HandleGroupLeave(w http.ResponseWriter, r *http.Request) {
-	// Decode the request body to get the group ID
-	var req GroupRequest
-	if err := utils.DecodeJSON(r, &req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-	// Convert group ID from string to UUID
-	groupID, err := uuid.FromString(req.GroupID)
-	if err != nil {
-		http.Error(w, "Invalid group ID", http.StatusBadRequest)
-		return
-	}
-	// Retrieve session ID from the cookie
-	sessionIDCookie, err := r.Cookie("session_id")
-	if err != nil {
-		http.Error(w, "Session ID cookie not found", http.StatusUnauthorized)
-		return
-	}
-	// Get the session from the session manager
-	session, err := pkgs.MainSessionManager.GetSession(sessionIDCookie.Value)
-	if err != nil {
-		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
-		return
-	}
-	// Extract the user ID from the session
-	userID := session.User.UserID
-	// Get the group details to find the group owner
-	group, err := models.GetGroupByID(groupID)
-	if err != nil {
-		http.Error(w, "Failed to retrieve group details", http.StatusInternalServerError)
-		return
-	}
-	if group == nil {
-		http.Error(w, "Group not found", http.StatusNotFound)
-		return
-	}
-	// Delete the user from the group_user table
-	err = models.DeleteUserFromGroup(userID, groupID)
-	if err != nil {
-		http.Error(w, "Failed to leave the group", http.StatusInternalServerError)
-		return
-	}
-	// Respond with a success message
-	response := map[string]string{"response": "Successfully left the group"}
-	if err := utils.EncodeJSON(w, response); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-		return
-	}
-}
-// HandleGroupDelete handles the request for deleting a group.
-func HandleGroupDelete(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling error")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
-}
-
-// HandleGroupEventResponse handles the request for responding to a group event.
-func HandleGroupEventResponse(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling error")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
-}
-
-// HandleGroupRequests handles the request for managing group requests.
-func HandleGroupRequests(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling error")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
 }
