@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -118,6 +119,20 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	if err := utils.DecodeJSON(r, &user); err != nil {
 		log.Println("Error decoding JSON in signup:", err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	// Validating that all *required* user fields except id are not empty or whitespaces
+	user.UserEmail = strings.TrimSpace(user.UserEmail)
+	user.UserPassword = strings.TrimSpace(user.UserPassword)
+	user.UserFirstName = strings.TrimSpace(user.UserFirstName)
+	user.UserLastName = strings.TrimSpace(user.UserLastName)
+	user.UserDOB = strings.TrimSpace(user.UserDOB)
+	user.ProfileExposure = strings.TrimSpace(user.ProfileExposure)
+
+	if user.UserEmail == "" || user.UserPassword == "" || user.UserFirstName == "" || user.UserLastName == "" || user.UserDOB == "" || user.ProfileExposure == "" {
+		log.Println("Error: Missing required fields in user data.")
+		http.Error(w, "HandleSignup: Missing required fields in user data.", http.StatusBadRequest)
 		return
 	}
 

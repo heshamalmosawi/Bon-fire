@@ -60,7 +60,7 @@ const AuthDesktop: FC = () => {
         id="pic-div"
         className="relative w-[50%] h-full bg-bonfire bg-cover rounded-r-3xl z-10"
       ></div>
-      <div className="absolute top-0 left-0 w-[50%] h-[50%] flex items-center justify-center">
+      <div className="absolute top-0 left-0 w-[50%] flex items-center justify-center">
         <SignupForm />
       </div>
       <div className="w-[50%] h-full flex flex-col items-center justify-center gap-7">

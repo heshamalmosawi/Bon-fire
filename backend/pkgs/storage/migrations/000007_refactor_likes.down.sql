@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS 'likes';
+
+DROP TRIGGER IF EXISTS updateLikeUp;
+
+DROP TRIGGER IF EXISTS updateLikeDown;

@@ -65,3 +65,25 @@ func GetOwwnerByGroup(ownerID string) (*GroupModel, error) {
 
 	return &group, nil
 }
+
+// GetGroupByID retrieves the group details by its ID
+func GetGroupByID(groupID uuid.UUID) (*GroupModel, error) {
+	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
+	condition := "group_id = ?"
+	rows, err := utils.Read("group", columns, condition, groupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		var group GroupModel
+		err := rows.Scan(&group.GroupID, &group.OwnerID, &group.GroupName, &group.GroupDescrip)
+		if err != nil {
+			return nil, err
+		}
+		return &group, nil
+	}
+
+	return nil, nil
+}

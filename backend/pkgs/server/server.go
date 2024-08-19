@@ -27,7 +27,7 @@ func Routers() {
 	mux.HandleFunc("GET /profile/{id}", HandleProfile)         // ✅
 	mux.HandleFunc("PUT /profile/update", HandleProfileUpdate) // ✅
 	mux.HandleFunc("POST /follow", HandleFollow)
-	mux.HandleFunc("POST /follow_response", HandleFollowResponse)
+	mux.HandleFunc("POST /follow_response", HandleFollowRequest)
 	mux.HandleFunc("GET /post/{id}", HandlePosts)               // ✅
 	mux.HandleFunc("POST /post/create", HandleCreatePosts)      // ✅
 	mux.HandleFunc("POST /like_post/{id}", HandleLikePost)      // ✅

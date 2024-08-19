@@ -16,9 +16,10 @@ func TestGetLikesByCommentID(t *testing.T) {
 
 	// Create a test comment like
 	commentLikeID, _ := uuid.NewV4()
-	commentLike := models.CommentLikeModel{
-		ListingID: commentLikeID,
-		CommentID: uuid.Nil,
+	commentID, _ := uuid.NewV4()
+	commentLike := models.LikeModel{
+		LikeID:    commentLikeID,
+		CommentID: commentID,
 		UserID:    uuid.Nil,
 	}
 
@@ -27,17 +28,17 @@ func TestGetLikesByCommentID(t *testing.T) {
 	}
 
 	// Get likes by comment ID
-	likes, err := models.GetLikesByCommentID(commentLikeID)
+	likes, err := models.GetLikesByCommentID(commentID)
 	if err != nil {
 		t.Fatal("error getting likes by comment ID:", err)
 	}
 
 	// Check that the comment like is returned
 	if len(likes) != 1 {
-		t.Fatalf("expected 1 like, got %d", len(likes))
+		t.Fatalf("expected 1 like, got %d %v", len(likes), likes)
 	}
-	if likes[0].ListingID != commentLikeID {
-		t.Fatalf("expected comment like ID %s, got %s", commentLikeID, likes[0].ListingID)
+	if likes[0].LikeID != commentLikeID {
+		t.Fatalf("expected comment like ID %s, got %s", commentLikeID, likes[0].LikeID)
 	}
 
 	// Clean up test comment like
@@ -49,7 +50,6 @@ func TestGetLikesByCommentID(t *testing.T) {
 		t.Fatal("error removing test file:", err)
 	}
 }
-
 
 func TestToggleCommentLike(t *testing.T) {
 	storage.InitDB("test")

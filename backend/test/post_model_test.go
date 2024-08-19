@@ -36,7 +36,7 @@ func TestPostCRUD(t *testing.T) {
 		PostID:        postID,
 		PostContent:   "This is a test post",
 		PostImagePath: "/path/to/image",
-		PostExposure:  "Public",
+		PostExposure:  "public",
 		GroupID:       uuid.Nil, 
 		PostLikeCount: 0,
 		CreatedAt:     "2024-01-01T00:00:00Z",
@@ -97,7 +97,7 @@ func TestPostLikeToggle(t *testing.T) {
 		PostID:        postID,
 		PostContent:   "This is a test post",
 		PostImagePath: "/path/to/image",
-		PostExposure:  "Public",
+		PostExposure:  "public",
 		GroupID:       uuid.Nil, 
 		PostLikeCount: 0,
 		CreatedAt:     "2024-01-01T00:00:00Z",
@@ -109,7 +109,7 @@ func TestPostLikeToggle(t *testing.T) {
 	}
 
 	// Toggle like on the post
-	if err := models.ToggleLike(postID, userID); err != nil {
+	if err := models.TogglePostLike(postID, userID); err != nil {
 		t.Fatal("error toggling like:", err)
 	}
 
@@ -123,7 +123,7 @@ func TestPostLikeToggle(t *testing.T) {
 	}
 
 	// Toggle like again to remove it
-	if err := models.ToggleLike(postID, userID); err != nil {
+	if err := models.TogglePostLike(postID, userID); err != nil {
 		t.Fatal("error toggling like:", err)
 	}
 
