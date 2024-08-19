@@ -14,6 +14,12 @@ import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { signupSchema, HandleSignupSubmission } from "@/lib/schemas/signupSchema";
 import { useToast } from "../ui/use-toast";
+import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { cn } from "@/lib/utils";
+import { Calendar } from "../ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { Textarea } from "../ui/textarea";
 
 const SignupForm: FC = () => {
   const { toast } = useToast();
@@ -68,17 +74,17 @@ const SignupForm: FC = () => {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6 w-[80%] mx-auto"
+              className="space-y-4 w-full mx-auto"
             >
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="dark">
                     <FormLabel className="text-white">Email</FormLabel>
                     <FormControl>
                       <Input
-                        className="w-full bg-neutral-900 text-white border-0 rounded-md"
+                        className="dark text-white"
                         type="email"
                         placeholder="john.doe@example.com"
                         {...field}
@@ -92,11 +98,11 @@ const SignupForm: FC = () => {
                 control={form.control}
                 name="password"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="dark">
                     <FormLabel className="text-white">Password</FormLabel>
                     <FormControl>
                       <Input
-                        className="w-full bg-neutral-900 text-white border-0 rounded-md"
+                        className="text-white"
                         type="password"
                         placeholder="********"
                         {...field}
@@ -110,11 +116,13 @@ const SignupForm: FC = () => {
                 control={form.control}
                 name="confirmPassword"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Confirm Password</FormLabel>
+                  <FormItem className="dark">
+                    <FormLabel className="text-white">
+                      Confirm Password
+                    </FormLabel>
                     <FormControl>
                       <Input
-                        className="w-full bg-neutral-900 text-white border-0 rounded-md"
+                        className="text-white"
                         type="password"
                         placeholder="********"
                         {...field}
@@ -138,25 +146,25 @@ const SignupForm: FC = () => {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6 w-[80%] mx-auto"
+              className="space-y-6 w-full mx-auto"
             >
-              <FormItem>
+              <FormItem className="dark">
                 <FormLabel className="text-white">Avatar</FormLabel>
                 <FormControl>
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarChange}
-                      className="w-full bg-neutral-900 text-white border-0 rounded-md file:btn file:btn-bordered file:btn-accent"
-                    />
+                  <div className="flex flex-col items-center justify-center gap-4">
                     {avatarPreview && (
                       <img
                         src={avatarPreview}
                         alt="Avatar Preview"
-                        className="mt-4 w-24 h-24 rounded-full mx-auto"
+                        className="mt-4 w-20 h-20 rounded-full mx-auto"
                       />
                     )}
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="w-full text-white file:text-white"
+                    />
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -165,11 +173,11 @@ const SignupForm: FC = () => {
                 control={form.control}
                 name="firstName"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="dark">
                     <FormLabel className="text-white">First Name</FormLabel>
                     <FormControl>
                       <Input
-                        className="w-full bg-neutral-900 text-white border-0 rounded-md"
+                        className="w-full text-white"
                         placeholder="John"
                         {...field}
                       />
@@ -182,11 +190,11 @@ const SignupForm: FC = () => {
                 control={form.control}
                 name="lastName"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="dark">
                     <FormLabel className="text-white">Last Name</FormLabel>
                     <FormControl>
                       <Input
-                        className="w-full bg-neutral-900 text-white border-0 rounded-md"
+                        className="w-full text-white"
                         placeholder="Doe"
                         {...field}
                       />
@@ -195,22 +203,43 @@ const SignupForm: FC = () => {
                   </FormItem>
                 )}
               />
-             <FormField
+              <FormField
                 control={form.control}
                 name="dateOfBirth"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Date of Birth</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="w-full bg-neutral-900 text-white border-0 rounded-md"
-                        type="date"
-                        value={field.value instanceof Date ? field.value.toISOString().substring(0, 10) : field.value || ''}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        ref={field.ref}
-                      />
-                    </FormControl>
+                  <FormItem className="dark flex flex-col text-white">
+                    <FormLabel>Date of birth</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="dark w-auto p-0 border-4"
+                        align="start"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          className="bg-neutral-950 text-white"
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -219,11 +248,13 @@ const SignupForm: FC = () => {
                 control={form.control}
                 name="nickname"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Nickname (Optional)</FormLabel>
+                  <FormItem className="dark">
+                    <FormLabel className="text-white">
+                      Nickname (Optional)
+                    </FormLabel>
                     <FormControl>
                       <Input
-                        className="w-full bg-neutral-900 text-white border-0 rounded-md"
+                        className="w-full text-white"
                         placeholder="Nickname"
                         {...field}
                       />
@@ -236,11 +267,11 @@ const SignupForm: FC = () => {
                 control={form.control}
                 name="about"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">About Me (Optional)</FormLabel>
+                  <FormItem className="dark">
+                    <FormLabel className="text-white">Bio (Optional)</FormLabel>
                     <FormControl>
-                      <Input
-                        className="w-full bg-neutral-900 text-white border-0 rounded-md"
+                      <Textarea
+                        className="w-full text-white"
                         placeholder="Tell us about yourself..."
                         {...field}
                       />
