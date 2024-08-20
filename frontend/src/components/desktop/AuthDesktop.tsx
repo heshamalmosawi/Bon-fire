@@ -55,7 +55,7 @@ const AuthDesktop: FC = () => {
   };
 
   return (
-    <main className="w-screen h-screen flex items-center justify-center bg-neutral-950">
+    <main className="w-screen h-screen flex items-center justify-center bg-[#18181B]">
       <div
         id="pic-div"
         className="relative w-[50%] h-full bg-bonfire bg-cover rounded-r-3xl z-10"
