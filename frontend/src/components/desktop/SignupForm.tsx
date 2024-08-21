@@ -1,3 +1,5 @@
+"use client";
+
 import React, { FC, useState, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
@@ -27,20 +29,19 @@ import anime from "animejs";
 
 const SignupForm: FC = () => {
   const { toast } = useToast();
-  const [stage, setStage] = useState(1);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      user_email: "",
+      user_password: "",
       confirmPassword: "",
-      firstName: "",
-      lastName: "",
+      user_fname: "",
+      user_lname: "",
       avatar: undefined,
-      dateOfBirth: new Date(),
-      nickname: "",
-      about: "",
+      user_dob: new Date(),
+      user_nickname: "",
+      user_about: "",
     },
   });
 
@@ -76,16 +77,6 @@ const SignupForm: FC = () => {
     });
   };
 
-  const nextStage = () => {
-    console.log("Proceeding to next stage");
-    setStage(2);
-  };
-
-  const prevStage = () => {
-    console.log("Going back to previous stage");
-    setStage(1);
-  };
-
   const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (file) {
@@ -98,17 +89,17 @@ const SignupForm: FC = () => {
 
   return (
     <main className="w-screen h-screen flex items-center justify-center bg-neutral-950">
-      <div className="w-[50%] h-full flex flex-col items-center justify-center gap-7">
+      <div className="w-[80%] h-full flex flex-col items-center justify-center gap-7">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 w-full mx-auto"
           >
-            {stage === 1 ? (
-              <>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col space-y-4">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="user_email"
                   render={({ field }) => (
                     <FormItem className="dark">
                       <FormLabel className="text-white">Email</FormLabel>
@@ -126,89 +117,7 @@ const SignupForm: FC = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem className="dark">
-                      <FormLabel className="text-white">Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="text-white"
-                          type="password"
-                          placeholder="********"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem className="dark">
-                      <FormLabel className="text-white">
-                        Confirm Password
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          className="text-white"
-                          type="password"
-                          placeholder="********"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  className="w-full bg-blue-400 hover:bg-blue-800 rounded-md"
-                  type="button"
-                  onClick={nextStage}
-                >
-                  Next
-                </Button>
-                <Button
-                  className="text-white w-full text-center"
-                  variant={"link"}
-                  onClick={handleHaveAccountClick}
-                >
-                  Got an Account?
-                </Button>
-              </>
-            ) : (
-              <>
-                <FormField
-                  control={form.control}
-                  name="avatar"
-                  render={({ field }) => (
-                    <FormItem className="dark">
-                      <FormLabel className="text-white">Avatar</FormLabel>
-                      <FormControl>
-                        <div className="flex flex-col items-center justify-center gap-4">
-                          {avatarPreview && (
-                            <img
-                              src={avatarPreview}
-                              alt="Avatar Preview"
-                              className="mt-4 w-20 h-20 rounded-full mx-auto"
-                            />
-                          )}
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleAvatarChange}
-                            className="w-full text-white file:text-white"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="firstName"
+                  name="user_fname"
                   render={({ field }) => (
                     <FormItem className="dark">
                       <FormLabel className="text-white">First Name</FormLabel>
@@ -225,24 +134,7 @@ const SignupForm: FC = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem className="dark">
-                      <FormLabel className="text-white">Last Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="w-full text-white"
-                          placeholder="Doe"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="dateOfBirth"
+                  name="user_dob"
                   render={({ field }) => (
                     <FormItem className="dark flex flex-col text-white">
                       <FormLabel>Date of birth</FormLabel>
@@ -282,7 +174,7 @@ const SignupForm: FC = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="nickname"
+                  name="user_nickname"
                   render={({ field }) => (
                     <FormItem className="dark">
                       <FormLabel className="text-white">
@@ -299,14 +191,76 @@ const SignupForm: FC = () => {
                     </FormItem>
                   )}
                 />
+              </div>
+              <div className="flex flex-col space-y-4">
                 <FormField
                   control={form.control}
-                  name="about"
+                  name="user_password"
                   render={({ field }) => (
                     <FormItem className="dark">
-                      <FormLabel className="text-white">
-                        Bio (Optional)
-                      </FormLabel>
+                      <FormLabel className="text-white">Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-white"
+                          type="password"
+                          placeholder="********"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="user_lname"
+                  render={({ field }) => (
+                    <FormItem className="dark">
+                      <FormLabel className="text-white">Last Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="w-full text-white"
+                          placeholder="Doe"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="avatar"
+                  render={({ field }) => (
+                    <FormItem className="dark">
+                      <FormLabel className="text-white">Avatar</FormLabel>
+                      <FormControl>
+                        <div className="flex flex-col items-center justify-center gap-4">
+                          {avatarPreview && (
+                            <img
+                              src={avatarPreview}
+                              alt="Avatar Preview"
+                              className="mt-4 w-20 h-20 rounded-full mx-auto"
+                            />
+                          )}
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarChange}
+                            className="w-full text-white file:text-white"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="user_about"
+                  render={({ field }) => (
+                    <FormItem className="dark">
+                      <FormLabel className="text-white">Bio (Optional)</FormLabel>
                       <FormControl>
                         <Textarea
                           className="w-full text-white"
@@ -318,23 +272,21 @@ const SignupForm: FC = () => {
                     </FormItem>
                   )}
                 />
-                <div className="flex justify-between">
-                  <Button
-                    className="bg-gray-600 text-white rounded-md py-2 hover:bg-gray-800"
-                    type="button"
-                    onClick={prevStage}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    className="bg-blue-400 text-white rounded-md py-2 hover:bg-blue-800"
-                    type="submit"
-                  >
-                    Complete Sign Up
-                  </Button>
-                </div>
-              </>
-            )}
+              </div>
+            </div>
+            <Button
+              className="w-full bg-blue-400 hover:bg-blue-800 rounded-md"
+              type="submit"
+            >
+              Complete Sign Up
+            </Button>
+            <Button
+              className="text-white w-full text-center"
+              variant={"link"}
+              onClick={handleHaveAccountClick}
+            >
+              Got an Account?
+            </Button>
           </form>
         </Form>
       </div>

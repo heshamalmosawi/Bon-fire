@@ -8,8 +8,8 @@ import axios from "axios";
 // Schema for signup form
 export const signupSchema = z
   .object({
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters long"),
+    user_email: z.string().email("Invalid email address"),
+    user_password: z.string().min(6, "Password must be at least 6 characters long"),
     confirmPassword: z
       .string()
       .min(6, "Confirm Password must be at least 6 characters long"),
@@ -19,14 +19,14 @@ export const signupSchema = z
         message: "Mime type of file unacceptable",
       })
       .optional(),
-    dateOfBirth: z.date(),
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    nickname: z.string().optional(),
-    about: z.string().optional(),
+      user_dob: z.date(),
+      user_fname: z.string().min(1, "First name is required"),
+      user_lname: z.string().min(1, "Last name is required"),
+      user_nickname: z.string().optional(),
+      user_about: z.string().optional(),
   })
-  .superRefine(({ confirmPassword, password }, ctx) => {
-    if (confirmPassword !== password) {
+  .superRefine(({ confirmPassword, user_password }, ctx) => {
+    if (confirmPassword !== user_password) {
       ctx.addIssue({
         code: "custom",
         message: "The passwords did not match",
@@ -42,9 +42,17 @@ export const HandleSignupSubmission = async (values: z.infer<typeof signupSchema
     const avatarUrl = values.avatar ? await HandleFileUpload(values.avatar) : null;
     // Convert date to ISO string for consistent backend handling
     const payload = {
-      ...values,
-      avatar: avatarUrl,
+      user_email: values.user_email,
+      user_password: values.user_password,
+      user_fname: values.user_fname,
+      user_lname: values.user_lname,
+      user_dob: values.user_dob.toISOString(),
+      user_avatar_path: avatarUrl,
+      user_nickname: values.user_nickname,
+      user_about: values.user_about,
+      profile_exposure: "Public"
     };
+    
 
     console.log("Final Payload:", payload);
     console.log("final values:",values);
