@@ -6,31 +6,34 @@ import axios from "axios";
 
 
 // Schema for signup form
-export const signupSchema = z.object({
-  firstName: z.string().nonempty("First name is required"),
-  lastName: z.string().nonempty("Last name is required"),
-  userName: z.string().nonempty("Username is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-  confirmPassword: z.string().min(6, "Confirm Password must be at least 6 characters long"),
-  nickname: z.string().optional(),
-  about: z.string().optional(),
-  avatar: z.instanceof(File)
-    .refine(file => CheckMimeType(file), {
-      message: "Mime type of file unacceptable",
-    })
-    .optional(),
-  dateOfBirth: z.date(),
-  isPrivate: z.string().default("public"),
-}).superRefine(({ confirmPassword, password }, ctx) => {
-  if (confirmPassword !== password) {
-    ctx.addIssue({
-      code: "custom",
-      message: "The passwords did not match",
-      path: ["confirmPassword"],
-    });
-  }
-});
+export const signupSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters long"),
+    confirmPassword: z
+      .string()
+      .min(6, "Confirm Password must be at least 6 characters long"),
+    avatar: z
+      .instanceof(File)
+      .refine((file) => !CheckMimeType(file), {
+        message: "Mime type of file unacceptable",
+      })
+      .optional(),
+    dateOfBirth: z.date(),
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    nickname: z.string().optional(),
+    about: z.string().optional(),
+  })
+  .superRefine(({ confirmPassword, password }, ctx) => {
+    if (confirmPassword !== password) {
+      ctx.addIssue({
+        code: "custom",
+        message: "The passwords did not match",
+        path: ["confirmPassword"],
+      });
+    }
+  });
 
 
 export const HandleSignupSubmission = async (values: z.infer<typeof signupSchema>) => {
