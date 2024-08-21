@@ -12,7 +12,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
-import { signupSchema, HandleSignupSubmission } from "@/lib/schemas/signupSchema";
+import {
+  signupSchema,
+  HandleSignupSubmission,
+} from "@/lib/schemas/signupSchema";
 import { useToast } from "../ui/use-toast";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -20,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { Calendar } from "../ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { Textarea } from "../ui/textarea";
+import anime from "animejs";
 
 const SignupForm: FC = () => {
   const { toast } = useToast();
@@ -47,6 +51,19 @@ const SignupForm: FC = () => {
     }
   };
 
+  const handleHaveAccountClick = () => {
+    anime({
+      targets: "#pic-div",
+      translateX: "0",
+      update: () => {
+        document.getElementById("pic-div")!.className =
+          "relative w-[50%] h-full bg-bonfire bg-cover rounded-r-3xl z-10";
+      },
+      duration: 3000,
+      easing: "easeOutExpo",
+    });
+  };
+
   const nextStage = () => {
     console.log("Proceeding to next stage");
     setStage(2);
@@ -71,76 +88,85 @@ const SignupForm: FC = () => {
     <main className="w-screen h-screen flex items-center justify-center bg-neutral-950">
       <div className="w-[50%] h-full flex flex-col items-center justify-center gap-7">
         {stage === 1 && (
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 w-full mx-auto"
-            >
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem className="dark">
-                    <FormLabel className="text-white">Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="dark text-white"
-                        type="email"
-                        placeholder="john.doe@example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem className="dark">
-                    <FormLabel className="text-white">Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="text-white"
-                        type="password"
-                        placeholder="********"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem className="dark">
-                    <FormLabel className="text-white">
-                      Confirm Password
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        className="text-white"
-                        type="password"
-                        placeholder="********"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                className="w-full bg-blue-400 hover:bg-blue-800 rounded-md"
-                type="button"
-                onClick={nextStage}
+          <>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4 w-full mx-auto"
               >
-                Next
-              </Button>
-            </form>
-          </Form>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="dark">
+                      <FormLabel className="text-white">Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="dark text-white"
+                          type="email"
+                          placeholder="john.doe@example.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem className="dark">
+                      <FormLabel className="text-white">Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-white"
+                          type="password"
+                          placeholder="********"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem className="dark">
+                      <FormLabel className="text-white">
+                        Confirm Password
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-white"
+                          type="password"
+                          placeholder="********"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  className="w-full bg-blue-400 hover:bg-blue-800 rounded-md"
+                  type="button"
+                  onClick={nextStage}
+                >
+                  Next
+                </Button>
+              </form>
+            </Form>
+            <Button
+              className="text-white w-full text-center"
+              variant={"link"}
+              onClick={handleHaveAccountClick}
+            >
+              Got an Account?
+            </Button>
+          </>
         )}
         {stage === 2 && (
           <Form {...form}>
