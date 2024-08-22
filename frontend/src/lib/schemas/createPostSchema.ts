@@ -10,13 +10,6 @@ export const createPostSchema = z.object({
 export const HandleCreatePost = async (
   values: z.infer<typeof createPostSchema>
 ) => {
-  // const payload = {
-  //   post_image_path: values.imageContent
-  //     ? await HandleFileUpload(values.imageContent)
-  //     : "",
-  //   post_content: values.textContent,
-  // };
-
   const payload = new FormData();
 
   payload.append("post_content", values.textContent);
