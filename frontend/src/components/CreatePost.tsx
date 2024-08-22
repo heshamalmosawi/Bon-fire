@@ -28,7 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Images, Globe, Lock, UserPlus } from "lucide-react";
+import { Images } from "lucide-react";
 import {
   Select,
   SelectContent,
