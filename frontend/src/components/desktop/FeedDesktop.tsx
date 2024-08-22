@@ -1,12 +1,11 @@
 import React, { FC } from "react";
 import PostComponent from "./PostComponent";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
 import CreatePost from "../CreatePost";
+import EventsList from "./EventsList";
 
 const FeedDesktop: FC = () => {
   return (
-    <div className="w-[80%] h-full flex items-center justify-center">
+    <div className="w-[60%] h-full flex items-center justify-center">
       <div className="w-[70%] h-full px-5 py-10 space-y-8 overflow-y-scroll">
         <CreatePost />
         <PostComponent />
@@ -15,7 +14,9 @@ const FeedDesktop: FC = () => {
         <PostComponent />
         <PostComponent />
       </div>
-      <div className="w-[30%] h-full"></div>
+      <div className="w-[30%] h-full flex flex-col items-center justify-around">
+        <EventsList />
+      </div>
     </div>
   );
 };
