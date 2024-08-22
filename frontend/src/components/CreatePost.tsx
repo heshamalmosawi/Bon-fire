@@ -60,7 +60,11 @@ const CreatePost = () => {
 
   const onSubmit = async (values: z.infer<typeof createPostSchema>) => {
     try {
-      const payload = { ...values, visibility: postVisibility, selectedFollowers };
+      const payload = {
+        ...values,
+        visibility: postVisibility,
+        selectedFollowers,
+      };
       await HandleCreatePost(payload);
 
       setIsDialogOpen(false);
@@ -120,33 +124,34 @@ const CreatePost = () => {
                 }}
                 value={postVisibility}
               >
-<SelectTrigger className="flex items-center justify-between w-[150px] mt-1 bg-neutral-800 border border-gray-600 rounded-lg px-4 py-2 text-white leading-none">
-  <SelectValue placeholder="Public Post" />
-</SelectTrigger>
-<SelectContent className="bg-neutral-800 border border-gray-600 rounded-lg mt-2 text-white">
-<SelectItem value="public" className="flex items-center gap-2 px-4 py-2">
-  <span className="flex-1 text-left">Public</span>
-</SelectItem>
-<SelectItem value="private" className="flex items-center gap-2 px-4 py-2">
-  <span className="flex-1 text-left">Private</span>
-</SelectItem>
-    <SelectItem
-      value="custom"
-      className="flex items-center gap-2 px-4 py-2"
-      onClick={() => {
-        setPostVisibility('custom');
-        setIsCustomModalOpen(true);
-      }}
-    >
-      <span className="flex-1 text-left">Custom</span>
-    </SelectItem>
-</SelectContent>
-
-
+                <SelectTrigger className="flex items-center justify-between w-[150px] mt-1 bg-neutral-800 border border-gray-600 rounded-lg px-4 py-2 text-white leading-none">
+                  <SelectValue placeholder="Public Post" />
+                </SelectTrigger>
+                <SelectContent className="bg-neutral-800 border border-gray-600 rounded-lg mt-2 text-white">
+                  <SelectItem
+                    value="public"
+                    className="flex items-center gap-2 px-4 py-2"
+                  >
+                    <div className="ml-3">Public</div>
+                  </SelectItem>
+                  <SelectItem
+                    value="private"
+                    className="flex items-center gap-2 px-4 py-2"
+                  >
+                    <div className="ml-3">Private</div>
+                  </SelectItem>
+                  <SelectItem
+                    value="custom"
+                    className="flex items-center gap-2 px-4 py-2"
+                    onClick={() => {
+                      setPostVisibility("custom");
+                      setIsCustomModalOpen(true);
+                    }}
+                  >
+                    <div className="ml-3">Custom</div>
+                  </SelectItem>
+                </SelectContent>
               </Select>
-
-
-
             </div>
           </div>
           <Form {...form}>
@@ -194,15 +199,15 @@ const CreatePost = () => {
                 className="cursor-pointer"
               />
 
-         <div className="w-full flex items-center justify-end">
-         {postVisibility === "custom" && (
-  <Button
-    className="ml-2 bg-grey text-white hover:bg-gray-800"
-    onClick={() => setIsCustomModalOpen(true)}
-  >
-    Edit
-  </Button>
-)}
+              <div className="w-full flex items-center justify-end">
+                {postVisibility === "custom" && (
+                  <Button
+                    className="ml-2 bg-grey text-white hover:bg-gray-800"
+                    onClick={() => setIsCustomModalOpen(true)}
+                  >
+                    Edit
+                  </Button>
+                )}
                 <Button type="submit">Submit</Button>
               </div>
             </form>
@@ -217,14 +222,13 @@ const CreatePost = () => {
         <DialogContent className="text-white bg-neutral-950 border-[#ffffff66] w-[570px] flex flex-col items-start justify-evenly">
           <DialogHeader>
             <DialogTitle>Select Followers</DialogTitle>
-            <DialogDescription>Select followers to view this post.</DialogDescription>
+            <DialogDescription>
+              Select followers to view this post.
+            </DialogDescription>
           </DialogHeader>
           <ScrollArea className="w-full h-48">
             {followers.map((follower) => (
-              <div
-                key={follower.id}
-                className="flex items-center gap-2 mb-2"
-              >
+              <div key={follower.id} className="flex items-center gap-2 mb-2">
                 <Checkbox
                   checked={selectedFollowers.includes(follower.id)}
                   onCheckedChange={() => handleSelectFollower(follower.id)}
@@ -240,9 +244,7 @@ const CreatePost = () => {
             ))}
           </ScrollArea>
           <div className="w-full flex items-center justify-end mt-4">
-            <Button onClick={() => setIsCustomModalOpen(false)}>
-              Done
-            </Button>
+            <Button onClick={() => setIsCustomModalOpen(false)}>Done</Button>
           </div>
         </DialogContent>
       </Dialog>
