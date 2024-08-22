@@ -115,43 +115,7 @@ const CreatePost = () => {
             </Avatar>
             <div className="flex flex-col">
               <h4 className="text-white font-bold">Abdulrahman Idrees</h4>
-              <Select
-                onValueChange={(value) => {
-                  setPostVisibility(value);
-                  if (value === "custom") {
-                    setIsCustomModalOpen(true);
-                  }
-                }}
-                value={postVisibility}
-              >
-                <SelectTrigger className="flex items-center justify-between w-[150px] mt-1 bg-neutral-800 border border-gray-600 rounded-lg px-4 py-2 text-white leading-none">
-                  <SelectValue placeholder="Public Post" />
-                </SelectTrigger>
-                <SelectContent className="bg-neutral-800 border border-gray-600 rounded-lg mt-2 text-white">
-                  <SelectItem
-                    value="public"
-                    className="flex items-center gap-2 px-4 py-2"
-                  >
-                    <div className="ml-3">Public</div>
-                  </SelectItem>
-                  <SelectItem
-                    value="private"
-                    className="flex items-center gap-2 px-4 py-2"
-                  >
-                    <div className="ml-3">Private</div>
-                  </SelectItem>
-                  <SelectItem
-                    value="custom"
-                    className="flex items-center gap-2 px-4 py-2"
-                    onClick={() => {
-                      setPostVisibility("custom");
-                      setIsCustomModalOpen(true);
-                    }}
-                  >
-                    <div className="ml-3">Custom</div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <h6 className="text-[#ffffff66]">@akhaled01</h6>
             </div>
           </div>
           <Form {...form}>
@@ -192,20 +156,58 @@ const CreatePost = () => {
                   </FormItem>
                 )}
               />
-              <Images
-                onClick={() =>
-                  document.getElementById("post-image-input")?.click()
-                }
-                className="cursor-pointer"
-              />
-
-              <div className="w-full flex items-center justify-end">
+              <div className="w-full h-fit flex items-center justify-start gap-5">
+                <Images
+                  onClick={() =>
+                    document.getElementById("post-image-input")?.click()
+                  }
+                  className="cursor-pointer"
+                />
+                <Select
+                  onValueChange={(value) => {
+                    setPostVisibility(value);
+                    if (value === "custom") {
+                      setIsCustomModalOpen(true);
+                    }
+                  }}
+                  value={postVisibility}
+                >
+                  <SelectTrigger className="flex items-center justify-between w-[150px] mt-1 bg-neutral-800 border border-gray-600 rounded-lg px-4 py-2 text-white leading-none">
+                    <SelectValue placeholder="Public Post" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-neutral-800 border border-gray-600 rounded-lg mt-2 text-white">
+                    <SelectItem
+                      value="public"
+                      className="flex items-center gap-2 px-4 py-2"
+                    >
+                      <div className="ml-3">Public</div>
+                    </SelectItem>
+                    <SelectItem
+                      value="private"
+                      className="flex items-center gap-2 px-4 py-2"
+                    >
+                      <div className="ml-3">Private</div>
+                    </SelectItem>
+                    <SelectItem
+                      value="custom"
+                      className="flex items-center gap-2 px-4 py-2"
+                      onClick={() => {
+                        setPostVisibility("custom");
+                        setIsCustomModalOpen(true);
+                      }}
+                    >
+                      <div className="ml-3">Custom</div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-full flex items-center justify-end gap-5">
                 {postVisibility === "custom" && (
                   <Button
-                    className="ml-2 bg-grey text-white hover:bg-gray-800"
+                    className="ml-2 text-white"
                     onClick={() => setIsCustomModalOpen(true)}
                   >
-                    Edit
+                    Edit Followers Selection
                   </Button>
                 )}
                 <Button type="submit">Submit</Button>
