@@ -74,11 +74,11 @@ const AuthDesktop: FC = () => {
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="dark">
                   <FormLabel className="text-white">Email</FormLabel>
                   <FormControl>
                     <Input
-                      className="w-full bg-neutral-900 text-white border-0"
+                      className="w-full text-white"
                       placeholder="noobmaster69@gmail.com"
                       {...field}
                     />
@@ -91,11 +91,11 @@ const AuthDesktop: FC = () => {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="dark">
                   <FormLabel className="text-white">Password</FormLabel>
                   <FormControl>
                     <Input
-                      className="w-full bg-neutral-900 text-white border-0"
+                      className="w-full text-white"
                       type="password"
                       placeholder="**********"
                       {...field}

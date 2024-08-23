@@ -6,10 +6,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const CheckMimeType = (file: File) => {
-  return (
-    file.type === "image/png" ||
-    file.type === "image/jpeg" ||
-    file.type === "image/jpg" ||
-    file.type === "image/gif"
-  );
+  const validMimeTypes = ["image/png", "image/jpeg", "image/gif"];
+  return validMimeTypes.includes(file.type);
 };

@@ -9,7 +9,7 @@ import ToolTipWrapper from "../ToolTipWrapper";
 const PostComponent = () => {
   return (
     <div
-      className={`w-[570px] max-h-[540px] bg-black rounded-lg flex flex-col items-center justify-center px-4 py-4 gap-4 ${inter.className}`}
+      className={`w-[570px] max-h-[540px] bg-black rounded-lg flex flex-col items-center justify-center px-4 py-4 gap-4`}
     >
       <div
         id="user-content"

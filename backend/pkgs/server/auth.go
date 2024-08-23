@@ -128,8 +128,7 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	user.UserFirstName = strings.TrimSpace(user.UserFirstName)
 	user.UserLastName = strings.TrimSpace(user.UserLastName)
 	user.UserDOB = strings.TrimSpace(user.UserDOB)
-	user.ProfileExposure = strings.TrimSpace(user.ProfileExposure)
-
+	user.ProfileExposure = "Public"
 	if user.UserEmail == "" || user.UserPassword == "" || user.UserFirstName == "" || user.UserLastName == "" || user.UserDOB == "" || user.ProfileExposure == "" {
 		log.Println("Error: Missing required fields in user data.")
 		http.Error(w, "HandleSignup: Missing required fields in user data.", http.StatusBadRequest)
