@@ -11,16 +11,20 @@ const ProfilePage = () => {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            const response = await fetch("/api/profile/1"); // Replace '1' with the actual user ID
+            const response = await fetch("http://localhost:8080/profile/e", {credentials: 'include'}); // Replace 'e' with the actual user ID
+            console.log(response.status)
             const data = await response.json();
+            let userName = data.user.user_fname + " " + data.user.user_lname;
+            console.log("user:" , data.user); // TODO: delete this line
             setProfile({
-                name: data.user.name,
-                avatarUrl: data.user.avatarUrl,
+                name: userName,
+                avatarUrl: data.user.user_avatar_path,
             });
         };
 
         fetchProfile();
     }, []);
+    console.log("profile object:", profile);
 
     return (
         // <div className="w-screen h-screen flex flex-col items-center justify-start bg-[#111]">
@@ -107,10 +111,10 @@ const ProfilePage = () => {
                         {/* <!-- Profile Info --> */}
                         <div className="sticky top-4 w-1/3 space-y-6 left-6">
                             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
-                            <Avatar className="w-32 h-32 rounded-full mx-auto">
-                                <AvatarImage src="https://github.com/shadcn.png" />
-                                <AvatarFallback>CN</AvatarFallback>
-                            </Avatar>
+                                <Avatar className="w-32 h-32 rounded-full mx-auto">
+                                    <AvatarImage src="https://github.com/shadcn.png" />
+                                    <AvatarFallback>CN</AvatarFallback>
+                                </Avatar>
                                 {/* <div className="relative">
                                     <img src="https://via.placeholder.com/150" alt="Profile Picture" className="w-32 h-32 rounded-full mx-auto"></img>
                                 </div> */}
@@ -123,28 +127,9 @@ const ProfilePage = () => {
                             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
                                 <div className="mt-6">
                                     <h3 className="text-lg font-semibold mb-4">About</h3>
-                                    <ul className="space-y-2">
-                                        <li className="flex items-center space-x-3">
-                                            <span className="iconify" data-icon="mdi:briefcase"></span>
-                                            <span>UX Designer at Apple</span>
-                                        </li>
-                                        <li className="flex items-center space-x-3">
-                                            <span className="iconify" data-icon="mdi:book-open-outline"></span>
-                                            <span>Product Designer at Netflix</span>
-                                        </li>
-                                        <li className="flex items-center space-x-3">
-                                            <span className="iconify" data-icon="mdi:school-outline"></span>
-                                            <span>Studied Interaction Design at University of America</span>
-                                        </li>
-                                        <li className="flex items-center space-x-3">
-                                            <span className="iconify" data-icon="mdi:account-multiple"></span>
-                                            <span>Followed by 325 People</span>
-                                        </li>
-                                        <li className="flex items-center space-x-3">
-                                            <span className="iconify" data-icon="mdi:map-marker-outline"></span>
-                                            <span>From Kyiv, Ukraine</span>
-                                        </li>
-                                    </ul>
+                                    <span>
+                                        I'm a UX Designer at Apple with a background in Product Design from Netflix. I studied Interaction Design at the University of America and am followed by 325 people. Originally from Kyiv, Ukraine, I bring a diverse perspective to my design work.
+                                    </span>
                                 </div>
                             </div>
                             {/* <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
@@ -171,14 +156,11 @@ const ProfilePage = () => {
                                 <a href="#" className="text-gray-400 p-2">About</a>
                                 <a href="#" className="text-gray-400 p-2">More</a>
                             </div>
-                            
-
-                            <div>
-                            <PostComponent/>
-                            <PostComponent/>
-                            <PostComponent/>
-                            <PostComponent/>
-
+                            <div className="space-y-8 ">
+                                <PostComponent />
+                                <PostComponent />
+                                <PostComponent />
+                                <PostComponent />
                             </div>
 
 
