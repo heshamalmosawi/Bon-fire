@@ -6,14 +6,22 @@ import PostComponent from "@/components/desktop/PostComponent";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/desktop/Navbar";
 
-
 const ProfilePage = () => {
   const [profile, setProfile] = useState<{ name: string; avatarUrl: string; bio: string; nickname: string }>({ name: "", avatarUrl: "", bio: "", nickname: "" });
+
+  let current_URL = window.location.href;
+  let u_id = current_URL.split("/profile/")[1];
+
+  if (!u_id){
+    let session_id = document.cookie.split("session_id=")[1];
+    return;
+  }
+
 
   useEffect(() => {
     const fetchProfile = async () => {
       // TODO: find a way to get the user id from the index page or threw the url
-      const response = await fetch("http://localhost:8080/profile/e", { credentials: 'include' }); // Replace 'e' with the actual user ID
+      const response = await fetch(`http://localhost:8080/profile/${u_id}`, { credentials: 'include' }); // Replace 'e' with the actual user ID
       console.log(response.status)
       // try {
       if (response.status === 200) {
