@@ -5,15 +5,20 @@ import ProfileComponent from "@/components/desktop/ProfileComponent";
 import PostComponent from "@/components/desktop/PostComponent";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/desktop/Navbar";
+import { usePathname } from 'next/navigation';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState<{ name: string; avatarUrl: string; bio: string; nickname: string }>({ name: "", avatarUrl: "", bio: "", nickname: "" });
 
-  let current_URL = window.location.href;
-  let u_id = current_URL.split("/profile/")[1];
-
+  const pathname = usePathname();
+  console.log("ur path", pathname);
+  let u_id = pathname.split("/")[2];
   if (!u_id){
+    // TODO: send request to backend endpoint to validate session, remove session if not validated
     let session_id = document.cookie.split("session_id=")[1];
+    if (session_id){
+      // ...
+    }
     return;
   }
 
