@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
 	// "net/url"
 	"reflect"
 	"strings"
@@ -46,10 +47,8 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	var user *models.UserModel
 	// Retrieve the user based on the session information
 	if err == nil || session_id != nil {
-		session, err1 := pkgs.MainSessionManager.GetSession(session_id.Value)
-		if err1 == nil {
-			user = session.User
-		}
+		session, _ := pkgs.MainSessionManager.GetSession(session_id.Value)
+		user = session.User
 
 	}
 	// if err != nil || session == nil {
@@ -62,30 +61,16 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("HandleProfile: theUrl", theUrl)
 
-	urlParts := strings.Split(theUrl, "/")
-	if len(urlParts) < 3 || urlParts[2] == "" {
-		http.Error(w, "HandleProfile: Cannot get user profile", http.StatusBadRequest)
-		return
-	}
-
 	// Retrieve the profile user based on the query parameter
-	profileUserID := urlParts[2]
+	profileUserID := r.URL.Path[len("/profile/"):]
 
-	// if no profile user id is provided, use the session user id
-	var profileUserIDUUID uuid.UUID
-	if profileUserID == "" {
-		log.Println("HandleProfile: No profile user ID provided")
-		http.Error(w, "HandleProfile: Cannot get user profile", http.StatusBadRequest)
+	// get the profile user uuid
+	profileUserIDUUID, err := uuid.FromString(profileUserID)
+	if err != nil {
+		log.Println("the user id:", profileUserID)
+		log.Println("HandleProfile: Error converting profileUserID to UUID", err, profileUserID)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
-	} else {
-		// get the profile user uuid
-		profileUserIDUUID, err = uuid.FromString(profileUserID)
-		if err != nil {
-			log.Println("the user id:", profileUserID)
-			log.Println("HandleProfile: Error converting profileUserID to UUID", err, profileUserID)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
 	}
 
 	profileUser, err := models.GetUserByID(profileUserIDUUID)
@@ -115,19 +100,14 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extract the query parameter
-	query := r.URL.Query().Get("q")
-	if query == "" {
-		query = "posts" // Default to "posts" if no query parameter is provided
-	}
-
 	// Retrieve user-related data based on the query parameter
 	var response interface{}
 
-    switch query {
+	switch query {
 
 	// Placeholder for followers
 	case "followers":
+		user_followers, err := models.GetFollowersByUserID(profileUserIDUUID)
 		user_followers, err := models.GetFollowersByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting followers by user ID", err)
@@ -139,6 +119,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for followings
 	case "followings":
 		user_followings, err := models.GetFollowingsByUserID(profileUserIDUUID)
+		user_followings, err := models.GetFollowingsByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting followings by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -149,6 +130,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for comments
 	case "comments":
 		user_comments, err := models.GetCommentsByUserID(profileUserIDUUID)
+		user_comments, err := models.GetCommentsByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting comments by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -158,6 +140,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for posts liked
 	case "post_likes":
+		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
 		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting likes by user ID", err)
@@ -182,6 +165,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for posts liked
 	case "comments_liked":
 		user_posts_comments, err := models.GetCommentLikeByUserID(profileUserIDUUID)
+		user_posts_comments, err := models.GetCommentLikeByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting comments by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -204,6 +188,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for posts
 	default:
 		user_posts, err := models.GetPostsByAuthorID(profileUserIDUUID)
+		user_posts, err := models.GetPostsByAuthorID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting posts by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -215,6 +200,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Serve the JSON of the user profile
 	utils.EncodeJSON(w, map[string]interface{}{
+		"user":     profileUser,
 		"user":     profileUser,
 		"response": response,
 	})
