@@ -6,9 +6,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 interface ProfileProps {
     name: string;
     avatarUrl: string;
+    bio: string;
+    nickname: string;
 }
 
-const ProfileComponent: React.FC<ProfileProps> = ({ name, avatarUrl }) => {
+const ProfileComponent: React.FC<ProfileProps> = ({ name, avatarUrl, bio, nickname }) => {
     return (
         <main>
             <div className={`h-56 bg-gray-200 rounded-lg flex items-center justify-center my-8`}>
