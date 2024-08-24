@@ -1,10 +1,11 @@
 package models
 
 import (
-	"bonfire/pkgs/utils"
 	"database/sql"
 
 	"github.com/gofrs/uuid"
+
+	"bonfire/pkgs/utils"
 )
 
 // UserFollowModel represents the structure of the user_follow table
@@ -99,4 +100,16 @@ func GetFollowingUser(user uuid.UUID, following uuid.UUID) (UserFollowModel, err
 	}
 
 	return followingUser, nil
+}
+
+// Function to see if the user is a follower of the other user
+func IsFollower(userID uuid.UUID, followerID uuid.UUID) (bool, error) {
+	columns := []string{"user_id", "follower_id"}
+	condition := "user_id = ? AND follower_id = ?"
+	rows, err := utils.Read("user_follow", columns, condition, userID, followerID)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	return rows.Next(), nil
 }
