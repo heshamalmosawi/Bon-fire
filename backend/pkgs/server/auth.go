@@ -8,6 +8,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"bonfire/api/middleware"
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
@@ -171,4 +172,15 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("User logged out successfully")
 	w.WriteHeader(http.StatusOK)
+}
+
+// This function is called on an endpoint to authenticate a user. It is used to check the validity of a session from the frontend.
+func authenticate(w http.ResponseWriter, r *http.Request) {
+	session, err := middleware.Auth(r)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
+
+	// Respond with the user's session information
+	utils.EncodeJSON(w, session)
 }
