@@ -45,8 +45,10 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	var user *models.UserModel
 	// Retrieve the user based on the session information
 	if err == nil || session_id != nil {
-		session, _ := pkgs.MainSessionManager.GetSession(session_id.Value)
-		user = session.User
+		session, err1 := pkgs.MainSessionManager.GetSession(session_id.Value)
+		if err1 != nil {
+			user = session.User
+		}
 
 	}
 	// if err != nil || session == nil {
