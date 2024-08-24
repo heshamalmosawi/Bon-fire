@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
 	// "net/url"
 	"reflect"
 	"strings"
@@ -246,7 +247,7 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 	// Dynamically change the values in the user through what is sent to this function
 	v := reflect.ValueOf(user).Elem()
 	for field, info := range inputData {
-		if  strings.TrimSpace(info) == "" {
+		if strings.TrimSpace(info) == "" {
 			continue // no need to update empty fields.
 		}
 		fieldValue := v.FieldByName(field)

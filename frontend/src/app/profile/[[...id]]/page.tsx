@@ -14,7 +14,6 @@ import { usePathname, useRouter } from 'next/navigation';
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
   const [profile, setProfile] = useState<{ fname: string; lname:string; avatarUrl: string; bio: string; nickname: string; privacy: string}>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: ""});
-  const [profile, setProfile] = useState<{ fname: string; lname:string; avatarUrl: string; bio: string; nickname: string; privacy: string}>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: ""});
 
   const pathname = usePathname();
   const [u_id, setU_id] = useState(pathname.split("/")[2]);
@@ -88,8 +87,6 @@ const ProfilePage = () => {
         if (data.user) {
           console.log("user:", data.user); // TODO: delete this line
           setProfile({
-            fname: data.user.user_fname,
-            lname:data.user.user_lname,
             fname: data.user.user_fname,
             lname:data.user.user_lname,
             avatarUrl: data.user.user_avatar_path,

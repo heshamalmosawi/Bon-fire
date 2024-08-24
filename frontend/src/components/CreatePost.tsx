@@ -65,11 +65,6 @@ const CreatePost = () => {
         visibility: postVisibility,
         selectedFollowers,
       };
-      const payload = {
-        ...values,
-        visibility: postVisibility,
-        selectedFollowers,
-      };
       await HandleCreatePost(payload);
 
       setIsDialogOpen(false);
