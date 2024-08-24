@@ -48,7 +48,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the user based on the session information
 	if err == nil || session_id != nil {
 		session, err1 := pkgs.MainSessionManager.GetSession(session_id.Value)
-		if err1 != nil {
+		if err1 == nil {
 			user = session.User
 		}
 
@@ -66,13 +66,23 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the profile user based on the query parameter
 	profileUserID := r.URL.Path[len("/profile/"):]
 
-	// get the profile user uuid
-	profileUserIDUUID, err := uuid.FromString(profileUserID)
-	if err != nil {
-		log.Println("the user id:", profileUserID)
-		log.Println("HandleProfile: Error converting profileUserID to UUID", err, profileUserID)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+	// if no profile user id is provided, use the session user id
+	var profileUserIDUUID uuid.UUID
+	if profileUserID == "" {
+		if user == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		profileUserIDUUID = user.UserID
+	} else {
+		// get the profile user uuid
+		profileUserIDUUID, err = uuid.FromString(profileUserID)
+		if err != nil {
+			log.Println("the user id:", profileUserID)
+			log.Println("HandleProfile: Error converting profileUserID to UUID", err, profileUserID)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	profileUser, err := models.GetUserByID(profileUserIDUUID)
