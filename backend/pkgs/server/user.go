@@ -67,11 +67,9 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// if no profile user id is provided, use the session user id
 	var profileUserIDUUID uuid.UUID
 	if profileUserID == "" {
-		if user == nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		profileUserIDUUID = user.UserID
+		log.Println("HandleProfile: No profile user ID provided")
+		http.Error(w, "HandleProfile: Cannot get user profile", http.StatusBadRequest)
+		return
 	} else {
 		// get the profile user uuid
 		profileUserIDUUID, err = uuid.FromString(profileUserID)
