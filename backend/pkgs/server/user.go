@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	// "net/url"
 	"reflect"
 	"strings"
 	"time"
@@ -61,8 +62,13 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("HandleProfile: theUrl", theUrl)
 
+	urlParts := strings.Split(theUrl, "/")
+	if len(urlParts) < 4 || urlParts[3] == "" {
+		urlParts = append(urlParts, "posts")
+	}
+
 	// Retrieve the profile user based on the query parameter
-	profileUserID := r.URL.Path[len("/profile/"):]
+	profileUserID := urlParts[2]
 
 	// if no profile user id is provided, use the session user id
 	var profileUserIDUUID uuid.UUID
@@ -111,7 +117,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Retrieve user-related data based on the query parameter
 	var response interface{}
 
-	switch r.URL.Query().Get("q") {
+	switch urlParts[3] {
 
 	// Placeholder for followers
 	case "followers":
