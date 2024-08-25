@@ -1,11 +1,12 @@
 package server
 
 import (
+	"log"
+	"net/http"
+
 	"bonfire/api/middleware"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
-	"log"
-	"net/http"
 )
 
 func GetFeed(w http.ResponseWriter, r *http.Request) {
