@@ -178,9 +178,19 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 func authenticate(w http.ResponseWriter, r *http.Request) {
 	session, err := middleware.Auth(r)
 	if err != nil {
+		expiringCookie := http.Cookie{
+			Name:    "session_id",
+			Value:   "",
+			Expires: time.Unix(0, 0),
+			MaxAge:  -1,
+		}
+	
+		http.SetCookie(w, &expiringCookie)	
 		w.WriteHeader(http.StatusUnauthorized)
+		log.Print("authenticate: Error authenticating user: ", err)
 	}
 
+	log.Print("authenticate: User authenticated successfully")
 	// Respond with the user's session information
 	utils.EncodeJSON(w, session)
 }
