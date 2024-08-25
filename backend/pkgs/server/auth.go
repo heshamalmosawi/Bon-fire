@@ -68,17 +68,18 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set the session cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    session.ID,
-		MaxAge:   3600 * 24, // 1 day
-		HttpOnly: true,      // Secure cookie to prevent XSS
-		SameSite: http.SameSiteNoneMode,
+		Name:    "session_id",
+		Value:   session.ID,
+		Expires: time.Now().Add(time.Hour * 24),
 	})
 
-	// Respond with a success status
-	w.Write([]byte("Authentication successful!"))
+	// Set the session cookie
+	utils.EncodeJSON(w, struct {
+		SessionID string `json:"session_id"`
+	}{
+		SessionID: session.ID,
+	})
 }
 
 // Signup handles user registration by decoding the JSON payload, saving the user information to the database.
