@@ -7,7 +7,7 @@ interface PostProps {
   lastName: string;
   username: string;
   avatarUrl: string;
-  creationDate: Date;
+  creationDate: string;
   postTextContent: string;
   postImageContentUrl: string;
   postLikeNum: number;
