@@ -118,7 +118,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Retrieve user-related data based on the query parameter
 	var response interface{}
 
-	switch r.URL.Query().Get("q") {
+	switch urlParts[3] {
 
 	// Placeholder for followers
 	case "followers":
