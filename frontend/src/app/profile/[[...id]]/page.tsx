@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import ProfileComponent from "@/components/desktop/ProfileComponent";
 import PostComponent from "@/components/desktop/PostComponent";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/desktop/Navbar";
 import { usePathname, useRouter } from 'next/navigation';
+import CommentComponent from "@/components/desktop/CommentComponent";
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
@@ -14,6 +15,11 @@ const ProfilePage = () => {
   const pathname = usePathname();
   const [u_id, setU_id] = useState(pathname.split("/")[2]);
   const router = useRouter();
+
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
 
   useEffect(() => {
     const authenticate = async () => {
@@ -38,6 +44,30 @@ const ProfilePage = () => {
     authenticate();
   }, [router]);
 
+  // useEffect(() => {
+  const handleClick = async (endpoint: string) => {
+    console.log("endpoint:", endpoint);
+    // const fetchData = async (endpoint: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/profile/${u_id}/${endpoint}`, { credentials: 'include' });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      } else {
+        console.log("response:", response);
+        console.log("response.status:", response);
+      }
+      const result = await response.json();
+      setData(result);
+    } catch (error) {
+      setError((error as any).message);
+    } finally {
+      setLoading(false);
+    }
+    // };
+  };
+  // }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -68,8 +98,37 @@ const ProfilePage = () => {
     };
 
     fetchProfile();
+    handleClick('Posts');
   }, [u_id]);
-  console.log("profile object:", profile);
+
+  useEffect(() => {
+    const profileElement = document.getElementById("profile");
+    console.log("profile element:", profileElement);
+
+    const handleScroll = () => {
+      console.log("scrolling");
+      if (profileElement) {
+        const rect = profileElement.getBoundingClientRect();
+        if (rect.top <= 16) { // 1rem = 16px
+          profileElement.classList.add("sticky");
+          profileElement.classList.add("top-4");
+          profileElement.classList.remove("relative");
+          profileElement.classList.remove("-top-24");
+        } else {
+          profileElement.classList.add("relative");
+          profileElement.classList.add("-top-24");
+          profileElement.classList.remove("sticky");
+          profileElement.classList.remove("top-4");
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+  // console.log("profile object:", profile);
 
   return (
     // <div className="w-screen h-screen flex flex-col items-center justify-start bg-[#111]">
@@ -98,12 +157,16 @@ const ProfilePage = () => {
             <div className="w-2/3 space-y-6">
               {/* <!-- Timeline Tabs --> */}
               <div className="flex space-x-6 border-b border-gray-700 pb-4">
-                <a href="#" className="text-white p-2 bg-indigo-500 rounded-lg">Timeline</a>
-                <a href="#" className="text-gray-400 p-2">Friends</a>
-                <a href="#" className="text-gray-400 p-2">About</a>
-                <a href="#" className="text-gray-400 p-2">More</a>
+                <button id="posts" onClick={() => handleClick('posts')} className="text-white p-2 bg-indigo-500 rounded-lg">Posts</button>
+                <button id="commets" onClick={() => handleClick('comments')} className="text-gray-400 p-2">Comments</button>
+                <button id="likes" onClick={() => handleClick('likes')} className="text-gray-400 p-2">Likes</button>
+                <button id="followers" onClick={() => handleClick('followers')} className="text-gray-400 p-2">followers</button>
+                <button id="following" onClick={() => handleClick('following')} className="text-gray-400 p-2">followings</button>
+                {/* <a href="#" className="text-gray-400 p-2">About</a>
+                <a href="#" className="text-gray-400 p-2">More</a> */}
               </div>
               <div className="space-y-8 ">
+                <CommentComponent />
                 <PostComponent />
                 <PostComponent />
                 <PostComponent />
@@ -119,5 +182,7 @@ const ProfilePage = () => {
 
   );
 }
+
+
 
 export default ProfilePage;
