@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react";
 import DisplayLogo from "../DisplayLogo";
 import { useRouter } from 'next/navigation';
