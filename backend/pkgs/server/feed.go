@@ -4,7 +4,6 @@ import (
 	"bonfire/api/middleware"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -23,8 +22,6 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	fmt.Println(posts)
 
 	var result []struct {
 		Post   models.PostModel `json:"post"`
