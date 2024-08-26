@@ -1,12 +1,15 @@
 'use client';
 
 import React, { use, useEffect, useState } from "react";
-import ProfileComponent from "@/components/desktop/ProfileComponent";
+import { ProfileComponent, PeopleList } from "@/components/desktop/ProfileComponent";
+// import AllPeopleList from "@/components/desktop/ProfileComponent";
 import PostComponent from "@/components/desktop/PostComponent";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/desktop/Navbar";
 import { usePathname, useRouter } from 'next/navigation';
-import CommentComponent from "@/components/desktop/CommentComponent";
+// import CommentComponent from "@/components/desktop/CommentComponent";
+// import AllPeopleList from "@/components/desktop/CommentComponent";
+
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
@@ -19,6 +22,8 @@ const ProfilePage = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('posts');
+
 
 
   useEffect(() => {
@@ -50,6 +55,7 @@ const ProfilePage = () => {
     // const fetchData = async (endpoint: string) => {
     setLoading(true);
     setError(null);
+    setActiveTab(endpoint);
     try {
       const response = await fetch(`/profile/${u_id}/${endpoint}`, { credentials: 'include' });
       if (!response.ok) {
@@ -131,22 +137,13 @@ const ProfilePage = () => {
   // console.log("profile object:", profile);
 
   return (
-    // <div className="w-screen h-screen flex flex-col items-center justify-start bg-[#111]">
-    //     <ProfileComponent name={profile.name} avatarUrl={profile.avatarUrl} />
-    // </div>
-
     <div className="bg-neutral-950 min-h-screen text-gray-200">
-
       <div className="flex">
-        <aside className="w-1/4 h-screen bg-black p-4">
-          <Navbar />
-        </aside>
-
-        {/* <!-- Main Content --> */}
-        {/* <ProfileComponent name={profile.name} avatarUrl={profile.avatarUrl} /> */}
-
+        <Navbar />
         <main className="w-3/4 p-8">
-          <ProfileComponent name={profile.name} avatarUrl={profile.avatarUrl} bio={profile.bio} nickname={profile.nickname} />
+          <div className={`h-56 bg-gray-200 rounded-lg flex items-center justify-center my-8`}>
+            {/* Placeholder content for background*/}
+          </div>
 
           <div className="flex items-start space-x-6">
             {/* <!-- Profile Info --> */}
@@ -157,20 +154,45 @@ const ProfilePage = () => {
             <div className="w-2/3 space-y-6">
               {/* <!-- Timeline Tabs --> */}
               <div className="flex space-x-6 border-b border-gray-700 pb-4">
-                <button id="posts" onClick={() => handleClick('posts')} className="text-white p-2 bg-indigo-500 rounded-lg">Posts</button>
-                <button id="commets" onClick={() => handleClick('comments')} className="text-gray-400 p-2">Comments</button>
-                <button id="likes" onClick={() => handleClick('likes')} className="text-gray-400 p-2">Likes</button>
-                <button id="followers" onClick={() => handleClick('followers')} className="text-gray-400 p-2">followers</button>
-                <button id="following" onClick={() => handleClick('following')} className="text-gray-400 p-2">followings</button>
-                {/* <a href="#" className="text-gray-400 p-2">About</a>
-                <a href="#" className="text-gray-400 p-2">More</a> */}
+                <button
+                  id="posts"
+                  onClick={() => handleClick('posts')}
+                  className={`p-2 rounded-lg ${activeTab === 'posts' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                >
+                  Posts
+                </button>
+                <button
+                  id="comments"
+                  onClick={() => handleClick('comments')}
+                  className={`p-2 rounded-lg ${activeTab === 'comments' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                >
+                  Comments
+                </button>
+                <button
+                  id="likes"
+                  onClick={() => handleClick('likes')}
+                  className={`p-2 rounded-lg ${activeTab === 'likes' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                >
+                  Likes
+                </button>
+                <button
+                  id="followers"
+                  onClick={() => handleClick('followers')}
+                  className={`p-2 rounded-lg ${activeTab === 'followers' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                >
+                  Followers
+                </button>
+                <button
+                  id="following"
+                  onClick={() => handleClick('following')}
+                  className={`p-2 rounded-lg ${activeTab === 'following' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                >
+                  Following
+                </button>
               </div>
               <div className="space-y-8 ">
-                <CommentComponent />
-                <PostComponent />
-                <PostComponent />
-                <PostComponent />
-                <PostComponent />
+                // TODO: change this so it could be a containor
+                <PeopleList />
               </div>
 
 
