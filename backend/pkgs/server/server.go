@@ -24,11 +24,12 @@ func Routers() {
 	mux.HandleFunc("POST /login", HandleLogin)                 // ✅
 	mux.HandleFunc("POST /signup", HandleSignup)               // ✅
 	mux.HandleFunc("GET /logout", HandleLogout)                // ✅
-	mux.HandleFunc("GET /feed", GetFeed)						   // ✅
+	mux.HandleFunc("GET /feed", GetFeed)                       // ✅
 	mux.HandleFunc("GET /profile/{id}", HandleProfile)         // ✅
 	mux.HandleFunc("PUT /profile/update", HandleProfileUpdate) // ✅
 	mux.HandleFunc("POST /follow", HandleFollow)
 	mux.HandleFunc("POST /follow_response", HandleFollowRequest)
+	mux.HandleFunc("POST /people", HandlePeople)
 	mux.HandleFunc("GET /post/{id}", HandlePosts)               // ✅
 	mux.HandleFunc("POST /post/create", HandleCreatePosts)      // ✅
 	mux.HandleFunc("POST /like_post/{id}", HandleLikePost)      // ✅
