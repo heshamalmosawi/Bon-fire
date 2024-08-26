@@ -480,3 +480,26 @@ func HandlePeople(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
+
+// HandlePeople handles the HTTP request for retrieving a all the users
+func HandlePeople(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Handling people")
+
+	// Authenticate the user
+	_, err := middleware.Auth(r)
+	if err != nil {
+		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
+		return
+	}
+
+	// Get all the users
+	users, err := models.GetAllUsers()
+	if err != nil {
+		log.Println("HandlePeople: Error getting all users", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
+}
