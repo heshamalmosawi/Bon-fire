@@ -18,7 +18,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := models.GetViewablePosts(session.User.UserID)
 	if err != nil {
-		log.Println("error getting user feed:", err)
+		utils.BonfireLogger.Error("error getting user feed: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -32,7 +32,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 	for _, post := range posts {
 		author, err := models.GetUserByID(post.AuthorID)
 		if err != nil {
-			log.Println("error getting post for user:", err)
+			utils.BonfireLogger.Error("error getting post for user: " + err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -47,7 +47,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := utils.EncodeJSON(w, result); err != nil {
-		log.Println("error encoding user feed:", err)
+		utils.BonfireLogger.Error("error encoding user feed: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
