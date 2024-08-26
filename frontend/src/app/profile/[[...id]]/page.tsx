@@ -13,7 +13,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
-  const [profile, setProfile] = useState<{ name: string; avatarUrl: string; bio: string; nickname: string }>({ name: "", avatarUrl: "", bio: "", nickname: "" });
+  const [profile, setProfile] = useState<{ fname: string; lname:string; avatarUrl: string; bio: string; nickname: string; privacy: string}>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: ""});
 
   const pathname = usePathname();
   const [u_id, setU_id] = useState(pathname.split("/")[2]);
@@ -88,10 +88,12 @@ const ProfilePage = () => {
           let userName = data.user.user_fname + " " + data.user.user_lname;
           console.log("user:", data.user); // TODO: delete this line
           setProfile({
-            name: userName,
+            fname: data.user.user_fname,
+            lname:data.user.user_lname,
             avatarUrl: data.user.user_avatar_path,
             bio: data.user.user_about,
             nickname: data.user.user_nickname,
+            privacy: data.user.user_exposure
           });
         } else {
           console.error("User data is null or undefined");
@@ -146,7 +148,7 @@ const ProfilePage = () => {
 
           <div className="flex items-start space-x-6">
             {/* <!-- Profile Info --> */}
-            <ProfileComponent name={profile.name} avatarUrl={profile.avatarUrl} bio={profile.bio} nickname={profile.nickname} session_user={sessionUser} u_id={u_id} />
+            <ProfileComponent fname={profile.fname} lname={profile.lname} avatarUrl={profile.avatarUrl} bio={profile.bio} nickname={profile.nickname} session_user={sessionUser} u_id={u_id} privacy={profile.privacy} />
 
 
             {/* <!-- Timeline --> */}
