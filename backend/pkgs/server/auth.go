@@ -9,7 +9,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"bonfire/api/middleware"
-	"bonfire/api/middleware"
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"

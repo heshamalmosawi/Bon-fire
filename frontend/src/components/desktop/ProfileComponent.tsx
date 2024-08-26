@@ -7,30 +7,32 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Forward, Heart, MessageSquare } from "lucide-react";
 import ToolTipWrapper from "../ToolTipWrapper";
-
+import EditProfile  from "../EditProfile";
 
 
 interface ProfileProps {
-    name: string;
+    fname: string;
+    lname: string;
     avatarUrl: string;
     bio: string;
     nickname: string;
     session_user: string;
     u_id: string;
+    privacy: string;
 }
 
-export const ProfileComponent: React.FC<ProfileProps> = ({ name, avatarUrl, bio, nickname, session_user, u_id }) => {
+export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, avatarUrl, bio, nickname, session_user, u_id, privacy}) => {
     return (
         <div id="profile" className="relative -top-24 w-1/3 space-y-6">
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
                 <Avatar className="w-32 h-32 rounded-full mx-auto">
                     <AvatarImage src={avatarUrl} />
-                    <AvatarFallback>{nickname || name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>{nickname || fname.charAt(0) + lname.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="text-center mt-4">
-                    <h2 className="text-2xl font-semibold">{name}</h2>
+                    <h2 className="text-2xl font-semibold">{fname} {lname}</h2>
                     <p className="text-gray-400">Full Stack Developer</p>
-                    {session_user && session_user === u_id && <button className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-full">Edit Profile</button>}
+                    {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"}/>}
                 </div>
             </div>
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
@@ -41,7 +43,7 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ name, avatarUrl, bio,
                     </span>
                 </div>
             </div>
-        </div>
+        </div>   
     );
 }
 
