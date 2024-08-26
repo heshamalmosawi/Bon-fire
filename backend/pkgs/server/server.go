@@ -46,6 +46,7 @@ func Routers() {
 	mux.HandleFunc("GET /group/requests", HandleGroupRequests)
 
 	mux.HandleFunc("POST /authenticate", authenticate)
+	mux.HandleFunc("GET /ws", handleConnections)
 
 	// handle cors
 	cors_mux := middleware.CORS(mux)
