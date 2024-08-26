@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react";
+import React, { useState } from "react";
 import DisplayLogo from "../DisplayLogo";
 import { useRouter } from 'next/navigation';
 import logo from "/public/logo.png";
@@ -20,8 +20,11 @@ import {
 
 const Navbar = () => {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState('feed');
 
-  const handleNavigation = (path: string) => {
+
+  const handleNavigation = (path: string, tab: string) => {
+    setActiveTab(tab);
     router.push(path);
   };
 
@@ -30,19 +33,31 @@ const Navbar = () => {
       <DisplayLogo />
       <h3 className="text-lg font-semibold mb-4 text-white">Main Menu</h3>
       <nav className="space-y-4 gap-4">
-        <button onClick={() => handleNavigation('/messages')} className="flex items-center space-x-3 text-gray-400 hover:text-white px-2.5">
+        <button
+          onClick={() => handleNavigation('/messages', 'messages')}
+          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'messages' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
+        >
           <MessagesSquare />
           <span>Messages</span>
         </button>
-        <button onClick={() => handleNavigation('/people')} className="flex items-center space-x-3 text-gray-400 hover:text-white px-2.5">
+        <button
+          onClick={() => handleNavigation('/people', 'people')}
+          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'people' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
+        >
           <Users />
           <span>People</span>
         </button>
-        <button onClick={() => handleNavigation('/')} className="flex items-center space-x-3 text-gray-400 hover:text-white px-2.5">
+        <button
+          onClick={() => handleNavigation('/', 'feed')}
+          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'feed' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
+        >
           <House />
           <span>Feed</span>
         </button>
-        <button onClick={() => handleNavigation('/profile')} className="flex items-center space-x-3 text-gray-400 hover:text-white bg-customGray x-spacings2 p-2.5 rounded-lg">
+        <button
+          onClick={() => handleNavigation('/profile', 'profile')}
+          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'profile' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
+        >
           <CircleUser />
           <span>My Timeline</span>
         </button>
@@ -51,11 +66,17 @@ const Navbar = () => {
       <div>
         <h3 className="text-lg font-semibold mb-4 text-white">Explore</h3>
         <nav className="space-y-4 gap-4">
-          <button onClick={() => handleNavigation('/events')} className="flex items-center space-x-3 text-gray-400 hover:text-white px-2.5">
+          <button
+            onClick={() => handleNavigation('/events', 'events')}
+            className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'events' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
+          >
             <Calendar />
             <span>Events</span>
           </button>
-          <button onClick={() => handleNavigation('/groups')} className="flex items-center space-x-3 text-gray-400 hover:text-white px-2.5">
+          <button
+            onClick={() => handleNavigation('/groups', 'groups')}
+            className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'groups' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
+          >
             <Boxes />
             <span>Groups</span>
           </button>
