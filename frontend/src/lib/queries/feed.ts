@@ -8,19 +8,20 @@ export const getFeed = async (): Promise<PostProps[] | undefined> => {
   if (res.status !== 200) {
     return undefined;
   } else {
+    console.log(res.data);
     return res.data
       ? res.data.map(
-          (post: any): PostProps => ({
-            id: post.id,
-            firstName: post.firstName,
-            lastName: post.lastName,
-            username: post.username,
-            avatarUrl: post.avatarUrl,
-            creationDate: post.creationDate,
-            postTextContent: post.postTextContent,
-            postImageContentUrl: post.postImageContentUrl,
-            postLikeNum: post.postLikeNum,
-            postCommentNum: post.postCommentNum,
+          (item: any): PostProps => ({
+            id: item.post_id,
+            firstName: item.author.user_fname,
+            lastName: item.author.user_lname,
+            username: item.author.user_nickname,
+            avatarUrl: item.author.user_avatar_path,
+            creationDate: item.post.created_at,
+            postTextContent: item.post.post_content,
+            postImageContentUrl: item.post.post_image_path,
+            postLikeNum: item.post.post_likecount,
+            postCommentNum: 200, //FIXME: serve this in the frontend
           })
         )
       : undefined;

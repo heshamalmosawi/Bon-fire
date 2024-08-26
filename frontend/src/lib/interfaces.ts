@@ -13,3 +13,19 @@ interface PostProps {
   postLikeNum: number;
   postCommentNum: number;
 }
+
+/**
+ * interface representing a user
+ */
+interface UserModel {
+  userId: string;
+  userEmail: string;
+  userPassword: string;
+  userFirstName: string;
+  userLastName: string;
+  userDOB: string;
+  userAvatarPath: string;
+  userNickname: string;
+  userBio: string;
+  profileExposure: string;
+}
