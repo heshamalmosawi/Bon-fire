@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
 	// "net/url"
 	"reflect"
 	"strings"
@@ -123,7 +122,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for followers
 	case "followers":
 		user_followers, err := models.GetFollowersByUserID(profileUserIDUUID)
-		user_followers, err := models.GetFollowersByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting followers by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -133,7 +131,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for followings
 	case "followings":
-		user_followings, err := models.GetFollowingsByUserID(profileUserIDUUID)
 		user_followings, err := models.GetFollowingsByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting followings by user ID", err)
@@ -145,7 +142,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for comments
 	case "comments":
 		user_comments, err := models.GetCommentsByUserID(profileUserIDUUID)
-		user_comments, err := models.GetCommentsByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting comments by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -155,7 +151,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for posts liked
 	case "post_likes":
-		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
 		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting likes by user ID", err)
@@ -180,7 +175,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for posts liked
 	case "comments_liked":
 		user_posts_comments, err := models.GetCommentLikeByUserID(profileUserIDUUID)
-		user_posts_comments, err := models.GetCommentLikeByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting comments by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -203,7 +197,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for posts
 	default:
 		user_posts, err := models.GetPostsByAuthorID(profileUserIDUUID)
-		user_posts, err := models.GetPostsByAuthorID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting posts by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -215,7 +208,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Serve the JSON of the user profile
 	utils.EncodeJSON(w, map[string]interface{}{
-		"user":     profileUser,
 		"user":     profileUser,
 		"response": response,
 	})
@@ -456,29 +448,6 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Follow Response"})
-}
-
-// HandlePeople handles the HTTP request for retrieving a all the users
-func HandlePeople(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling people")
-
-	// Authenticate the user
-	_, err := middleware.Auth(r)
-	if err != nil {
-		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
-		return
-	}
-
-	// Get all the users
-	users, err := models.GetAllUsers()
-	if err != nil {
-		log.Println("HandlePeople: Error getting all users", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
 }
 
 // HandlePeople handles the HTTP request for retrieving a all the users
