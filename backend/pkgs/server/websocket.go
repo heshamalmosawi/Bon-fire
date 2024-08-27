@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bonfire/pkgs"
 	"log"
 	"net/http"
 	"sync"
@@ -21,32 +22,47 @@ var upgrader = websocket.Upgrader{
 
 // Handles the WebSocket connections
 func handleConnections(w http.ResponseWriter, r *http.Request) {
+	// Upgrade the connection to WebSocket
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to upgrade to WebSocket:", err)
 		return
 	}
 	defer ws.Close()
-	cookies := r.Cookies()
-	var clientID string
-	for _, c := range cookies {
+
+	// Retrieve the session ID from cookies
+	var sessionID string
+	for _, c := range r.Cookies() {
 		if c.Name == "session_id" {
-			clientID = c.Value // Get the client ID from the session cookie
+			sessionID = c.Value
+			break
 		}
-	} // ?? Do we need the Session ID or the User ID?
+	}
+
+	// Retrieve the user session based on the session ID
+	userSession, err := pkgs.MainSessionManager.GetSession(sessionID)
+	if err != nil {
+		log.Printf("Failed to get session for sessionID %s: %v", sessionID, err)
+		return
+	}
+	userID := userSession.User.UserID.String()
+
+	// Store the WebSocket connection in the clients map
 	mutex.Lock()
-	clients[clientID] = ws
+	clients[userID] = ws
 	mutex.Unlock()
 
-	log.Printf("Client connected: %s", clientID)
+	log.Printf("Client connected: %s", userID)
 
+	// Remove the client from the clients map on disconnect
 	defer func() {
 		mutex.Lock()
-		delete(clients, clientID)
+		delete(clients, userID)
 		mutex.Unlock()
-		log.Printf("Client disconnected: %s", clientID)
+		log.Printf("Client disconnected: %s", userID)
 	}()
 
+	// Handle incoming messages from the WebSocket
 	for {
 		var msg map[string]string
 		err := ws.ReadJSON(&msg)
@@ -54,22 +70,23 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 			log.Printf("error: %v", err)
 			break
 		}
-		log.Printf("Received: %v", msg)
+		log.Printf("Received message: %v", msg)
 
-		// Broadcast message to other clients
+		// Send message to a specific client if "to" is specified
 		if to, ok := msg["to"]; ok {
-			// Send the message to a specific client
 			mutex.Lock()
 			if client, ok := clients[to]; ok {
 				client.WriteJSON(msg)
+			} else {
+				log.Printf("Client with ID %s not found", to)
 			}
 			mutex.Unlock()
 		} else {
-			// Broadcast to all clients
+			// Broadcast to all other clients
 			mutex.Lock()
 			for id, client := range clients {
-				// Don't send the message back to the sender
-				if id != clientID {
+				// Avoid sending the message back to the sender
+				if id != userID {
 					client.WriteJSON(msg)
 				}
 			}

@@ -1,20 +1,22 @@
 import React, { useState } from "react";
 import useWebSocket from "@/hooks/useWebSockets";
 import chat from "../../../public/chat.png";
+import { User } from "@/components/desktop/UserList";
 
 interface ChatProps {
-  selectedUser: string | null;
+  selectedUser: User | null;
+  sessionUser: string;
 }
 
-const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
+const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
   const [newMessage, setNewMessage] = useState<string>("");
   const { messages, sendMessage } = useWebSocket("ws://localhost:8080/ws");
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
       const messageObject = {
-        from: "MY_NAME?",
-        to: selectedUser,
+        from: sessionUser,
+        to: selectedUser?.user_id,
         message: newMessage,
       };
       sendMessage(JSON.stringify(messageObject));
@@ -32,18 +34,23 @@ const Chat: React.FC<ChatProps> = ({ selectedUser }) => {
     <div className="w-3/4 h-full flex flex-col border border-customborder">
       <div className="flex items-center justify-between mb-4 m-2">
         <div>
-          <h2 className="text-xl font-semibold">{selectedUser}</h2>
-          <p className="text-sm text-gray-400">{selectedUser?.charAt(0)}</p>
+          <h2 className="text-xl font-semibold">{selectedUser?.user_nickname}</h2>
+          <p className="text-sm text-gray-400">{selectedUser?.user_fname + " " + selectedUser?.user_lname}</p>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto space-y-4  border border- p-4">
 
         {selectedUser ? (
           messages
-            .filter((msg) => msg.to === selectedUser) // Filter messages based on selectedUser
+            .filter((msg) => (msg.from === selectedUser.user_id && msg.to === sessionUser) || (msg.from === sessionUser && msg.to === selectedUser.user_id)) // Filter messages based on selectedUser
             .map((msg, index) => (
-              <div key={index} className="self-end bg-blue-600 p-4 rounded-lg w-[60%]">
-                <strong></strong> {msg.message}
+              <div
+                key={index}
+                className={`p-4 rounded-lg w-[60%] ${
+                  msg.from === sessionUser ? "self-start bg-blue-600 text-white" : "self-end bg-gray-700 text-white"
+                }`}
+              >
+                <strong>{msg.from === sessionUser ? "Me" : selectedUser.user_fname}:</strong> {msg.message}
               </div>
             ))
         ) : (
