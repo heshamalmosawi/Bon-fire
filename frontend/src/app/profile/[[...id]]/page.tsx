@@ -95,7 +95,6 @@ const ProfilePage = () => {
             avatarUrl: data.user.user_avatar_path,
             bio: data.user.user_about,
             nickname: data.user.user_nickname,
-            privacy: data.user.user_exposure
             privacy: data.user.profile_exposure
           });
         } else {
