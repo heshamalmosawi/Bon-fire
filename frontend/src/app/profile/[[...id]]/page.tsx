@@ -85,7 +85,6 @@ const ProfilePage = () => {
         const data = await response.json();
         console.log(data);
         if (data.user) {
-          let userName = data.user.user_fname + " " + data.user.user_lname;
           console.log("user:", data.user); // TODO: delete this line
           setProfile({
             fname: data.user.user_fname,
@@ -93,7 +92,7 @@ const ProfilePage = () => {
             avatarUrl: data.user.user_avatar_path,
             bio: data.user.user_about,
             nickname: data.user.user_nickname,
-            privacy: data.user.user_exposure
+            privacy: data.user.profile_exposure
           });
         } else {
           console.error("User data is null or undefined");
