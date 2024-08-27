@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea";
-
+import { useEffect } from "react";
 
 interface ProfileFormData {
     fname: string;
@@ -25,21 +25,32 @@ interface ProfileFormData {
 
 
 const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, privacy }) => {
-    const [isPrivate] = useState();
     const [profileData, setProfileData] = useState<ProfileFormData>({
         fname,
         lname,
         username,
         bio,
-        privacy: privacy
+        privacy,
     });
+
+    // stupid useeffect cause rendering.
+    useEffect(() => {
+        setProfileData(prevData => ({
+            ...prevData,
+            fname,
+            lname,
+            username,
+            bio,
+            privacy,
+        }));
+    }, [fname, lname, username, bio, privacy]);
 
     // updating the profile data when the user types in the input fields
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { id, value } = e.target;
+        const { name, value } = e.target;
         setProfileData(prevData => ({
             ...prevData,
-            [id]: value
+            [name]: value
         }));
     };
 
@@ -96,22 +107,23 @@ const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, p
                 <form onSubmit={handleSubmit}>
 
                     <Label htmlFor="fname" className="text-sm">First name</Label>
-                    <Input id="fname" defaultValue={fname} name="fname" className="bg-neutral-900 border-neutral-700 border-2" onChange={handleInputChange}/>
+                    <Input id="fname" defaultValue={fname} name="fname" className="bg-neutral-900 border-neutral-700 border-2" onChange={handleInputChange} />
                     <Label htmlFor="lname" className="text-sm">Last name</Label>
-                    <Input id="lname" defaultValue={lname} className="bg-neutral-900 border-neutral-700 border-2" onChange={handleInputChange}/>
+                    <Input id="lname" defaultValue={lname} name="lname" className="bg-neutral-900 border-neutral-700 border-2" onChange={handleInputChange} />
                     <div>
                         <Label htmlFor="username" className="text-sm">Username</Label>
-                        <Input id="username" defaultValue={username} className="bg-neutral-900 border-neutral-700 border-2" onChange={handleInputChange}/>
+                        <Input id="username" defaultValue={username} name="username" className="bg-neutral-900 border-neutral-700 border-2" onChange={handleInputChange} />
                         <Label htmlFor="bio" className="text-sm" > Bio </Label>
                         <Textarea
-                            placeholder={bio}
+                            defaultValue={bio}
                             className="bg-neutral-900 border-neutral-700 border-2"
                             spellCheck={false}
+                            name="bio"
                             onChange={handleInputChange}
                         />
                         <div className="mt-4 flex justify-between">
                             <Label htmlFor="privacy" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm ml-1">Private account</Label>
-                            <Switch id="privacy" checked={profileData.privacy} onCheckedChange={handleSwitchChange} className="data-[state=unchecked]:bg-neutral-400 data-[state=checked]:bg-indigo-500" />
+                            <Switch id="privacy" name="privacy" checked={profileData.privacy} onCheckedChange={handleSwitchChange} className="data-[state=unchecked]:bg-neutral-400 data-[state=checked]:bg-indigo-500" />
                         </div>
 
                     </div>
