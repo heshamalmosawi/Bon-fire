@@ -12,8 +12,8 @@ export const HandleCreateGroup = async (
   ) => {
     // Create the payload with the form values
     const payload = {
-      groupName: values.groupName,
-      groupDescrip: values.groupDescrip,
+    group_name: values.groupName,
+    group_desc: values.groupDescrip,
     };
   
     try {
@@ -27,13 +27,10 @@ export const HandleCreateGroup = async (
         credentials: "include", 
       });
       // Check if the response is successful
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+      if (response.status !== 200) {
+        throw new Error("backend responded with status: " + response.status.toString());
       }
   
-      const data = await response.json();
-      console.log("Group created successfully:", data);
-      return data;
     } catch (error) {
       console.error("Error creating group:", error);
       throw error;

@@ -58,6 +58,9 @@ const AllGroupList: React.FC = () => {
                 <SelectItem className="hover:bg-gray-700" value="all">
                   All Groups
                 </SelectItem>
+                <SelectItem className="hover:bg-gray-700" value="owned">
+                  Owned
+                </SelectItem>
               </SelectContent>
             </Select>
             <Button 

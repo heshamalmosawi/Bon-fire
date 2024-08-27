@@ -59,6 +59,9 @@ func HandleGroupCreate(w http.ResponseWriter, r *http.Request) {
 	// Extract the user ID from the session
 	GroupOwner := session.User.UserID
 
+	fmt.Println(GroupOwner);
+	fmt.Println(req.GroupName);
+	fmt.Println(req.GroupDescrip);
 	group := models.GroupModel{
 		OwnerID:      GroupOwner,
 		GroupName:    req.GroupName,
@@ -67,6 +70,7 @@ func HandleGroupCreate(w http.ResponseWriter, r *http.Request) {
 
 	if err := group.Save(); err != nil {
 		http.Error(w, "Failed to create group", http.StatusInternalServerError)
+		fmt.Println(err)
 		return
 	}
 
