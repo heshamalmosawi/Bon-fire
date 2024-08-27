@@ -122,7 +122,7 @@ func GetUserByID(uid uuid.UUID) (*UserModel, error) {
 func GetAllUsers() ([]UserModel, error) {
 	columns := []string{"user_id", "user_email", "user_fname", "user_lname", "user_dob", "user_avatar_path", "user_nickname", "user_about", "profile_exposure"}
 	condition := ""
-	rows, err := utils.Read("user", columns , condition)
+	rows, err := utils.Read("user", columns, condition)
 	if err != nil {
 		return nil, err
 	}

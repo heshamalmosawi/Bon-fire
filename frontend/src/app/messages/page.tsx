@@ -1,13 +1,43 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserList from "@/components/desktop/UserList";
 import Chat from "@/components/desktop/Chat";
 import Navbar from "@/components/desktop/Navbar";
+import { useRouter } from "next/navigation";
+import { User } from "@/components/desktop/UserList";
+
 
 
 const MessagesPage = () => {
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [sessionUser, setSessionUser] = useState("");
+  const [u_id, setU_id] = useState<string | undefined>(undefined);
+  const router = useRouter();
+
+  useEffect(() => {
+    const authenticate = async () => {
+      const response = await fetch(`http://localhost:8080/authenticate`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      console.log(response.status);
+      if (response.status !== 200 && u_id === undefined) {
+        console.log(`Failed to authenticate user: ${response.status}`);
+        router.push('/auth');
+        return;
+      } else if (response.status === 200) { // if user is authenticated and u_id is defined in URL
+        const data = await response.json();
+        console.log("authentication data:", data.User);
+        setSessionUser(data.User.user_id);
+        if (u_id === undefined) {
+          setU_id(data.User.user_id);
+        }
+      }
+    };
+    authenticate();
+  }, [router]);
+
 
   return (
     <div className="w-screen h-screen flex bg-neutral-950">
@@ -15,8 +45,8 @@ const MessagesPage = () => {
       <div className="flex w-full h-full flex-col text-white">
       <div className="text-xl font-semibold h-[8%] flex items-center pl-10">Messages</div>
         <div className="flex w-full h-[92%] border border-customborder">
-          <UserList onSelectUser={setSelectedUser} />
-          <Chat selectedUser={selectedUser} />
+          <UserList onSelectUser={setSelectedUser} sessionUser={sessionUser}  />
+          <Chat selectedUser={selectedUser} sessionUser={sessionUser} />
         </div>
       </div>
     </div>

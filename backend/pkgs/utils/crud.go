@@ -4,6 +4,7 @@ import (
 	"bonfire/pkgs/storage"
 	"database/sql"
 	"fmt"
+	"strings"
 )
 
 // Create inserts a new record into the specified table.
@@ -36,7 +37,19 @@ func Create(tableName string, columns []string, values []interface{}) (sql.Resul
 //
 // Returns the rows resulting from the query or an error if the query fails.
 func Read(tableName string, columns []string, condition string, args ...interface{}) (*sql.Rows, error) {
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s", join(columns, ","), tableName, condition)
+	// Construct the column list
+	columnList := "*"
+	if len(columns) > 0 {
+		columnList = strings.Join(columns, ", ")
+	}
+
+	// Construct the base query
+	query := fmt.Sprintf("SELECT %s FROM %s", columnList, tableName)
+
+	// Add the WHERE clause if condition is provided
+	if condition != "" {
+		query = fmt.Sprintf("%s WHERE %s", query, condition)
+	}
 	return storage.DB.Query(query, args...)
 }
 
