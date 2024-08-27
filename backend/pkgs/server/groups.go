@@ -21,6 +21,10 @@ type GroupJoin struct {
 	UserID  string `json:"user_id"`
 }
 
+type GroupCreateRequest struct {
+	GroupName    string `json:"group_name"`
+	GroupDescrip string `json:"group_desc"`
+}
 /**
  * This file handles the group related requests.
  */
@@ -36,7 +40,40 @@ func HandleGroup(w http.ResponseWriter, r *http.Request) {
 
 // HandleGroupCreate handles the request for creating a new group.
 func HandleGroupCreate(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling error")
+	fmt.Println("HIIII")
+	var req GroupCreateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	sessionIDCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Session ID cookie not found", http.StatusUnauthorized)
+		return
+	}
+
+	// Get the session from the session manager
+	session, _ := pkgs.MainSessionManager.GetSession(sessionIDCookie.Value)
+
+	// Extract the user ID from the session
+	GroupOwner := session.User.UserID
+
+	group := models.GroupModel{
+		OwnerID:      GroupOwner,
+		GroupName:    req.GroupName,
+		GroupDescrip: req.GroupDescrip,
+	}
+
+	if err := group.Save(); err != nil {
+		http.Error(w, "Failed to create group", http.StatusInternalServerError)
+		return
+	}
+
+	// Return a success response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Group created successfully"})
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
 }

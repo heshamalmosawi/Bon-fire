@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import AllPeopleList from "@/components/GroupList";
+import AllGroupList from "@/components/GroupList";
 import Navbar from "@/components/desktop/Navbar";
 
 const PeoplePage = () => {
@@ -15,7 +15,7 @@ const PeoplePage = () => {
         
         {/* Main Content Area */}
         <main className="w-3/4 p-8">
-          <AllPeopleList />
+          <AllGroupList />
         </main>
       </div>
     </div>
