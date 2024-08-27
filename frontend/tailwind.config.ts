@@ -37,6 +37,7 @@ const config = {
       },
       colors: {
         customGray: 'rgba(104, 104, 108, 0.26);',
+        customborder: '#ffffff69',
       },
     },
   },

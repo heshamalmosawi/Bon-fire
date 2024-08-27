@@ -11,7 +11,7 @@ const users = [
 
 const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
   return (
-    <div className="w-1/4 h-full bg-black p-4 overflow-y-auto">
+    <div className="w-1/4 h-full p-4 overflow-y-auto">
       <h3 className="text-lg font-semibold mb-4 text-white">Users</h3>
       <ul>
         {users.map((user) => (
