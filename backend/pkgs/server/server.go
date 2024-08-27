@@ -42,6 +42,7 @@ func Routers() {
 	mux.HandleFunc("DELETE /group/delete", HandleGroupDelete)
 	mux.HandleFunc("POST /group/event_response", HandleGroupEventResponse)
 	mux.HandleFunc("GET /group/requests", HandleGroupRequests)
+	mux.HandleFunc("GET /fetchGroups", FetchGroups)
 
 	// handle cors
 	cors_mux := middleware.CORS(mux)

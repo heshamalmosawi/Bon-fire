@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import GroupCard from "./GroupCard"; 
+import React, { useEffect, useState } from "react";
+import GroupCard from "./GroupCard";  // Import the GroupCard component
 import {
   Select,
   SelectContent,
@@ -8,34 +8,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import GroupCreationDialog from "./CreateGroup"; 
+import GroupCreationDialog from "./CreateGroup"; // Import the GroupCreationDialog component
 
-const people = [
-  {
-    name: 'Carter Philips',
-    description: 'IT NEERRRRRDSSS',
-    members: '53',
-    isMine: true,
-  },
-  {
-    name: 'Wilson Bergson',
-    description: 'SIGMAA',
-    members: '5',
-    isMine: false,
-  },
-  // Add more people as needed
-];
+interface Group {
+  group_id: string;
+  owner_id: string;
+  group_name: string;
+  group_desc: string;
+}
 
 const AllGroupList: React.FC = () => {
-  const [filter, setFilter] = useState('all'); 
-  const [isDialogOpen, setIsDialogOpen] = useState(false); 
+  const [filter, setFilter] = useState('all'); // 'all' or 'mine'
+  const [groups, setGroups] = useState<Group[]>([]); // State to hold groups
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog state
+
+  // Fetch groups from the backend
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/fetchGroups");
+        if (!response.ok) {
+          throw new Error("Failed to fetch groups");
+        }
+        const data: Group[] = await response.json();
+        setGroups(data);
+      } catch (error) {
+        console.error("Error fetching groups:", error);
+      }
+    };
+
+    fetchGroups();
+  }, []);
 
   // Filter the groups based on the selected filter
-  const filteredPeople = people.filter(person => {
+  const filteredGroups = groups.filter(group => {
     if (filter === 'mine') {
-      return person.isMine;
+      // Assuming 'isMine' is determined by comparing owner_id with logged-in user ID
+      return group.owner_id === "some-logged-in-user-id"; // Replace with actual logic
     }
-    return true; 
+    return true; // Return all groups if filter is 'all'
   });
 
   const openDialog = () => setIsDialogOpen(true);
@@ -45,7 +56,7 @@ const AllGroupList: React.FC = () => {
     <div className="ml-1/4 p-2">
       <div className="w-[80%] h-full shadow-md mx-auto mb-8">  
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-white text-3xl font-semibold">Groups ({filteredPeople.length})</h1>
+          <h1 className="text-white text-3xl font-semibold">Groups ({filteredGroups.length})</h1>
           <div className="flex items-center">
             <Select onValueChange={(value) => setFilter(value)}>
               <SelectTrigger className="w-[180px] bg-gray-800 text-white border border-gray-600">
@@ -57,9 +68,6 @@ const AllGroupList: React.FC = () => {
                 </SelectItem>
                 <SelectItem className="hover:bg-gray-700" value="all">
                   All Groups
-                </SelectItem>
-                <SelectItem className="hover:bg-gray-700" value="owned">
-                  Owned
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -75,13 +83,13 @@ const AllGroupList: React.FC = () => {
       </div>
 
       <div className="w-[80%] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPeople.map((person, index) => (
+        {filteredGroups.map((group) => (
           <GroupCard
-            key={index}
-            name={person.name}
-            description={person.description}
-            members={person.members}
-            isMine={person.isMine}
+            key={group.group_id}
+            name={group.group_name}
+            description={group.group_desc}
+            members="0"  // Replace with actual members count if available
+            isMine={group.owner_id === "some-logged-in-user-id"} // Replace with actual logic
           />
         ))}
       </div>
