@@ -63,8 +63,9 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	log.Println("HandleProfile: theUrl", theUrl)
 
 	urlParts := strings.Split(theUrl, "/")
-	if len(urlParts) < 4 || urlParts[3] == "" {
-		urlParts = append(urlParts, "posts")
+	if len(urlParts) < 3 || urlParts[2] == "" {
+		http.Error(w, "HandleProfile: Cannot get user profile", http.StatusBadRequest)
+		return
 	}
 
 	// Retrieve the profile user based on the query parameter
@@ -114,10 +115,16 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Extract the query parameter
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		query = "posts" // Default to "posts" if no query parameter is provided
+	}
+
 	// Retrieve user-related data based on the query parameter
 	var response interface{}
 
-	switch urlParts[3] {
+    switch query {
 
 	// Placeholder for followers
 	case "followers":
@@ -342,7 +349,7 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 
 	noti, notiType, resp := "", "", ""
 	// if user is private, send follow request
-	if user.ProfileExposure != "public" {
+	if user.ProfileExposure != "Public" {
 
 		// check if follow request already exists
 		followrequestcheck, err := models.GetPendingRequest(uid, session.User.UserID)
@@ -471,7 +478,6 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Follow Response"})
 }
-
 
 // HandlePeople handles the HTTP request for retrieving a all the users
 func HandlePeople(w http.ResponseWriter, r *http.Request) {
