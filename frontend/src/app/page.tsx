@@ -8,7 +8,10 @@ export default function Home() {
     <div className="w-screen h-screen flex items-center justify-evenly bg-neutral-950">
       <Navbar />
       <FeedDesktop />
-      <div id="right-nav" className="w-[20%] h-full"></div>
+      <div
+        id="right-nav"
+        className="w-[20%] h-full flex flex-col items-center justify-evenly"
+      ></div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"bonfire/api/middleware"
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
@@ -130,8 +131,7 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	user.UserFirstName = strings.TrimSpace(user.UserFirstName)
 	user.UserLastName = strings.TrimSpace(user.UserLastName)
 	user.UserDOB = strings.TrimSpace(user.UserDOB)
-	user.ProfileExposure = strings.TrimSpace(user.ProfileExposure)
-
+	user.ProfileExposure = "Public"
 	if user.UserEmail == "" || user.UserPassword == "" || user.UserFirstName == "" || user.UserLastName == "" || user.UserDOB == "" || user.ProfileExposure == "" {
 		log.Println("Error: Missing required fields in user data.")
 		http.Error(w, "HandleSignup: Missing required fields in user data.", http.StatusBadRequest)
@@ -174,4 +174,25 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("User logged out successfully")
 	w.WriteHeader(http.StatusOK)
+}
+
+// This function is called on an endpoint to authenticate a user. It is used to check the validity of a session from the frontend.
+func authenticate(w http.ResponseWriter, r *http.Request) {
+	session, err := middleware.Auth(r)
+	if err != nil {
+		expiringCookie := http.Cookie{
+			Name:    "session_id",
+			Value:   "",
+			Expires: time.Unix(0, 0),
+			MaxAge:  -1,
+		}
+	
+		http.SetCookie(w, &expiringCookie)	
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Print("authenticate: Error authenticating user: ", err)
+	}
+
+	log.Print("authenticate: User authenticated successfully")
+	// Respond with the user's session information
+	utils.EncodeJSON(w, session)
 }
