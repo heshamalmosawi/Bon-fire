@@ -64,8 +64,10 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	log.Println("HandleProfile: theUrl", theUrl)
 
 	urlParts := strings.Split(theUrl, "/")
-	if len(urlParts) < 4 || urlParts[3] == "" {
-		urlParts = append(urlParts, "posts")
+	if len(urlParts) < 3 || urlParts[2] == "" {
+		log.Println("HandleProfile: No profile user ID provided")
+		http.Error(w, "HandleProfile: Cannot get user profile", http.StatusBadRequest)
+		return
 	}
 
 	// Retrieve the profile user based on the query parameter
