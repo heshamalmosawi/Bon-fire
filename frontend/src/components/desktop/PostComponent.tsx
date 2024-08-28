@@ -25,8 +25,8 @@ const PostComponent = (props: PostProps) => {
         >
           <Avatar>
             <AvatarImage src={props.avatarUrl} />
-            <AvatarFallback>{`${props.firstName[0]}${props.lastName[0]}`}</AvatarFallback>
-          </Avatar>
+            <AvatarFallback>{`NW`}</AvatarFallback>
+            </Avatar>
           <div className="flex flex-col items-start justify-center">
             <div className="flex gap-2">
               <h2 className="text-white font-bold">{`${props.firstName} ${props.lastName}`}</h2>

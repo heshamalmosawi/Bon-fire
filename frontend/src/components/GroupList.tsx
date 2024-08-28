@@ -31,7 +31,7 @@ const AllGroupList: React.FC = () => {
           throw new Error("Failed to fetch groups");
         }
         const data: Group[] = await response.json();
-        setGroups(data);
+        setGroups(data || []); // Set groups to an empty array if data is null or undefined
       } catch (error) {
         console.error("Error fetching groups:", error);
       }

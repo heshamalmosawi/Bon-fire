@@ -23,29 +23,32 @@ interface ProfileProps {
 
 export const Group: React.FC<ProfileProps> = ({ fname, lname, avatarUrl, bio, nickname, session_user, u_id, privacy}) => {
     return (
-        <div id="profile" className="relative -top-24 w-1/3 space-y-6">
-            <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
-                <Avatar className="w-32 h-32 rounded-full mx-auto">
-                    <AvatarImage src={avatarUrl} />
-                    <AvatarFallback>{nickname || fname.charAt(0) + lname.charAt(0)}</AvatarFallback>
-                </Avatar>
+        // <div id="profile" className="relative -top-24 w-1/3 space-y-6">
+          
+                 <div className="ml-1/4 p-2">
+      <div className="w-[100%] h-full shadow-md mx-auto mb-8">  
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-white text-3xl font-semibold">Group Name</h1>
+          <h1 className="text-white/50 text-l font-semibold order-last">Members : 1</h1>
+          <div className="flex items-center">
+      
+          </div>
+        </div>
+        <div className="w-full border-t-[0.1px] border-gray-700 mx-auto mb-8"></div>
+      </div>
+
+      <div className="w-[80%] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+     
+      </div>
                 <div className="text-center mt-4">
                     <h2 className="text-2xl font-semibold">{fname} {lname}</h2>
-                    <p className="text-gray-400">Full Stack Developer</p>
                     {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"}/>}
                 </div>
-            </div>
-            {/* <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
-                <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-4">About</h3>
-                    <span>
-                        {bio}
-                    </span>
-                </div>
-            </div> */}
+          
         </div>   
     );
 }
+    
 
 
 // TODO: delete the hard-coded part, call 
