@@ -56,7 +56,7 @@ func GetFollowersByUserID(userID uuid.UUID) ([]UserFollowModel, error) {
 
 // Function to get followings of a user
 func GetFollowingsByUserID(userID uuid.UUID) ([]UserFollowModel, error) {
-	columns := []string{"user_id", "following_id"}
+	columns := []string{"user_id", "follower_id"}
 	condition := "user_id = ?"
 	rows, err := utils.Read("user_follow", columns, condition, userID)
 	if err != nil {
@@ -67,7 +67,7 @@ func GetFollowingsByUserID(userID uuid.UUID) ([]UserFollowModel, error) {
 	var followings []UserFollowModel
 	for rows.Next() {
 		var following UserFollowModel
-		err := rows.Scan(&following.FollowerID, &following.UserID)
+		err := rows.Scan(&following.UserID, &following.FollowerID)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +89,7 @@ func GetFollowingUser(user uuid.UUID, following uuid.UUID) (UserFollowModel, err
 
 	var followingUser UserFollowModel
 	for rows.Next() {
-		err := rows.Scan(&followingUser.UserID, &followingUser.FollowerID)
+		err := rows.Scan(&followingUser.FollowerID, &followingUser.UserID)
 		if err != nil {
 			return UserFollowModel{}, err
 		}
