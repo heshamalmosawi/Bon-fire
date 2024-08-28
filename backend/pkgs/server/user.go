@@ -216,16 +216,8 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 // This function expects the updated profile information to be provided in the request body in JSON format.
 // The updated profile information is returned in JSON format.
 func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
-	// Get the session cookie to check if the user is logged in
-	session_id, err := r.Cookie("session_id")
-	if err != nil || session_id == nil {
-		log.Println("HandleProfileUpdate: Error getting session cookie:", err)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Retrieve the user based on the session information
-	session, err := pkgs.MainSessionManager.GetSession(session_id.Value)
+	fmt.Println("Handling profile update")
+	session, err := middleware.Auth(r)
 	if err != nil || session == nil {
 		log.Println("HandleProfileUpdate: Error getting session", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -249,27 +241,14 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 		inputData[trimmedKey] = strings.TrimSpace(value)
 	}
 
-	/*------------------------------------- IF x-www-form-urlencoded && NOT JSON, reverse comments and comment JSON parts ---------------------------------*/
-	// Parse form data
-	// if err := r.ParseForm(); err != nil {
-	// 	http.Error(w, "Could not parse form data", http.StatusBadRequest)
-	// 	log.Println("HandleProfileUpdate: Could not parse form data:", err)
-	// 	return
-	// }
-
 	user := session.User
-	// // writing for flexibility, as front end is not yet started
-	// for key, value := range r.Form {
-	// 	log.Println("HandleProfileUpdate: Received update request for ", key)
-	// 	in_value := strings.TrimSpace(value[0])
-	// 	if in_value != "" {
-	// 		inputData[key] = in_value // assuming no input will take in a number of values
-	// 	}
-	// }
 
 	// Dynamically change the values in the user through what is sent to this function
 	v := reflect.ValueOf(user).Elem()
 	for field, info := range inputData {
+		if  strings.TrimSpace(info) == "" {
+			continue // no need to update empty fields.
+		}
 		fieldValue := v.FieldByName(field)
 		if fieldValue.IsValid() && fieldValue.CanSet() {
 			fieldValue.SetString(info)
@@ -280,7 +259,6 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 
 	session.User.Update()
 
-	fmt.Println("Handling profile update")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Profile updated successfully"})
 }
@@ -470,4 +448,27 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Follow Response"})
+}
+
+// HandlePeople handles the HTTP request for retrieving a all the users
+func HandlePeople(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Handling people")
+
+	// Authenticate the user
+	_, err := middleware.Auth(r)
+	if err != nil {
+		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
+		return
+	}
+
+	// Get all the users
+	users, err := models.GetAllUsers()
+	if err != nil {
+		log.Println("HandlePeople: Error getting all users", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
 }

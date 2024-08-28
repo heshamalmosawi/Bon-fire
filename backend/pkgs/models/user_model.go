@@ -1,10 +1,10 @@
 package models
 
 import (
-	"bonfire/pkgs/utils"
-
 	"github.com/gofrs/uuid"
 	"github.com/mattn/go-sqlite3"
+
+	"bonfire/pkgs/utils"
 )
 
 type UserModel struct {
@@ -116,4 +116,27 @@ func GetUserByID(uid uuid.UUID) (*UserModel, error) {
 		}
 	}
 	return &user, nil
+}
+
+// Function to get all users
+func GetAllUsers() ([]UserModel, error) {
+	columns := []string{"user_id", "user_email", "user_fname", "user_lname", "user_dob", "user_avatar_path", "user_nickname", "user_about", "profile_exposure"}
+	condition := ""
+	rows, err := utils.Read("user", columns , condition)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []UserModel
+	for rows.Next() {
+		var user UserModel
+		err := rows.Scan(&user.UserID, &user.UserEmail, &user.UserFirstName, &user.UserLastName, &user.UserDOB, &user.UserAvatarPath, &user.UserNickname, &user.UserBio, &user.ProfileExposure)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
 }
