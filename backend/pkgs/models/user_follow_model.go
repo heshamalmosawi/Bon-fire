@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	// "log"
 
 	"github.com/gofrs/uuid"
 
@@ -57,7 +58,7 @@ func GetFollowersByUserID(userID uuid.UUID) ([]UserFollowModel, error) {
 // Function to get followings of a user
 func GetFollowingsByUserID(userID uuid.UUID) ([]UserFollowModel, error) {
 	columns := []string{"user_id", "follower_id"}
-	condition := "user_id = ?"
+	condition := "follower_id = ?"
 	rows, err := utils.Read("user_follow", columns, condition, userID)
 	if err != nil {
 		return nil, err
@@ -67,7 +68,7 @@ func GetFollowingsByUserID(userID uuid.UUID) ([]UserFollowModel, error) {
 	var followings []UserFollowModel
 	for rows.Next() {
 		var following UserFollowModel
-		err := rows.Scan(&following.UserID, &following.FollowerID)
+		err := rows.Scan(&following.FollowerID, &following.UserID)
 		if err != nil {
 			return nil, err
 		}
