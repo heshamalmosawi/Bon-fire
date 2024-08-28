@@ -114,3 +114,15 @@ func IsFollower(userID uuid.UUID, followerID uuid.UUID) (bool, error) {
 	defer rows.Close()
 	return rows.Next(), nil
 }
+
+// Function to see if the user is a followeing of the other user
+func IsFollowing(userID uuid.UUID, followerID uuid.UUID) (bool, error) {
+	columns := []string{"user_id", "follower_id"}
+	condition := "user_id = ? AND follower_id = ?"
+	rows, err := utils.Read("user_follow", columns, condition, followerID, userID)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	return rows.Next(), nil
+}

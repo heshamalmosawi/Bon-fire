@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
 	// "net/url"
 	"reflect"
 	"strings"
@@ -453,12 +452,12 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"response": "Follow Response"})
 }
 
-// HandlePeople handles the HTTP request for retrieving a all the users
+// HandlePeople handles the HTTP request for retrieving all the users
 func HandlePeople(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling people")
 
 	// Authenticate the user
-	_, err := middleware.Auth(r)
+	authUser, err := middleware.Auth(r)
 	if err != nil {
 		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
 		return
@@ -472,6 +471,28 @@ func HandlePeople(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create a response structure
+	type UserResponse struct {
+		models.UserModel
+		IsFollowing bool `json:"is_follower"`
+	}
+
+	var userResponses []UserResponse
+
+	for _, user := range users {
+		isFollowing, err := models.IsFollowing(authUser.User.UserID, user.UserID)
+		if err != nil {
+			log.Println("HandlePeople: Error checking follower status", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		userResponses = append(userResponses, UserResponse{
+			UserModel:  user,
+			IsFollowing: isFollowing,
+		})
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(userResponses)
 }

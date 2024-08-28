@@ -11,6 +11,7 @@ interface Person {
   user_lname: string;
   profile_exposure: string;
   user_avatar_path: string;
+  is_follower: boolean;
 }
 
 // const people = [
@@ -80,29 +81,29 @@ const AllPeopleList = () => {
     fetchSessionUser();
   }, []);
 
-  useEffect(() => {
-    const fetchFollowing = async () => {
-      try {
-        const response = await fetch(`http://localhost:8080/profile/${sessionUser}?q=followings`, {
-          method: 'GET',
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Following set:", data);
-          setFollowing(new Set(data.map((user: { user_id: string }) => user.user_id)));
-        } else {
-          console.error("Failed to fetch following list");
-        }
-      } catch (error) {
-        console.error("Error fetching following list:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchFollowing = async () => {
+  //     try {
+  //       const response = await fetch(`http://localhost:8080/profile/${sessionUser}?q=followings`, {
+  //         method: 'GET',
+  //         credentials: 'include',
+  //       });
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         console.log("Following set:", data);
+  //         setFollowing(new Set(data.map((user: { user_id: string }) => user.user_id)));
+  //       } else {
+  //         console.error("Failed to fetch following list");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching following list:", error);
+  //     }
+  //   };
 
-    if (sessionUser) {
-      fetchFollowing();
-    }
-  }, [sessionUser]);
+  //   if (sessionUser) {
+  //     fetchFollowing();
+  //   }
+  // }, [sessionUser]);
 
   const handleFollow = async (userId: string) => {
     try {
@@ -135,7 +136,7 @@ const AllPeopleList = () => {
         {people.map((person) => (
           <div key={person.user_id} className="bg-black rounded-lg overflow-hidden shadow-md text-white">
             <Image
-              src={person.user_avatar_path}
+              src={person.user_avatar_path || "https://github.com/shadcn.png"}
               alt={person.user_fname}
               width={300}
               height={200}
@@ -153,9 +154,10 @@ const AllPeopleList = () => {
                   <span className="text-gray-500 ml-2">(4.8 of 5.0)</span>
                 </p> */}
               </div>
-              {following.has(person.user_id) ? (
-                <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded">
-                  Message
+              {person.is_follower ? (
+                <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded"
+                  onClick={() => handleFollow(person.user_id)}>
+                  UnFollow
                 </button>
               ) : (
                 <button
