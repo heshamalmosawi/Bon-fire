@@ -23,7 +23,7 @@ const PostComponent = (props: PostProps) => {
           <div className="flex gap-2">
             <h2 className="text-white font-bold">{`${props.firstName} ${props.lastName}`}</h2>
             <h6 className="text-[#ffffff66]">
-              | {getAgo(props.creationDate.toISOString())}
+              | {getAgo(new Date(props.creationDate).toISOString())}
             </h6>
           </div>
           <h6 className="text-[#ffffff66]">
