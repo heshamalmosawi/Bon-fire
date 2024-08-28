@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   Dialog,
@@ -38,21 +38,114 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { usePathname } from 'next/navigation';
+
+interface ProfileProps {
+  fname: string;
+  lname: string;
+  avatarUrl: string;
+  bio: string;
+  nickname: string;
+  session_user: string;
+  u_id: string;
+  privacy: string;
+}
+
+interface Follower {
+  id: string;
+  name: string;
+}
 
 const CreatePost = () => {
+  const [sessionUser, setSessionUser] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [postVisibility, setPostVisibility] = useState("public");
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [selectedFollowers, setSelectedFollowers] = useState<string[]>([]);
+  const [followers, setFollowers] = useState<Follower[]>([]);
+
+  const pathname = usePathname();
+  // Remove the duplicate declaration of `pathname`
+  const [u_id, setU_id] = useState(pathname.split("/")[2]);
+  const [User, setProfile] = useState<{ fname: string; lname: string; avatarUrl: string; bio: string; nickname: string; privacy: string }>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: "" });
   const { toast } = useToast();
 
+  useEffect(() => {
+    const authenticate = async () => {
+      const response = await fetch(`http://localhost:8080/authenticate`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      console.log(response.status);
+      if (response.status !== 200 && u_id === undefined) {
+        console.log(`Failed to authenticate user: ${response.status}`);
+        // router.push('/auth');
+        return;
+      } else if (response.status === 200) { // if user is authenticated and u_id is defined in URL
+        const data = await response.json();
+        console.log("authentication data:", data.User.user_id);
+        setSessionUser(data.User.user_id);
+        if (u_id === undefined) {
+          setU_id(data.User.user_id);
+        }
+      }
+    };
+    authenticate();
+  }, []);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      // TODO: find a way to get the user id from the index page or threw the url
+      const response = await fetch(`http://localhost:8080/profile/${u_id}?q=followers`, { credentials: 'include' });
+      console.log(response.status)
+      // try {
+      if (response.status === 200) {
+        const data = await response.json();
+        console.log(data);
+        if (data.user) {
+          console.log("user:", data.user); // TODO: delete this line
+          setProfile({
+            fname: data.user.user_fname,
+            lname: data.user.user_lname,
+            avatarUrl: data.user.user_avatar_path,
+            bio: data.user.user_about,
+            nickname: data.user.user_nickname,
+            privacy: data.user.profile_exposure
+          });
+
+          // Set followers
+          if (data.followers) {
+            setFollowers(data.followers.map((follower: any) => ({
+              id: follower.id,
+              name: follower.name
+            })));
+          }
+
+          // Set selected followers
+          if (data.followers) {
+            setSelectedFollowers(data.followers.map((follower: any) => follower.id));
+          }
+          // setSelectedFollowers(Array.from(new Set(data.map((user: { user_id: string }) => user.user_id))));
+        } else {
+          console.error("User data is null or undefined");
+        }
+      } else {
+        console.error(`Failed to fetch profile: ${response.status}`);
+      }
+
+    };
+
+    fetchProfile();
+    // handleClick('Posts');
+  }, [u_id]);
+
   // Sample followers list for demonstration purposes
-  const followers = [
-    { id: "1", name: "John Doe" },
-    { id: "2", name: "Jane Smith" },
-    { id: "3", name: "Alice Johnson" },
-    { id: "4", name: "Michael Brown" },
-  ];
+  // const followers = [
+  //   { id: "1", name: "John Doe" },
+  //   { id: "2", name: "Jane Smith" },
+  //   { id: "3", name: "Alice Johnson" },
+  //   { id: "4", name: "Michael Brown" },
+  // ];
 
   const form = useForm<z.infer<typeof createPostSchema>>({
     resolver: zodResolver(createPostSchema),
@@ -85,12 +178,14 @@ const CreatePost = () => {
   };
 
   const handleSelectFollower = (followerId: string) => {
-    setSelectedFollowers((prev) =>
-      prev.includes(followerId)
-        ? prev.filter((id) => id !== followerId)
-        : [...prev, followerId]
-    );
-  };
+    const handleSelectFollower = (followerId: string) => {
+      setSelectedFollowers((prevSelected) =>
+        prevSelected.includes(followerId)
+          ? prevSelected.filter((id) => id !== followerId)
+          : [...prevSelected, followerId]
+      );
+    };
+  }
 
   return (
     <>
@@ -101,8 +196,8 @@ const CreatePost = () => {
         <DialogTrigger className="w-full" onClick={() => setIsDialogOpen(true)}>
           <div className="cursor-pointer bg-black h-fit flex items-center justify-start gap-4 py-2 px-4 rounded-lg">
             <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage src={User.avatarUrl} />
+              <AvatarFallback>{User.fname.charAt(0)}{User.lname.charAt(0)}</AvatarFallback>
             </Avatar>
             <h1 className="text-[#ffffff66]">What's new?</h1>
           </div>
@@ -110,12 +205,12 @@ const CreatePost = () => {
         <DialogContent className="text-white bg-neutral-950 border-[#ffffff66] w-[870px] flex flex-col items-start justify-evenly">
           <div className="flex items-center gap-2">
             <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage src={User.avatarUrl} />
+              <AvatarFallback>{User.fname.charAt(0)}{User.lname.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <h4 className="text-white font-bold">Abdulrahman Idrees</h4>
-              <h6 className="text-[#ffffff66]">@akhaled01</h6>
+              <h4 className="text-white font-bold">{User.fname} {User.lname}</h4>
+              <h6 className="text-[#ffffff66]">@{User.nickname}</h6>
             </div>
           </div>
           <Form {...form}>
@@ -253,5 +348,6 @@ const CreatePost = () => {
     </>
   );
 };
+
 
 export default CreatePost;
