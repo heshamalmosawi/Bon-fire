@@ -98,8 +98,8 @@ const CreatePost = () => {
         open={isDialogOpen}
         onOpenChange={() => setIsDialogOpen(!isDialogOpen)}
       >
-        <DialogTrigger onClick={() => setIsDialogOpen(true)}>
-          <div className="cursor-pointer w-[570px] bg-black h-fit flex items-center justify-start gap-4 py-2 px-4 rounded-lg">
+        <DialogTrigger className="w-full" onClick={() => setIsDialogOpen(true)}>
+          <div className="cursor-pointer bg-black h-fit flex items-center justify-start gap-4 py-2 px-4 rounded-lg">
             <Avatar>
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>CN</AvatarFallback>

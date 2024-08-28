@@ -14,27 +14,21 @@ const PostComponent = (props: PostProps) => {
   const closeDialog = () => setIsDialogOpen(false);
 
   return (
-    <div>
+    <div
+      className={`max-h-[540px] bg-black rounded-lg flex flex-col items-center justify-center px-4 py-4 gap-4`}
+    >
       <div
-        className={`w-[570px] max-h-[540px] bg-black rounded-lg flex flex-col items-center justify-center px-4 py-4 gap-4 cursor-pointer`}
-        onClick={openDialog}
+        id="user-content"
+        className="w-full h-[40px] flex items-center justify-start gap-2"
       >
-        <div
-          id="user-content"
-          className="w-full h-[40px] flex items-center justify-start gap-2"
-        >
-          <Avatar>
-            <AvatarImage src={props.avatarUrl} />
-            <AvatarFallback>{`NW`}</AvatarFallback>
-            </Avatar>
-          <div className="flex flex-col items-start justify-center">
-            <div className="flex gap-2">
-              <h2 className="text-white font-bold">{`${props.firstName} ${props.lastName}`}</h2>
-              <h6 className="text-[#ffffff66]">| {getAgo(props.creationDate)}</h6>
-            </div>
-            <h6 className="text-[#ffffff66]">
-              | {getAgo(new Date(props.creationDate).toISOString())}
-            </h6>
+        <Avatar>
+          <AvatarImage src={props.avatarUrl} />
+          <AvatarFallback>{`${props.firstName[0]}${props.lastName[0]}`}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col items-start justify-center">
+          <div className="flex gap-2">
+            <h2 className="text-white font-bold">{`${props.firstName} ${props.lastName}`}</h2>
+            <h6 className="text-[#ffffff66]">| {getAgo(props.creationDate)}</h6>
           </div>
           <h6 className="text-[#ffffff66]">
             {props.username ? `@${props.username}` : ""}
@@ -43,9 +37,9 @@ const PostComponent = (props: PostProps) => {
       </div>
       <div
         id="post-content"
-        className="w-full flex flex-col items-center justify-center gap-2"
+        className="w-full flex flex-col items-center justify-center gap-4"
       >
-        <div id="post-text-content" className="text-white text-sm">
+        <div id="post-text-content" className="text-white text-sm w-full">
           {props.postTextContent}
         </div>
         {props.postImageContentUrl ? (
