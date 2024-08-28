@@ -24,7 +24,7 @@ export const HandleCreateGroup = async (
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload), 
-        credentials: "include", 
+        credentials: "include", // what sends the cookie 
       });
       // Check if the response is successful
       if (response.status !== 200) {

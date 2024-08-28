@@ -42,11 +42,10 @@ const AllGroupList: React.FC = () => {
 
   // Filter the groups based on the selected filter
   const filteredGroups = groups.filter(group => {
-    if (filter === 'mine') {
-      // Assuming 'isMine' is determined by comparing owner_id with logged-in user ID
-      return group.owner_id === "some-logged-in-user-id"; // Replace with actual logic
+    if (filter === 'owned') {
+      return group.owner_id === "2111bf11-e34e-40dc-af50-4fe7900c00e7"; // TO DO FIX THIS SHIT
     }
-    return true; // Return all groups if filter is 'all'
+    return true; 
   });
 
   const openDialog = () => setIsDialogOpen(true);
@@ -66,7 +65,7 @@ const AllGroupList: React.FC = () => {
                 <SelectItem className="hover:bg-gray-700" value="mine">
                   My Groups
                 </SelectItem>
-                <SelectItem className="hover:bg-gray-700" value="all">
+                <SelectItem className="hover:bg-gray-700" value="owned">
                   All Groups
                 </SelectItem>
               </SelectContent>
@@ -88,8 +87,8 @@ const AllGroupList: React.FC = () => {
             key={group.group_id}
             name={group.group_name}
             description={group.group_desc}
-            members="0"  // Replace with actual members count if available
-            isMine={group.owner_id === "some-logged-in-user-id"} // Replace with actual logic
+            members="0"  // might delete 
+            isMine={group.owner_id === "2111bf11-e34e-40dc-af50-4fe7900c00e7"} // Replace with actual logic
           />
         ))}
       </div>
