@@ -32,7 +32,7 @@ const messages = [
 
 const RightSidebar = () => {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-start bg-neutral-950 text-white p-4 space-y-4">
+    <div className="w-full h-full flex flex-col items-center justify-between bg-black text-white p-7 space-y-4">
       {/* Groups Section */}
       <div className="w-full">
         <div className="flex justify-between items-center mb-4">
