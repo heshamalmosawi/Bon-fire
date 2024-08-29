@@ -39,15 +39,13 @@ const EventsList = () => {
   };
 
   return (
-    <div className="[&>*]:w-full w-[260px] h-[400px] flex flex-col gap-2 items-center justify-center bg-black rounded-lg px-4">
-      <div className="w-full h-[10%] flex items-center justify-start font-bold  text-white text-[1.5rem] py-6">
+    <div className="[&>*]:w-full w-[260px] h-[350px] flex flex-col gap-2 items-center justify-center bg-black rounded-lg px-4">
+      <div className="w-full h-[10%] flex items-center justify-start font-bold  text-white text-[1.5rem] py-6 mt-3">
         Events
       </div>
       <div className="w-full h-[85%] overflow-y-scroll">
         {sampleEvents
-          .sort((a, b) =>
-            a.eventDate.getTime() - b.eventDate.getTime()
-          )
+          .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime())
           .map((event, index) => (
             <div
               key={index}

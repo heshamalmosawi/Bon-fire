@@ -6,6 +6,7 @@ import CreatePost from "../CreatePost";
 import EventsList from "./EventsList";
 import { useToast } from "../ui/use-toast";
 import { getFeed } from "@/lib/queries/feed";
+import BirthdayList from "./BirthdayList";
 
 const FeedDesktop: FC = () => {
   const { toast } = useToast();
@@ -49,8 +50,9 @@ const FeedDesktop: FC = () => {
           </h1>
         )}
       </div>
-      <div className="w-[30%] h-full flex flex-col items-center justify-around">
+      <div className="w-[30%] h-full flex flex-col items-center justify-center gap-7">
         <EventsList />
+        <BirthdayList />
       </div>
     </div>
   );
