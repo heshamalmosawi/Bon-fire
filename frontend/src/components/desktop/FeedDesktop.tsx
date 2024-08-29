@@ -6,6 +6,7 @@ import CreatePost from "../CreatePost";
 import EventsList from "./EventsList";
 import { useToast } from "../ui/use-toast";
 import { getFeed } from "@/lib/queries/feed";
+import { string } from "zod";
 
 const FeedDesktop: FC = () => {
   const { toast } = useToast();
@@ -13,12 +14,14 @@ const FeedDesktop: FC = () => {
 
   useEffect(() => {
     getFeed().then((data) => {
-      if (!data) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "There was an error getting ur feed",
-        });
+      if (typeof data === "string") {
+        if (data) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: `There was an error getting ur feed: ${string}`,
+          });
+        }
       } else {
         setposts(data);
       }
