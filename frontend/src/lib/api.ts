@@ -91,7 +91,7 @@ export const handleClick = async (endpoint: string, u_id: string, setLoading: (l
 // a function to fetch the profile user 
 export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) => void, setLoading: (loading: boolean) => void, setError: (error: string) => void) => {
     try {
-        const response = await fetch(`${Yori}/${u_id}`);
+        const response = await fetch(`${Yori}/profile/${u_id}`);
         if (response.ok) {
             const data = await response.json();
             if (data.user) {
@@ -104,7 +104,7 @@ export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) 
                     privacy: data.user.profile_exposure
                 });
             } else {
-                console.error("User data is null or undefined");
+                console.error("User data is null or undefined", data);
             }
         } else {
             console.error(`Failed to fetch profile: ${response.status}`);
