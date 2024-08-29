@@ -70,7 +70,7 @@ export const handleClick = async (endpoint: string, u_id: string, setLoading: (l
     setError(null);
     setActiveTab(endpoint);
     try {
-        const response = await fetch(`/profile/${u_id}?q=${endpoint}`, { credentials: 'include' });
+        const response = await fetch(`http://localhost:8080/profile/${u_id}?q=${endpoint}`, { credentials: 'include' });
         if (!response.ok) {
             throw new Error('Network response was not ok');
         } else {
