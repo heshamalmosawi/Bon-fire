@@ -1,15 +1,16 @@
 package server
 
 import (
-	"bonfire/pkgs"
-	"bonfire/pkgs/models"
-	"bonfire/pkgs/utils"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gofrs/uuid"
+
+	"bonfire/pkgs"
+	"bonfire/pkgs/models"
+	"bonfire/pkgs/utils"
 )
 
 type GroupRequest struct {
@@ -25,6 +26,7 @@ type GroupCreateRequest struct {
 	GroupName    string `json:"group_name"`
 	GroupDescrip string `json:"group_desc"`
 }
+
 /**
  * This file handles the group related requests.
  */
@@ -59,9 +61,9 @@ func HandleGroupCreate(w http.ResponseWriter, r *http.Request) {
 	// Extract the user ID from the session
 	GroupOwner := session.User.UserID
 
-	fmt.Println(GroupOwner);
-	fmt.Println(req.GroupName);
-	fmt.Println(req.GroupDescrip);
+	fmt.Println(GroupOwner)
+	fmt.Println(req.GroupName)
+	fmt.Println(req.GroupDescrip)
 	group := models.GroupModel{
 		OwnerID:      GroupOwner,
 		GroupName:    req.GroupName,
@@ -134,9 +136,9 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//create a group notification that will be displayed in chat 
+	//create a group notification that will be displayed in chat
 	notification := models.GroupNotificationModel{
-		GroupID:  group.GroupID,
+		GroupID:     group.GroupID,
 		NotiType:    "group_join",
 		NotiContent: "User " + req.UserID + " has joined your group.",
 		NotiTime:    time.Now(),
@@ -207,6 +209,7 @@ func HandleGroupLeave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
 // HandleGroupDelete handles the request for deleting a group.
 func HandleGroupDelete(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling error")
@@ -282,7 +285,7 @@ func HandleGroupRequests(w http.ResponseWriter, r *http.Request) {
 	notification := models.UserNotificationModel{
 		ReceiverID:  group.OwnerID,
 		NotiType:    "join_request",
-		NotiContent: session.User.UserNickname + " has requested to join your group.", //discuss later 
+		NotiContent: session.User.UserNickname + " has requested to join your group.", //discuss later
 		NotiTime:    time.Now().Format(time.RFC3339),
 		NotiStatus:  "unread",
 	}
