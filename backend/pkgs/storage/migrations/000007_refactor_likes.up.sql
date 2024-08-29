@@ -11,36 +11,43 @@ CREATE TABLE IF NOT EXISTS likes (
   FOREIGN KEY (comment_id) REFERENCES comment(comment_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TRIGGER updateLikeUp
+CREATE TRIGGER updateLikeUp_comment
 AFTER INSERT ON likes
 FOR EACH ROW
+WHEN NEW.comment_id IS NOT NULL
 BEGIN
-    -- If comment_id is not NULL, update the comment's like count
-    IF NEW.comment_id IS NOT NULL THEN
-        UPDATE comment
-        SET comment_likecount = comment_likecount + 1
-        WHERE comment_id = NEW.comment_id;
-    -- else update the post's like count
-    ELSE
-        UPDATE post
-        SET post_likecount = post_likecount + 1
-        WHERE post_id = NEW.post_id;
-    END IF;
+    UPDATE comment
+    SET comment_likecount = comment_likecount + 1
+    WHERE comment_id = NEW.comment_id;
 END;
 
-CREATE TRIGGER updateLikeDown
+CREATE TRIGGER updateLikeUp_post
+AFTER INSERT ON likes
+FOR EACH ROW
+WHEN NEW.comment_id IS NULL
+BEGIN
+    UPDATE post
+    SET post_likecount = post_likecount + 1
+    WHERE post_id = NEW.post_id;
+END;
+
+CREATE TRIGGER updateLikeDown_comment
 AFTER DELETE ON likes
 FOR EACH ROW
+WHEN OLD.comment_id IS NOT NULL
 BEGIN
-    -- If comment_id is not NULL, update the comment's like count
-    IF OLD.comment_id IS NOT NULL THEN
-        UPDATE comment
-        SET comment_likecount = comment_likecount - 1
-        WHERE comment_id = OLD.comment_id;
-    -- else update the post's like count
-    ELSE
-        UPDATE post
-        SET post_likecount = post_likecount - 1
-        WHERE post_id = OLD.post_id;
-    END IF;
+    UPDATE comment
+    SET comment_likecount = comment_likecount - 1
+    WHERE comment_id = OLD.comment_id;
 END;
+
+CREATE TRIGGER updateLikeDown_post
+AFTER DELETE ON likes
+FOR EACH ROW
+WHEN OLD.comment_id IS NULL
+BEGIN
+    UPDATE post
+    SET post_likecount = post_likecount - 1
+    WHERE post_id = OLD.post_id;
+END;
+

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"bonfire/pkgs/server"
+	"bonfire/api/server"
 	"bonfire/pkgs/storage"
 )
 

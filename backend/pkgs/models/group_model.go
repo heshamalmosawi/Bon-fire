@@ -26,8 +26,13 @@ func (g *GroupModel) Save() error {
 
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	values := []interface{}{g.GroupID, g.OwnerID, g.GroupName, g.GroupDescrip}
+	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
+	values := []interface{}{g.GroupID, g.OwnerID, g.GroupName, g.GroupDescrip}
 
-	_, err := utils.Create("group", columns, values)
+	escapedTableName := "`group`" 
+
+
+	_, err := utils.Create(escapedTableName, columns, values)
 	return err
 }
 

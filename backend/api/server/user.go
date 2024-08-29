@@ -6,16 +6,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	// "net/url"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/gofrs/uuid"
 
 	"bonfire/api/middleware"
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
-
-	"github.com/gofrs/uuid"
 )
 
 /**
@@ -36,22 +37,84 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Get the session cookie to check if the user is logged in
 	session_id, err := r.Cookie("session_id")
-	if err != nil || session_id == nil {
-		log.Println("HandleProfile: Error getting session cookie", err)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	// if err != nil || session_id == nil {
+	// 	log.Println("HandleProfile: Error getting session cookie", err)
+	// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	// 	return
+	// }
 
+	var user *models.UserModel
 	// Retrieve the user based on the session information
-	session, err := pkgs.MainSessionManager.GetSession(session_id.Value)
-	if err != nil || session == nil {
-		log.Println("HandleProfile: Error getting session", err)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	if err == nil || session_id != nil {
+		session, err1 := pkgs.MainSessionManager.GetSession(session_id.Value)
+		if err1 == nil {
+			user = session.User
+		}
+
+	}
+	// if err != nil || session == nil {
+	// 	log.Println("HandleProfile: Error getting session", err)
+	// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	// 	return
+	// }
+
+	theUrl := r.URL.Path
+
+	log.Println("HandleProfile: theUrl", theUrl)
+
+	urlParts := strings.Split(theUrl, "/")
+	if len(urlParts) < 3 || urlParts[2] == "" {
+		log.Println("HandleProfile: No profile user ID provided")
+		http.Error(w, "HandleProfile: Cannot get user profile", http.StatusBadRequest)
 		return
 	}
 
-	// Get the user from the session
-	user := session.User
+	// Retrieve the profile user based on the query parameter
+	profileUserID := urlParts[2]
+
+	// if no profile user id is provided, use the session user id
+	var profileUserIDUUID uuid.UUID
+	if profileUserID == "" {
+		log.Println("HandleProfile: No profile user ID provided")
+		http.Error(w, "HandleProfile: Cannot get user profile", http.StatusBadRequest)
+		return
+	} else {
+		// get the profile user uuid
+		profileUserIDUUID, err = uuid.FromString(profileUserID)
+		if err != nil {
+			log.Println("the user id:", profileUserID)
+			log.Println("HandleProfile: Error converting profileUserID to UUID", err, profileUserID)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	profileUser, err := models.GetUserByID(profileUserIDUUID)
+	if err != nil {
+		log.Println("HandleProfile: Error getting profile user by ID", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	} else {
+		log.Println("HandleProfile: profileUser", profileUser)
+	}
+
+	// Check if the profile is private
+	if profileUser.ProfileExposure == "private" && user != nil {
+		// Check if the session user is one of the profile's followers
+		isFollower, err := models.IsFollower(user.UserID, profileUserIDUUID)
+		if err != nil {
+			log.Println("HandleProfile: Error checking if user is a follower", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		if !isFollower {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+	} else if profileUser.ProfileExposure == "private" && user == nil {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 
 	// Retrieve user-related data based on the query parameter
 	var response interface{}
@@ -60,7 +123,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for followers
 	case "followers":
-		user_followers, err := models.GetFollowersByUserID(user.UserID)
+		user_followers, err := models.GetFollowersByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting followers by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -70,7 +133,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for followings
 	case "followings":
-		user_followings, err := models.GetFollowingsByUserID(user.UserID)
+		user_followings, err := models.GetFollowingsByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting followings by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -80,7 +143,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for comments
 	case "comments":
-		user_comments, err := models.GetCommentsByUserID(user.UserID)
+		user_comments, err := models.GetCommentsByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting comments by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -90,7 +153,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for posts liked
 	case "post_likes":
-		user_posts_likes, err := models.GetPostLikesByUserID(user.UserID)
+		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting likes by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -113,7 +176,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for posts liked
 	case "comments_liked":
-		user_posts_comments, err := models.GetCommentLikeByUserID(user.UserID)
+		user_posts_comments, err := models.GetCommentLikeByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting comments by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -135,7 +198,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Placeholder for posts
 	default:
-		user_posts, err := models.GetPostsByAuthorID(user.UserID)
+		user_posts, err := models.GetPostsByAuthorID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting posts by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -147,7 +210,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Serve the JSON of the user profile
 	utils.EncodeJSON(w, map[string]interface{}{
-		"user":     user,
+		"user":     profileUser,
 		"response": response,
 	})
 }
@@ -155,16 +218,8 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 // This function expects the updated profile information to be provided in the request body in JSON format.
 // The updated profile information is returned in JSON format.
 func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
-	// Get the session cookie to check if the user is logged in
-	session_id, err := r.Cookie("session_id")
-	if err != nil || session_id == nil {
-		log.Println("HandleProfileUpdate: Error getting session cookie:", err)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Retrieve the user based on the session information
-	session, err := pkgs.MainSessionManager.GetSession(session_id.Value)
+	fmt.Println("Handling profile update")
+	session, err := middleware.Auth(r)
 	if err != nil || session == nil {
 		log.Println("HandleProfileUpdate: Error getting session", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -188,27 +243,14 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 		inputData[trimmedKey] = strings.TrimSpace(value)
 	}
 
-	/*------------------------------------- IF x-www-form-urlencoded && NOT JSON, reverse comments and comment JSON parts ---------------------------------*/
-	// Parse form data
-	// if err := r.ParseForm(); err != nil {
-	// 	http.Error(w, "Could not parse form data", http.StatusBadRequest)
-	// 	log.Println("HandleProfileUpdate: Could not parse form data:", err)
-	// 	return
-	// }
-
 	user := session.User
-	// // writing for flexibility, as front end is not yet started
-	// for key, value := range r.Form {
-	// 	log.Println("HandleProfileUpdate: Received update request for ", key)
-	// 	in_value := strings.TrimSpace(value[0])
-	// 	if in_value != "" {
-	// 		inputData[key] = in_value // assuming no input will take in a number of values
-	// 	}
-	// }
 
 	// Dynamically change the values in the user through what is sent to this function
 	v := reflect.ValueOf(user).Elem()
 	for field, info := range inputData {
+		if strings.TrimSpace(info) == "" {
+			continue // no need to update empty fields.
+		}
 		fieldValue := v.FieldByName(field)
 		if fieldValue.IsValid() && fieldValue.CanSet() {
 			fieldValue.SetString(info)
@@ -219,7 +261,6 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 
 	session.User.Update()
 
-	fmt.Println("Handling profile update")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Profile updated successfully"})
 }
@@ -281,7 +322,7 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 
 	noti, notiType, resp := "", "", ""
 	// if user is private, send follow request
-	if user.ProfileExposure != "public" {
+	if user.ProfileExposure != "Public" {
 
 		// check if follow request already exists
 		followrequestcheck, err := models.GetPendingRequest(uid, session.User.UserID)
@@ -409,4 +450,49 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Follow Response"})
+}
+
+// HandlePeople handles the HTTP request for retrieving all the users
+func HandlePeople(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Handling people")
+
+	// Authenticate the user
+	authUser, err := middleware.Auth(r)
+	if err != nil {
+		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
+		return
+	}
+
+	// Get all the users
+	users, err := models.GetAllUsers()
+	if err != nil {
+		log.Println("HandlePeople: Error getting all users", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Create a response structure
+	type UserResponse struct {
+		models.UserModel
+		IsFollowing bool `json:"is_follower"`
+	}
+
+	var userResponses []UserResponse
+
+	for _, user := range users {
+		isFollowing, err := models.IsFollowing(authUser.User.UserID, user.UserID)
+		if err != nil {
+			log.Println("HandlePeople: Error checking follower status", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		userResponses = append(userResponses, UserResponse{
+			UserModel:  user,
+			IsFollowing: isFollowing,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(userResponses)
 }

@@ -52,7 +52,9 @@ func InitDB(mode string) {
 	}
 
 	// Check if the database file exists; create it if it does not
+	dbExists := true
 	if _, err := os.Stat(dbFname); os.IsNotExist(err) {
+		dbExists = false
 		_, err := os.Create(dbFname)
 		if err != nil {
 			log.Fatalf("Error creating DB file: %v", err)
@@ -71,25 +73,28 @@ func InitDB(mode string) {
 		log.Fatalf("DB connection pinging failed: %v", err)
 	}
 
-	// Initialize the migration driver
-	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
-	if err != nil {
-		log.Fatalf("Failed to initialize sqlite3 migration driver: %v", err)
-	}
+	if !dbExists {
+		// Initialize the migration driver
+		driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
+		if err != nil {
+			log.Fatalf("Failed to initialize sqlite3 migration driver: %v", err)
+		}
 
-	// Create a new migrate instance with the migration source and database driver
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://"+migrations,
-		"sqlite3", driver,
-	)
-	if err != nil {
-		log.Fatalf("Failed to create migrate instance: %v", err)
-	}
+		// Create a new migrate instance with the migration source and database driver
+		m, err := migrate.NewWithDatabaseInstance(
+			"file://"+migrations,
+			"sqlite3", driver,
+		)
+		if err != nil {
+			log.Fatalf("Failed to create migrate instance: %v", err)
+		}
 
-	// Run all migrations
-	if err = m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("Failed to apply migrations: %v", err)
+		// Run all migrations
+		if err = m.Up(); err != nil && err != migrate.ErrNoChange {
+			log.Fatalf("Failed to apply migrations: %v", err)
+		}
 	}
+	
 	// Assign the database connection to the global variable
 	DB = db
 }

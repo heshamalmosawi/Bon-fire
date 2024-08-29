@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import { Button } from "@/components/ui/button";
+import anime from "animejs";
 import {
   Form,
   FormControl,
@@ -15,6 +16,8 @@ import { HandleLoginSubmission, loginSchema } from "@/lib/schemas/loginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
+import TypingAnimation from "../TypingAnimation";
+import SignupForm from "./SignupForm";
 
 const AuthDesktop: FC = () => {
   const { toast } = useToast();
@@ -38,13 +41,30 @@ const AuthDesktop: FC = () => {
     }
   };
 
+  const handleNoAccountClick = () => {
+    anime({
+      targets: "#pic-div",
+      translateX: "50vw",
+      update: () => {
+        document.getElementById("pic-div")!.className =
+          "relative w-[50%] h-full bg-bonfire bg-cover rounded-l-3xl z-10";
+      },
+      duration: 3000,
+      easing: "easeOutExpo",
+    });
+  };
+
   return (
     <main className="w-screen h-screen flex items-center justify-center bg-neutral-950">
-      <div className="w-[60%] h-full bg-bonfire bg-cover rounded-r-3xl">
-        <div className="w-full h-full flex items-center justify-center rounded-r-3xl"></div>
+      <div
+        id="pic-div"
+        className="relative w-[50%] h-full bg-bonfire bg-cover rounded-r-3xl z-10"
+      ></div>
+      <div className="absolute top-0 left-0 w-[50%] flex items-center justify-center">
+        <SignupForm />
       </div>
-      <div className="w-[40%] h-full flex flex-col items-center justify-center gap-7">
-        <h1 className="text-white text-[4rem] w-[80%] text-left">Bonfire</h1>
+      <div className="w-[50%] h-full flex flex-col items-center justify-center gap-7">
+        <TypingAnimation />
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -54,11 +74,11 @@ const AuthDesktop: FC = () => {
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="dark">
                   <FormLabel className="text-white">Email</FormLabel>
                   <FormControl>
                     <Input
-                      className="w-full bg-neutral-900 text-white border-0"
+                      className="w-full text-white"
                       placeholder="noobmaster69@gmail.com"
                       {...field}
                     />
@@ -71,11 +91,11 @@ const AuthDesktop: FC = () => {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="dark">
                   <FormLabel className="text-white">Password</FormLabel>
                   <FormControl>
                     <Input
-                      className="w-full bg-neutral-900 text-white border-0"
+                      className="w-full text-white"
                       type="password"
                       placeholder="**********"
                       {...field}
@@ -92,7 +112,11 @@ const AuthDesktop: FC = () => {
               Login
             </Button>
           </form>
-          <Button className="text-white" variant={"link"}>
+          <Button
+            className="text-white"
+            variant={"link"}
+            onClick={handleNoAccountClick}
+          >
             No Account?
           </Button>
         </Form>
