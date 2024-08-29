@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"bonfire/pkgs/server"
+	"bonfire/api/server"
 	"bonfire/pkgs/storage"
 )
 

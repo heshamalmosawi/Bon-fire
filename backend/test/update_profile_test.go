@@ -1,9 +1,9 @@
 package test
 
 import (
+	"bonfire/api/server"
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
-	"bonfire/pkgs/server"
 	"bonfire/pkgs/storage"
 	"bytes"
 	"encoding/json"

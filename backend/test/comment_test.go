@@ -13,8 +13,8 @@ import (
 
 	"github.com/gofrs/uuid"
 
+	"bonfire/api/server"
 	"bonfire/pkgs/models"
-	"bonfire/pkgs/server"
 )
 
 func TestHandleCreateComment(t *testing.T) {
@@ -136,25 +136,24 @@ func TestHandleLikeComment(t *testing.T) {
 	// 	t.Fatal(err)
 	// }
 
-		// Authenticate the user by calling the HandleLogin function
-		loginPayload := `{
+	// Authenticate the user by calling the HandleLogin function
+	loginPayload := `{
 			"user_email": "johndoe@example.com",
 			"user_password": "password123"
 		}`
-		loginReq, err := http.NewRequest("POST", "/login", strings.NewReader(loginPayload))
-		if err != nil {
-			t.Fatal(err)
-		}
-		loginReq.Header.Set("Content-Type", "application/json")
-		loginRR := httptest.NewRecorder()
-		server.HandleLogin(loginRR, loginReq)
-		if loginRR.Code != http.StatusOK {
-			t.Fatalf("expected status code %d, got %d", http.StatusOK, loginRR.Code)
-		}
-	
-		// Extract the session cookie from the login response
-		sessionCookie := loginRR.Result().Cookies()[0]
-	
+	loginReq, err := http.NewRequest("POST", "/login", strings.NewReader(loginPayload))
+	if err != nil {
+		t.Fatal(err)
+	}
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginRR := httptest.NewRecorder()
+	server.HandleLogin(loginRR, loginReq)
+	if loginRR.Code != http.StatusOK {
+		t.Fatalf("expected status code %d, got %d", http.StatusOK, loginRR.Code)
+	}
+
+	// Extract the session cookie from the login response
+	sessionCookie := loginRR.Result().Cookies()[0]
 
 	// Create a new request with the comment ID as a query parameter
 	req, err := http.NewRequest("POST", "/like-comment?comment_id=9db5832e-125b-41a7-9ca3-bb5edfaa4c89", nil)
@@ -184,10 +183,9 @@ func TestHandleLikeComment(t *testing.T) {
 
 	// all good.
 	// Check if the like count is present in the response
-	likes, ok := response["like_count"];
-	
+	likes, ok := response["like_count"]
+
 	if !ok || likes != 1 {
 		t.Errorf("HandleLikeComment returned unexpected response: got %v, want %v", response, map[string]interface{}{"like_count": 1})
 	}
 }
-

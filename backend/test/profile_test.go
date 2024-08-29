@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+
 	// "os"
 	"reflect"
 	"strings"
@@ -14,7 +15,7 @@ import (
 	// _ "github.com/lib/pq"
 
 	// "bonfire/pkgs/models"
-	"bonfire/pkgs/server"
+	"bonfire/api/server"
 	"bonfire/pkgs/storage"
 )
 
@@ -33,7 +34,6 @@ func setup() {
 func teardown() {
 	db.Close()
 }
-
 
 func TestHandleProfile(t *testing.T) {
 	setup()
@@ -102,7 +102,7 @@ func TestHandleProfile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	req.AddCookie(sessionCookie)
 
 	// Create a new response recorder to record the response

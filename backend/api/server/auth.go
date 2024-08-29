@@ -69,18 +69,20 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set the session cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    session.ID,
-		MaxAge:   3600 * 24, // 1 day
-		HttpOnly: true,      // Secure cookie to prevent XSS
-		SameSite: http.SameSiteNoneMode,
+		Name:    "session_id",
+		Value:   session.ID,
+		Expires: time.Now().Add(time.Hour * 24),
 	})
 
-	// Respond with a success status
-	w.Write([]byte("Authentication successful!"))
+	// Set the session cookie
+	utils.EncodeJSON(w, struct {
+		SessionID string `json:"session_id"`
+	}{
+		SessionID: session.ID,
+	})
 }
+
 
 // Signup handles user registration by decoding the JSON payload, saving the user information to the database.
 // It responds with the appropriate HTTP status code based on the success or failure of these operations.
@@ -129,8 +131,7 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	user.UserFirstName = strings.TrimSpace(user.UserFirstName)
 	user.UserLastName = strings.TrimSpace(user.UserLastName)
 	user.UserDOB = strings.TrimSpace(user.UserDOB)
-	user.ProfileExposure = strings.TrimSpace(user.ProfileExposure)
-
+	user.ProfileExposure = "Public"
 	if user.UserEmail == "" || user.UserPassword == "" || user.UserFirstName == "" || user.UserLastName == "" || user.UserDOB == "" || user.ProfileExposure == "" {
 		log.Println("Error: Missing required fields in user data.")
 		http.Error(w, "HandleSignup: Missing required fields in user data.", http.StatusBadRequest)

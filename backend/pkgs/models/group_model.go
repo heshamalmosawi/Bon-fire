@@ -1,7 +1,10 @@
 package models
 
 import (
+	"bonfire/pkgs/storage"
 	"bonfire/pkgs/utils"
+	"log"
+
 	"github.com/gofrs/uuid"
 )
 
@@ -21,12 +24,16 @@ func (g *GroupModel) Save() error {
 		g.GroupID = uid
 	}
 
-	columns := []string{"group_id","owner_id","group_name","group_desc"}
-	values := []interface{}{g.GroupID,g.OwnerID,g.GroupName,g.GroupDescrip}
+	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
+	values := []interface{}{g.GroupID, g.OwnerID, g.GroupName, g.GroupDescrip}
 
-	_, err := utils.Create("group", columns, values)
+	escapedTableName := "`group`" 
+
+
+	_, err := utils.Create(escapedTableName, columns, values)
 	return err
 }
+
 
 func (g *GroupModel) Del() error {
 	condition := "group_id = ?"
@@ -86,4 +93,34 @@ func GetGroupByID(groupID uuid.UUID) (*GroupModel, error) {
 	}
 
 	return nil, nil
+}
+
+func GetAllGroups() ([]GroupModel, error) {
+	query := "SELECT group_id, owner_id, group_name, group_desc FROM `group`"
+
+	// Execute the query
+	rows, err := storage.DB.Query(query)
+	if err != nil {
+		log.Println("Error executing query:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []GroupModel
+	for rows.Next() {
+		var group GroupModel
+		err := rows.Scan(&group.GroupID, &group.OwnerID, &group.GroupName, &group.GroupDescrip)
+		if err != nil {
+			log.Println("Error scanning row:", err)
+			return nil, err
+		}
+		groups = append(groups, group)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Println("Error with rows iteration:", err)
+		return nil, err
+	}
+
+	return groups, nil
 }
