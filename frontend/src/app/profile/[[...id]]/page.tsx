@@ -7,6 +7,7 @@ import PostComponent from "@/components/desktop/PostComponent";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/desktop/Navbar";
 import { usePathname, useRouter } from 'next/navigation';
+import { fetchProfile, fetchSessionUser, handleClick} from '@/lib/api';
 // import CommentComponent from "@/components/desktop/CommentComponent";
 // import AllPeopleList from "@/components/desktop/CommentComponent";
 
@@ -27,84 +28,37 @@ const ProfilePage = () => {
 
 
   useEffect(() => {
-    const authenticate = async () => {
-      const response = await fetch(`http://localhost:8080/authenticate`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      console.log(response.status);
-      if (response.status !== 200 && u_id === undefined) {
-        console.log(`Failed to authenticate user: ${response.status}`);
+
+    const getSessionUser = async () => {
+      const user = await fetchSessionUser();
+      console.log("user:", data, "status:", data.status, "CreatePost");
+      if (data.status === 200 && u_id === undefined) {
+        console.log(`Failed to authenticate user: ${data.status}, CreatePost`);
         router.push('/auth');
         return;
-      } else if (response.status === 200) { // if user is authenticated and u_id is defined in URL
-        const data = await response.json();
+      } else if (data.status === 200) { // if user is authenticated and u_id is defined in URL
+        // const data = await user.json();
         console.log("authentication data:", data.User.user_id);
         setSessionUser(data.User.user_id);
+        console.log("u_id:", u_id);
         if (u_id === undefined) {
           setU_id(data.User.user_id);
+          console.log("u_id after:", u_id, "user.user_id:", data.User.user_id);
         }
       }
     };
-    authenticate();
+    getSessionUser();
   }, [router]);
 
-  // useEffect(() => {
-  const handleClick = async (endpoint: string) => {
-    console.log("endpoint:", endpoint);
-    // const fetchData = async (endpoint: string) => {
-    setLoading(true);
-    setError(null);
-    setActiveTab(endpoint);
-    try {
-      const response = await fetch(`/profile/${u_id}/${endpoint}`, { credentials: 'include' });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      } else {
-        console.log("response:", response);
-        console.log("response.status:", response);
-      }
-      const result = await response.json();
-      setData(result);
-    } catch (error) {
-      setError((error as any).message);
-    } finally {
-      setLoading(false);
-    }
-    // };
-  };
-  // }, []);
-
   useEffect(() => {
-    const fetchProfile = async () => {
-      // TODO: find a way to get the user id from the index page or threw the url
-      const response = await fetch(`http://localhost:8080/profile/${u_id}`, { credentials: 'include' });
-      console.log(response.status)
-      // try {
-      if (response.status === 200) {
-        const data = await response.json();
-        console.log(data);
-        if (data.user) {
-          console.log("user:", data.user); // TODO: delete this line
-          setProfile({
-            fname: data.user.user_fname,
-            lname:data.user.user_lname,
-            avatarUrl: data.user.user_avatar_path,
-            bio: data.user.user_about,
-            nickname: data.user.user_nickname,
-            privacy: data.user.profile_exposure
-          });
-        } else {
-          console.error("User data is null or undefined");
-        }
-      } else {
-        console.error(`Failed to fetch profile: ${response.status}`);
-      }
-
+    const fetchData = async () => {
+      setLoading(true);
+      console.log("fetching data, u_id:", u_id);
+      await fetchProfile(u_id, setProfile, setLoading, setError);
+      handleClick('Posts', u_id, setLoading, setError, setActiveTab, setData);
     };
-
-    fetchProfile();
-    handleClick('Posts');
+  
+    fetchData();
   }, [u_id]);
 
   useEffect(() => {
@@ -156,41 +110,41 @@ const ProfilePage = () => {
               <div className="flex space-x-6 border-b border-gray-700 pb-4">
                 <button
                   id="posts"
-                  onClick={() => handleClick('posts')}
+                  onClick={() => handleClick('posts', u_id, setLoading, setError, setActiveTab, setData)}
                   className={`p-2 rounded-lg ${activeTab === 'posts' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
                 >
                   Posts
                 </button>
                 <button
                   id="comments"
-                  onClick={() => handleClick('comments')}
+                  onClick={() => handleClick('comments', u_id, setLoading, setError, setActiveTab, setData)}
                   className={`p-2 rounded-lg ${activeTab === 'comments' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
                 >
                   Comments
                 </button>
                 <button
                   id="likes"
-                  onClick={() => handleClick('likes')}
+                  onClick={() => handleClick('likes', u_id, setLoading, setError, setActiveTab, setData)}
                   className={`p-2 rounded-lg ${activeTab === 'likes' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
                 >
                   Likes
                 </button>
                 <button
                   id="followers"
-                  onClick={() => handleClick('followers')}
+                  onClick={() => handleClick('followers', u_id, setLoading, setError, setActiveTab, setData)}
                   className={`p-2 rounded-lg ${activeTab === 'followers' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
                 >
                   Followers
                 </button>
                 <button
                   id="following"
-                  onClick={() => handleClick('following')}
+                  onClick={() => handleClick('followings', u_id, setLoading, setError, setActiveTab, setData)}
                   className={`p-2 rounded-lg ${activeTab === 'following' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
                 >
                   Following
                 </button>
               </div>
-              <div className="space-y-8 ">
+              <div className="space-y-8" id="timeline">
                 // TODO: change this so it could be a containor
                 <PeopleList />
               </div>

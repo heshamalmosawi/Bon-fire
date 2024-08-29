@@ -37,19 +37,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { usePathname, useRouter } from 'next/navigation';
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { usePathname } from 'next/navigation';
-
-interface ProfileProps {
-  fname: string;
-  lname: string;
-  avatarUrl: string;
-  bio: string;
-  nickname: string;
-  session_user: string;
-  u_id: string;
-  privacy: string;
-}
+import { fetchProfile, fetchSessionUser, handleClick } from '@/lib/api';
 
 interface Follower {
   id: string;
@@ -63,89 +53,50 @@ const CreatePost = () => {
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [selectedFollowers, setSelectedFollowers] = useState<string[]>([]);
   const [followers, setFollowers] = useState<Follower[]>([]);
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('posts');
+  const router = useRouter();
 
   const pathname = usePathname();
-  // Remove the duplicate declaration of `pathname`
-  const [u_id, setU_id] = useState(pathname.split("/")[2]);
+  const [u_id, setU_id] = useState<string | undefined>(undefined);
   const [User, setProfile] = useState<{ fname: string; lname: string; avatarUrl: string; bio: string; nickname: string; privacy: string }>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: "" });
   const { toast } = useToast();
 
   useEffect(() => {
-    const authenticate = async () => {
-      const response = await fetch(`http://localhost:8080/authenticate`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      console.log(response.status);
-      if (response.status !== 200 && u_id === undefined) {
-        console.log(`Failed to authenticate user: ${response.status}`);
-        // router.push('/auth');
+    const getSessionUser = async () => {
+      const data = await fetchSessionUser();
+      console.log("user:", data, "status:", data.status, "CreatePost");
+      if (data.status === 200 && u_id === undefined) {
+        console.log(`Failed to authenticate user: ${data.status}, CreatePost`);
+        router.push('/auth');
         return;
-      } else if (response.status === 200) { // if user is authenticated and u_id is defined in URL
-        const data = await response.json();
+      } else if (data.status === 200) { // if user is authenticated and u_id is defined in URL
+        // const data = await user.json();
         console.log("authentication data:", data.User.user_id);
         setSessionUser(data.User.user_id);
+        console.log("u_id:", u_id);
         if (u_id === undefined) {
           setU_id(data.User.user_id);
+          console.log("u_id after:", u_id, "user.user_id:", data.User.user_id);
         }
       }
     };
-    authenticate();
+
+    getSessionUser();
   }, []);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      // TODO: find a way to get the user id from the index page or threw the url
-      const response = await fetch(`http://localhost:8080/profile/${u_id}?q=followers`, { credentials: 'include' });
-      console.log(response.status)
-      // try {
-      if (response.status === 200) {
-        const data = await response.json();
-        console.log(data);
-        if (data.user) {
-          console.log("user:", data.user); // TODO: delete this line
-          setProfile({
-            fname: data.user.user_fname,
-            lname: data.user.user_lname,
-            avatarUrl: data.user.user_avatar_path,
-            bio: data.user.user_about,
-            nickname: data.user.user_nickname,
-            privacy: data.user.profile_exposure
-          });
-
-          // Set followers
-          if (data.followers) {
-            setFollowers(data.followers.map((follower: any) => ({
-              id: follower.id,
-              name: follower.name
-            })));
-          }
-
-          // Set selected followers
-          if (data.followers) {
-            setSelectedFollowers(data.followers.map((follower: any) => follower.id));
-          }
-          // setSelectedFollowers(Array.from(new Set(data.map((user: { user_id: string }) => user.user_id))));
-        } else {
-          console.error("User data is null or undefined");
-        }
-      } else {
-        console.error(`Failed to fetch profile: ${response.status}`);
+    const fetchData = async () => {
+      setLoading(true);
+      if (u_id !== undefined) {
+        await fetchProfile(u_id, setProfile, setLoading, setError);
+        handleClick('followers', u_id, setLoading, setError, setActiveTab, setData);
       }
-
     };
-
-    fetchProfile();
-    // handleClick('Posts');
+    fetchData();
   }, [u_id]);
-
-  // Sample followers list for demonstration purposes
-  // const followers = [
-  //   { id: "1", name: "John Doe" },
-  //   { id: "2", name: "Jane Smith" },
-  //   { id: "3", name: "Alice Johnson" },
-  //   { id: "4", name: "Michael Brown" },
-  // ];
 
   const form = useForm<z.infer<typeof createPostSchema>>({
     resolver: zodResolver(createPostSchema),
@@ -178,13 +129,11 @@ const CreatePost = () => {
   };
 
   const handleSelectFollower = (followerId: string) => {
-    const handleSelectFollower = (followerId: string) => {
-      setSelectedFollowers((prevSelected) =>
-        prevSelected.includes(followerId)
-          ? prevSelected.filter((id) => id !== followerId)
-          : [...prevSelected, followerId]
-      );
-    };
+    setSelectedFollowers((prevSelected) =>
+      prevSelected.includes(followerId)
+        ? prevSelected.filter((id) => id !== followerId)
+        : [...prevSelected, followerId]
+    );
   }
 
   return (

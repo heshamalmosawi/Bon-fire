@@ -6,6 +6,7 @@ import Chat from "@/components/desktop/Chat";
 import Navbar from "@/components/desktop/Navbar";
 import { useRouter } from "next/navigation";
 import { User } from "@/components/desktop/UserList";
+import { fetchSessionUser} from '@/lib/api';
 
 
 
@@ -16,27 +17,25 @@ const MessagesPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const authenticate = async () => {
-      const response = await fetch(`http://localhost:8080/authenticate`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      console.log(response.status);
-      if (response.status !== 200 && u_id === undefined) {
-        console.log(`Failed to authenticate user: ${response.status}`);
+    const getSessionUser = async () => {
+      const data = await fetchSessionUser();
+      console.log("user:", data, "status:", data.status, "CreatePost");
+      if (data.status === 200 && u_id === undefined) {
+        console.log(`Failed to authenticate user: ${data.status}, CreatePost`);
         router.push('/auth');
         return;
-      } else if (response.status === 200) { // if user is authenticated and u_id is defined in URL
-        const data = await response.json();
-        console.log("authentication data:", data.User);
+      } else if (data.status === 200) { 
+        console.log("authentication data:", data.User.user_id);
         setSessionUser(data.User.user_id);
+        console.log("u_id:", u_id);
         if (u_id === undefined) {
           setU_id(data.User.user_id);
+          console.log("u_id after:", u_id, "user.user_id:", data.User.user_id);
         }
       }
     };
-    authenticate();
-  }, [router]);
+    getSessionUser();
+  }, []);
 
 
   return (
