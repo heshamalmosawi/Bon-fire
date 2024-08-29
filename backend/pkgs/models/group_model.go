@@ -2,9 +2,11 @@ package models
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gofrs/uuid"
 
+	"bonfire/pkgs/storage"
 	"bonfire/pkgs/utils"
 )
 
@@ -26,11 +28,8 @@ func (g *GroupModel) Save() error {
 
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	values := []interface{}{g.GroupID, g.OwnerID, g.GroupName, g.GroupDescrip}
-	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
-	values := []interface{}{g.GroupID, g.OwnerID, g.GroupName, g.GroupDescrip}
 
-	escapedTableName := "`group`" 
-
+	escapedTableName := "`group`"
 
 	_, err := utils.Create(escapedTableName, columns, values)
 	return err
@@ -74,6 +73,36 @@ func GetOwwnerByGroup(ownerID string) (*GroupModel, error) {
 	return &group, nil
 }
 
+func GetAllGroups() ([]GroupModel, error) {
+	query := "SELECT group_id, owner_id, group_name, group_desc FROM `group`"
+
+	// Execute the query
+	rows, err := storage.DB.Query(query)
+	if err != nil {
+		log.Println("Error executing query:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []GroupModel
+	for rows.Next() {
+		var group GroupModel
+		err := rows.Scan(&group.GroupID, &group.OwnerID, &group.GroupName, &group.GroupDescrip)
+		if err != nil {
+			log.Println("Error scanning row:", err)
+			return nil, err
+		}
+		groups = append(groups, group)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Println("Error with rows iteration:", err)
+		return nil, err
+	}
+
+	return groups, nil
+}
+
 // GetGroupByID retrieves the group details by its ID
 func GetGroupByID(groupID uuid.UUID) (*GroupModel, error) {
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
@@ -96,9 +125,8 @@ func GetGroupByID(groupID uuid.UUID) (*GroupModel, error) {
 	return nil, nil
 }
 
-
 func GetGroupNameByGroup(groupName string) (*GroupModel, error) {
-	columns := []string{"group_id","owner_id","group_name","group_desc"}
+	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	condition := " group_name = ?"
 	rows, err := utils.Read("group", columns, condition, groupName)
 	if err != nil {
@@ -118,7 +146,7 @@ func GetGroupNameByGroup(groupName string) (*GroupModel, error) {
 }
 
 func GetGroupDescripByGroup(groupDescrip string) (*GroupModel, error) {
-	columns := []string{"group_id","owner_id","group_name","group_desc"}
+	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	condition := " group_desc = ?"
 	rows, err := utils.Read("group", columns, condition, groupDescrip)
 	if err != nil {
