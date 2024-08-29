@@ -6,34 +6,43 @@ import CreatePost from "../CreatePost";
 import EventsList from "./EventsList";
 import { useToast } from "../ui/use-toast";
 import { getFeed } from "@/lib/queries/feed";
-import { string } from "zod";
 
 const FeedDesktop: FC = () => {
   const { toast } = useToast();
   const [posts, setposts] = useState<PostProps[]>();
+  const [newPost, setNewPost] = useState(false);
 
-  useEffect(() => {
+  const fetchFeed = () => {
     getFeed().then((data) => {
       if (typeof data === "string") {
-        if (data) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: `There was an error getting ur feed: ${string}`,
-          });
-        }
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: `There was an error getting your feed: ${data}`,
+        });
       } else {
         setposts(data);
       }
     });
+  };
+
+  useEffect(() => {
+    fetchFeed();
   }, []);
+
+  useEffect(() => {
+    if (newPost) {
+      fetchFeed();
+      setNewPost(false);
+    }
+  }, [newPost]);
 
   return (
     <div className="w-3/4 h-full flex items-center justify-center">
       <div className="w-[70%] h-full px-5 py-10 space-y-8 overflow-y-scroll">
-        <CreatePost />
+        <CreatePost onPostCreated={() => setNewPost(true)} />
         {posts ? (
-          posts.map((post) => <PostComponent {...post} />)
+          posts.map((post) => <PostComponent {...post} key={post.id} />)
         ) : (
           <h1 className="w-full h-[80%] text-white flex items-center justify-center text-4xl font-bold">
             Cricket Noises :/
