@@ -16,6 +16,7 @@ const PostComponent = (props: PostProps) => {
   return (
     <div
       className={`max-h-[540px] bg-black rounded-lg flex flex-col items-center justify-center px-4 py-4 gap-4`}
+      onClick={openDialog}
     >
       <div
         id="user-content"
@@ -78,6 +79,8 @@ const PostComponent = (props: PostProps) => {
         className="w-full bg-transparent text-white border-[0.1px] border-[#3838386f]"
         placeholder="Add a comment..."
       />
+            {/* Comment Dialog */}
+            <CommentDialog isOpen={isDialogOpen} onClose={closeDialog} post={props} />
     </div>
   );
 };
