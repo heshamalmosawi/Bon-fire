@@ -1,7 +1,9 @@
+export const Yori = "http://localhost:8080";
+
 // a function to fetch the session user
 export const fetchSessionUser = async () => {
     try {
-        const response = await fetch("http://localhost:8080/authenticate", {
+        const response = await fetch(`${Yori}/authenticate`, {
             method: 'POST',
             credentials: 'include',
         });
@@ -23,7 +25,7 @@ export const fetchSessionUser = async () => {
 // a function to fetch the follow request
 export const handleFollow = async (userId: string) => {
     try {
-        const response = await fetch(`http://localhost:8080/follow?user_id=${userId}`, {
+        const response = await fetch(`${Yori}/follow?user_id=${userId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -46,7 +48,7 @@ export const handleFollow = async (userId: string) => {
 // a function to fetch the people list
 export const fetchPeople = async () => {
     try {
-        const response = await fetch("http://localhost:8080/people", {
+        const response = await fetch(`${Yori}/people`, {
             method: 'POST',
             credentials: 'include',
         });
@@ -70,7 +72,7 @@ export const handleClick = async (endpoint: string, u_id: string, setLoading: (l
     setError(null);
     setActiveTab(endpoint);
     try {
-        const response = await fetch(`http://localhost:8080/profile/${u_id}?q=${endpoint}`, { credentials: 'include' });
+        const response = await fetch(`${Yori}/profile/${u_id}?q=${endpoint}`, { credentials: 'include' });
         if (!response.ok) {
             throw new Error('Network response was not ok');
         } else {
@@ -89,7 +91,7 @@ export const handleClick = async (endpoint: string, u_id: string, setLoading: (l
 // a function to fetch the profile user 
 export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) => void, setLoading: (loading: boolean) => void, setError: (error: string) => void) => {
     try {
-        const response = await fetch(`http://localhost:8080/profile/${u_id}`);
+        const response = await fetch(`${Yori}/${u_id}`);
         if (response.ok) {
             const data = await response.json();
             if (data.user) {
