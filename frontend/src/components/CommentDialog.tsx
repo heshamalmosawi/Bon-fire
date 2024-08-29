@@ -15,7 +15,7 @@ interface CommentDialogProps {
 }
 
 
-const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, post }) => {
+export const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, post }) => {
     // Example state for likes
     const [likes, setLikes] = useState(23);
     const [liked, setLiked] = useState(false);
