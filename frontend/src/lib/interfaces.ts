@@ -44,6 +44,6 @@ export interface Group {
   owner_id: string;
   group_name: string;
   group_desc: string;
-  is_member?: boolean; 
+  is_member: boolean; 
   total_members: number; // Extended 
 }

@@ -9,27 +9,30 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import GroupCreationDialog from "./CreateGroup"; // Import the GroupCreationDialog component
+import ConfirmJoinDialog from "./confirmGroupJoin"; // Import the ConfirmJoinDialog component for join confirmation
 import { Group } from "@/lib/interfaces";
 import { fetchGroups } from "@/lib/queries/groups";
-import { useRouter } from 'next/navigation';  // Import the useRouter hook
+import { useRouter } from "next/navigation"; // Import the useRouter hook
 
 const AllGroupList: React.FC = () => {
-  const [filter, setFilter] = useState("all"); // 'all' or 'mine'
+  const [filter, setFilter] = useState("all"); // 'all', 'mine', or 'joined'
   const [groups, setGroups] = useState<Group[]>([]); // State to hold groups
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog state
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog state for group creation
   const [sessionUser, setSessionUser] = useState<string | null>(null); // State to store the fetched user ID
+  const [isConfirmJoinDialogOpen, setIsConfirmJoinDialogOpen] = useState(false); // Dialog state for join confirmation
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null); // State to store selected group for joining
   const router = useRouter(); // Initialize router for navigation
 
   // Fetch the authenticated user's session
   useEffect(() => {
     const authenticate = async () => {
       const response = await fetch(`http://localhost:8080/authenticate`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
       });
 
       if (response.status !== 200) {
-        router.push('/auth');
+        router.push("/auth");
         return;
       } else if (response.status === 200) {
         const data = await response.json();
@@ -49,11 +52,32 @@ const AllGroupList: React.FC = () => {
     if (filter === "mine" && sessionUser) {
       return group.owner_id === sessionUser;
     }
+    if (filter === "joined" && sessionUser) {
+      return group.is_member;
+    }
     return true;
   });
 
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
+
+  const openConfirmJoinDialog = (group: Group) => {
+    setSelectedGroup(group);
+    setIsConfirmJoinDialogOpen(true);
+  };
+
+  const closeConfirmJoinDialog = () => {
+    setSelectedGroup(null);
+    setIsConfirmJoinDialogOpen(false);
+  };
+
+  const handleConfirmJoin = () => {
+    if (selectedGroup) {
+      // Logic to handle the join request goes here
+      console.log(`Request to join group ${selectedGroup.group_name} has been sent.`);
+      closeConfirmJoinDialog();
+    }
+  };
 
   return (
     <div className="ml-1/4 p-2">
@@ -68,11 +92,14 @@ const AllGroupList: React.FC = () => {
                 <SelectValue placeholder="All Groups" />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 text-white border border-gray-600">
+                <SelectItem className="hover:bg-gray-700" value="all">
+                  All Groups
+                </SelectItem>
                 <SelectItem className="hover:bg-gray-700" value="mine">
                   My Groups
                 </SelectItem>
-                <SelectItem className="hover:bg-gray-700" value="owned">
-                  All Groups
+                <SelectItem className="hover:bg-gray-700" value="joined">
+                  Joined Groups
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -93,14 +120,23 @@ const AllGroupList: React.FC = () => {
             key={group.group_id}
             name={group.group_name}
             description={group.group_desc}
-            members={group.total_members} // You might want to update this with the actual number of members
-            isMine={group.owner_id === sessionUser} // Use the fetched user ID for determining ownership
+            members={group.total_members} // Updated to use the actual number of members
+            isMine={group.owner_id === sessionUser} // Determine ownership
+            isMember={group.is_member} // Determine membership
+            onJoinClick={() => openConfirmJoinDialog(group)} // Pass the group to the confirmation dialog
           />
         ))}
       </div>
 
       {/* Group Creation Dialog */}
       <GroupCreationDialog isOpen={isDialogOpen} onClose={closeDialog} />
+
+      {/* Confirm Join Dialog */}
+      <ConfirmJoinDialog
+        isOpen={isConfirmJoinDialogOpen}
+        onClose={closeConfirmJoinDialog}
+        onConfirm={handleConfirmJoin}
+      />
     </div>
   );
 };

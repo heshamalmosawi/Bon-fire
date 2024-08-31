@@ -1,25 +1,35 @@
+// GroupCard.tsx
+
 import React from "react";
+import { Button } from "@/components/ui/button";
 
 interface GroupCardProps {
   name: string;
   description: string;
   members: number;
   isMine: boolean;
+  isMember: boolean;
+  onJoinClick: () => void;
 }
 
-const GroupCard: React.FC<GroupCardProps> = ({ name, description, members, isMine }) => {
+const GroupCard: React.FC<GroupCardProps> = ({
+  name,
+  description,
+  members,
+  isMine,
+  isMember,
+  onJoinClick,
+}) => {
   return (
-    <div className="bg-black rounded-lg overflow-hidden shadow-md text-white">
-      <div className="p-4">
-        <h3 className="text-lg font-semibold">{name}</h3>
-        <p className="text-sm text-gray-400">{description}</p>
-        <div className="mt-2 text-sm">
-          <p>Members: {members}</p>
-        </div>
-        <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded">
-          {isMine ? "Enter" : "Join"}
-        </button>
-      </div>
+    <div className="bg-black p-4 rounded-md shadow-md">
+      <h2 className="text-white text-lg font-semibold">{name}</h2>
+      <p className="text-gray-400">{description}</p>
+      <p className="text-gray-400">Members: {members}</p>
+      {!isMine && !isMember && (
+        <Button className="mt-4" onClick={onJoinClick}>
+          Join
+        </Button>
+      )}
     </div>
   );
 };
