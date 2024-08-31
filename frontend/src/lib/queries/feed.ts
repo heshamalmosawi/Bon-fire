@@ -1,12 +1,12 @@
 import axios from "axios";
 
-export const getFeed = async (): Promise<PostProps[] | undefined> => {
+export const getFeed = async (): Promise<PostProps[] | string> => {
   const res = await axios.get("http://localhost:8080/feed", {
     withCredentials: true,
   });
 
   if (res.status !== 200) {
-    return undefined;
+    return `the backend is not responding properly`;
   } else {
     console.log(res.data);
     return res.data
@@ -24,6 +24,6 @@ export const getFeed = async (): Promise<PostProps[] | undefined> => {
             postCommentNum: 200, //FIXME: serve this in the frontend
           })
         )
-      : undefined;
+      : "";
   }
 };

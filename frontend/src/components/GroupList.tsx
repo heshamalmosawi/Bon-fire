@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import GroupCard from "./GroupCard";  // Import the GroupCard component
+import GroupCard from "./GroupCard"; // Import the GroupCard component
 import {
   Select,
   SelectContent,
@@ -9,43 +9,25 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import GroupCreationDialog from "./CreateGroup"; // Import the GroupCreationDialog component
-
-interface Group {
-  group_id: string;
-  owner_id: string;
-  group_name: string;
-  group_desc: string;
-}
+import { Group } from "@/lib/interfaces";
+import { fetchGroups } from "@/lib/queries/groups";
 
 const AllGroupList: React.FC = () => {
-  const [filter, setFilter] = useState('all'); // 'all' or 'mine'
+  const [filter, setFilter] = useState("all"); // 'all' or 'mine'
   const [groups, setGroups] = useState<Group[]>([]); // State to hold groups
   const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog state
 
   // Fetch groups from the backend
   useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const response = await fetch("http://localhost:8080/fetchGroups");
-        if (!response.ok) {
-          throw new Error("Failed to fetch groups");
-        }
-        const data: Group[] = await response.json();
-        setGroups(data || []); // Set groups to an empty array if data is null or undefined
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-      }
-    };
-
-    fetchGroups();
+    fetchGroups().then((data) => setGroups(data || []));
   }, []);
 
   // Filter the groups based on the selected filter
-  const filteredGroups = groups.filter(group => {
-    if (filter === 'owned') {
-      return group.owner_id === "2111bf11-e34e-40dc-af50-4fe7900c00e7"; // TO DO FIX THIS SHIT
+  const filteredGroups = groups.filter((group) => {
+    if (filter === "owned") {
+      return group.owner_id === "2111bf11-e34e-40dc-af50-4fe7900c00e7"; // TODO FIX THIS SHIT
     }
-    return true; 
+    return true;
   });
 
   const openDialog = () => setIsDialogOpen(true);
@@ -53,9 +35,11 @@ const AllGroupList: React.FC = () => {
 
   return (
     <div className="ml-1/4 p-2">
-      <div className="w-[80%] h-full shadow-md mx-auto mb-8">  
+      <div className="w-[80%] h-full shadow-md mx-auto mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-white text-3xl font-semibold">Groups ({filteredGroups.length})</h1>
+          <h1 className="text-white text-3xl font-semibold">
+            Groups ({filteredGroups.length})
+          </h1>
           <div className="flex items-center">
             <Select onValueChange={(value) => setFilter(value)}>
               <SelectTrigger className="w-[180px] bg-gray-800 text-white border border-gray-600">
@@ -70,7 +54,7 @@ const AllGroupList: React.FC = () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <Button 
+            <Button
               className="ml-4 bg-blue-600 text-white hover:bg-blue-800 rounded-md px-4 py-2"
               onClick={openDialog}
             >
@@ -87,7 +71,7 @@ const AllGroupList: React.FC = () => {
             key={group.group_id}
             name={group.group_name}
             description={group.group_desc}
-            members="0"  // might delete 
+            members="0" // might delete
             isMine={group.owner_id === "2111bf11-e34e-40dc-af50-4fe7900c00e7"} // Replace with actual logic
           />
         ))}

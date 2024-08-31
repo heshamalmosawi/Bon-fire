@@ -2,6 +2,7 @@
 
 import FeedDesktop from "@/components/desktop/FeedDesktop";
 import Navbar from "@/components/desktop/Navbar";
+import RightSidebar from "@/components/rightNav";
 
 export default function Home() {
   return (
@@ -11,7 +12,9 @@ export default function Home() {
       <div
         id="right-nav"
         className="w-[20%] h-full flex flex-col items-center justify-evenly"
-      ></div>
+      >
+         <RightSidebar /> {/* Add the RightSidebar component here */}
+      </div>
     </div>
   );
 }

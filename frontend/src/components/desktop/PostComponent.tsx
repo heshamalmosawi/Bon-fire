@@ -39,6 +39,7 @@ const PostComponent = (props: PostProps) => {
       <div
         id="post-content"
         className="w-full flex flex-col items-center justify-center gap-4"
+        onClick={openDialog}
       >
         <div id="post-text-content" className="text-white text-sm w-full">
           {props.postTextContent}
