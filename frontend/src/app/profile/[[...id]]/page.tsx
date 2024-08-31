@@ -67,20 +67,27 @@ const ProfilePage = () => {
   const renderContent = () => {
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
+    console.log("data:", data, Array.isArray(data), data);
 
     switch (activeTab) {
       case 'posts':
-        return Array.isArray(data) ? data.map((post: any) => (
-          <PostComponent key={post.id} {...post} />
+        return data.response.length > 0 ? data.response.map((post: any) => (
+          <PostComponent key={post.id} {...post}   firstName={data.user.user_fname} 
+          lastName={data.user.user_lname} 
+          username={data.user.user_nickname}  />
         )) : <p>No posts available.</p>;
       case 'comments':
         return <p>Comments content will appear here.</p>;
       case 'likes':
         return <p>Likes content will appear here.</p>;
       case 'followers':
-        return <PeopleList onSelectPerson={data} sessionUser={sessionUser} type="Followers" />;
-      case 'following':
-        return <PeopleList onSelectPerson={data} sessionUser={sessionUser} type="Followings" />;
+        return data.response.length > 0 ? (
+          <PeopleList onSelectPerson={data.response} />
+        ) : <p>No followers available.</p>;
+      case 'followings':
+        return data.response.length > 0 ? (
+          <PeopleList onSelectPerson={data.response} />
+        ) : <p>No followings available.</p>;
       default:  
         return null;
     }

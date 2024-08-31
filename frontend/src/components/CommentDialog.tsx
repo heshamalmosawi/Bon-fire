@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Image from "next/image";
@@ -16,46 +16,50 @@ interface CommentDialogProps {
 
 
 export const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, post }) => {
-    // Example state for likes
-    const [likes, setLikes] = useState(23);
-    const [liked, setLiked] = useState(false);
-  
-    const toggleLike = () => {
-      setLiked(!liked);
-      setLikes(liked ? likes - 1 : likes + 1);
-    };
+  // Example state for likes
+  const [likes, setLikes] = useState(23);
+  const [liked, setLiked] = useState(false);
+
+  const firstNameInitial = post.firstName ? post.firstName[0] : "";
+  const lastNameInitial = post.lastName ? post.lastName[0] : "";
+
+
+  const toggleLike = () => {
+    setLiked(!liked);
+    setLikes(liked ? likes - 1 : likes + 1);
+  };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-black rounded-lg p-0 max-w-6xl mx-auto flex overflow-hidden  h-[90vh]">
         {/* Left Section - Placeholder or Image */}
         <div className="flex-1 bg-gray-800 flex items-center justify-center">
           (
-            <Image
-              src="/landing.jpg"  // Use the dynamic image URL
-              alt="post image"
-              width={700}
-              height={900}
-              className="object-cover h-full w-full"
-            />
-          ) 
+          <Image
+            src="/landing.jpg"  // Use the dynamic image URL
+            alt="post image"
+            width={700}
+            height={900}
+            className="object-cover h-full w-full"
+          />
+          )
         </div>
 
-         {/* Right Section - Comments and Details */}
-         <div className="flex-1 flex flex-col justify-between p-6 bg-black overflow-y-auto">
+        {/* Right Section - Comments and Details */}
+        <div className="flex-1 flex flex-col justify-between p-6 bg-black overflow-y-auto">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <Avatar>
                 <AvatarImage src={post.avatarUrl} />
-                <AvatarFallback>{`${post.firstName[0]}${post.lastName[0]}`}</AvatarFallback>
+                <AvatarFallback>{`${firstNameInitial}${lastNameInitial}`}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
                 <h2 className="text-white font-bold">{`${post.firstName} ${post.lastName}`}</h2>
                 <h6 className="text-[#ffffff66]">
-                  {post.username ? `@${post.username}` : ""} | {getAgo(post.creationDate)}
+                  {post.username ? `@${post.username}` : ""} | {getAgo(post.created_at)}
                 </h6>
               </div>
             </div>
-            <div className="text-white text-sm">{post.postTextContent}</div>
+            <div className="text-white text-sm">{post.post_content}</div>
             {/* Example Comments */}
             <div className="mt-4 space-y-4 max-h-[300px] overflow-y-auto">
               <div className="flex gap-2">

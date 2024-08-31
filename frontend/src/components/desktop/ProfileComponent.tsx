@@ -7,8 +7,8 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Forward, Heart, MessageSquare } from "lucide-react";
 import ToolTipWrapper from "../ToolTipWrapper";
-import EditProfile  from "../EditProfile";
-import { fetchProfile, fetchSessionUser, handleClick} from '@/lib/api';
+import EditProfile from "../EditProfile";
+import { fetchProfile, fetchSessionUser, handleClick } from '@/lib/api';
 
 
 interface ProfileProps {
@@ -22,7 +22,7 @@ interface ProfileProps {
     privacy: string;
 }
 
-export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, avatarUrl, bio, nickname, session_user, u_id, privacy}) => {
+export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, avatarUrl, bio, nickname, session_user, u_id, privacy }) => {
     return (
         <div id="profile" className="relative -top-24 w-1/3 space-y-6">
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
@@ -33,7 +33,7 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, avatarU
                 <div className="text-center mt-4">
                     <h2 className="text-2xl font-semibold">{fname} {lname}</h2>
                     <p className="text-gray-400">Full Stack Developer</p>
-                    {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"}/>}
+                    {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"} />}
                 </div>
             </div>
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
@@ -44,7 +44,7 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, avatarU
                     </span>
                 </div>
             </div>
-        </div>   
+        </div>
     );
 }
 
@@ -54,14 +54,15 @@ interface Person {
     user_lname: string;
     profile_exposure: string;
     user_avatar_path: string;
-    is_follower: boolean;
-  }
-  
-  interface PeopleListProps {
+    is_followed: boolean;
+    response: Array<Person>;
+}
+
+interface PeopleListProps {
     onSelectPerson: (person: Person) => void;
-    sessionUser: string;
-    type: string;
-  }
+    // sessionUser: string;
+    // type: "Followers" | "Followings";
+}
 
 // TODO: delete the hard-coded part, call 
 // const people = [
@@ -85,34 +86,59 @@ interface Person {
 //     },
 // ];
 
-export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson, sessionUser, type }) => {
+export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson }) => {
+    const [people, setPeople] = useState<Person[]>([]);
     const [followers, setFollowers] = useState<Person[]>([]);
+    const [followings, setFollowings] = useState<Person[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<string>("");
-  
-    useEffect(() => {
-        const fetchFollowers = async () => {
-          setLoading(true);
-          try {
-            await handleClick(
-              "followers", // endpoint
-              sessionUser, // u_id
-              setLoading, // setLoading
-              setError, // setError
-              setActiveTab, // setActiveTab
-              setFollowers // setData
-            );
-          } catch (error) {
-            console.error("Error fetching followers:", error);
-          } finally {
-            setLoading(false);
-          }
-        };
-    
-        fetchFollowers();
-      }, [sessionUser]);
-    
+    // const [activeTab, setActiveTab] = useState<string>("");
+
+    // useEffect(() => {
+    //     const fetchFollows = async () => {
+    //         setLoading(true);
+    //         // try {
+    //         //     if (type === "Followers") {
+    //         //         await handleClick(
+    //         //             type.toLowerCase(), // endpoint
+    //         //             sessionUser, // u_id
+    //         //             setLoading, // setLoading
+    //         //             setError, // setError
+    //         //             () => { }, // setActiveTab
+    //         //             setFollowers // setData
+    //         //         );
+    //         //     } else if (type === "Followings") {
+    //         //         await handleClick(
+    //         //             "followings", // endpoint
+    //         //             sessionUser, // u_id
+    //         //             setLoading, // setLoading
+    //         //             setError, // setError
+    //         //             () => { }, // setActiveTab
+    //         //             setFollowings // setData
+    //         //         );
+    //         //     }
+    //         try {
+    //             const response = await handleClick(
+    //                 type.toLowerCase(), // endpoint
+    //                 sessionUser, // u_id
+    //                 setLoading, // setLoading
+    //                 setError, // setError
+    //                 () => { }, // setActiveTab
+    //                 setPeople // setData
+    //             );
+    //             // if (response && response.response) {
+    //             //     setPeople(response.response);
+    //             // }
+    //         } catch (error) {
+    //             console.error("Error fetching followers:", error);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     fetchFollows();
+    // }, [sessionUser, type]);
+
 
     // return (
     //     <div className="min-h-screen bg-black p-6">
@@ -146,24 +172,56 @@ export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson, sessionU
     //     </div>
     // );
 
-  return (
-    <div className="w-1/4 h-full p-4 overflow-y-auto">
-      <h3 className="text-lg font-semibold mb-4 text-white">{type}</h3>
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      <ul>
-      {Array.isArray(followers) && followers.map((person) => (         
-        <li
-            key={person.user_id}
-            className="p-2 text-white cursor-pointer hover:bg-gray-700"
-            onClick={() => onSelectPerson(person)}
-          >
-            {person.user_fname + " " + person.user_lname}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+    console.log("Followers:", followers);
+    console.log("Followings:", followings);
+
+    console.log("People:", people);
+    console.log("Type of people:", typeof people);
+    console.log("Is people an array:", Array.isArray(people));
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
+
+    return (
+        <div className="min-h-screen bg-black p-6">
+            <div className="ml-1/4 p-2">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl text-white">People  ({onSelectPerson.length})</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Array.isArray(onSelectPerson) && onSelectPerson.map((person) => (
+                        <div key={person.user_id} className="bg-neutral-950 rounded-lg overflow-hidden shadow-md text-white">
+                            <Image
+                                src={person.user_avatar_path}
+                                alt={`${person.user_fname} ${person.user_lname}`}
+                                width={300}
+                                height={200}
+                                className="w-full h-48 object-cover"
+                            />
+                            <div className="p-4">
+                                <h3 className="text-lg font-semibold">{person.user_fname} {person.user_lname}</h3>
+                                <div className="mt-2 text-sm">
+                                    <p>{person.profile_exposure}</p>
+                                </div>
+                                {person.is_followed ? (
+                                    <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded">
+                                        UnFollow
+                                    </button>
+                                ) : (
+                                    <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded">
+                                        Follow
+                                    </button>
+                                )}
+                                {/* <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded" onClick={() => onSelectPerson(person)}>
+                                    Message
+                                </button> */}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
 }
 
 // export ProfileComponent, PeopleList;

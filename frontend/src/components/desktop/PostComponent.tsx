@@ -13,6 +13,12 @@ const PostComponent = (props: PostProps) => {
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
 
+  const firstNameInitial = props.firstName ? props.firstName[0] : "";
+  const lastNameInitial = props.lastName ? props.lastName[0] : "";
+  if (props.firstName === "") {
+    props.firstName = ``;
+  }
+
   return (
     <div
       className={`max-h-[540px] bg-black rounded-lg flex flex-col items-center justify-center px-4 py-4 gap-4`}
@@ -24,12 +30,12 @@ const PostComponent = (props: PostProps) => {
       >
         <Avatar>
           <AvatarImage src={props.avatarUrl} />
-          <AvatarFallback>{`${props.firstName[0]}${props.lastName[0]}`}</AvatarFallback>
+          <AvatarFallback>{`${firstNameInitial}${lastNameInitial}`}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col items-start justify-center">
           <div className="flex gap-2">
             <h2 className="text-white font-bold">{`${props.firstName} ${props.lastName}`}</h2>
-            <h6 className="text-[#ffffff66]">| {getAgo(props.creationDate)}</h6>
+            <h6 className="text-[#ffffff66]">| {getAgo(props.created_at)}</h6>
           </div>
           <h6 className="text-[#ffffff66]">
             {props.username ? `@${props.username}` : ""}
@@ -41,11 +47,11 @@ const PostComponent = (props: PostProps) => {
         className="w-full flex flex-col items-center justify-center gap-4"
       >
         <div id="post-text-content" className="text-white text-sm w-full">
-          {props.postTextContent}
+          {props.post_content}
         </div>
-        {props.postImageContentUrl ? (
+        {props.post_image_path ? (
           <Image
-            src={props.postImageContentUrl}
+            src={props.post_image_path}
             className="w-full h-[200px] rounded-lg"
             alt="post image"
             width={400}
@@ -56,7 +62,7 @@ const PostComponent = (props: PostProps) => {
         )}
       </div>
       <div className="w-full h-[44px] flex items-center justify-around gap-4 border-b-[0.1px] border-b-[#3838386f] border-t-[0.1px] border-t-[#3838386f]">
-        <ToolTipWrapper text={`${props.postLikeNum} Likes`}>
+        <ToolTipWrapper text={`${props.post_likecount} Likes`}>
           <Heart
             color="white"
             className="cursor-pointer hover:stroke-red-600 duration-300"

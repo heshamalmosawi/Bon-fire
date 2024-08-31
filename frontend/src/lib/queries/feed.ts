@@ -17,10 +17,10 @@ export const getFeed = async (): Promise<PostProps[] | undefined> => {
             lastName: item.author.user_lname,
             username: item.author.user_nickname,
             avatarUrl: item.author.user_avatar_path,
-            creationDate: item.post.created_at,
-            postTextContent: item.post.post_content,
-            postImageContentUrl: item.post.post_image_path,
-            postLikeNum: item.post.post_likecount,
+            created_at: item.post.created_at,
+            post_content: item.post.post_content,
+            post_image_path: item.post.post_image_path,
+            post_likecount: item.post.post_likecount,
             postCommentNum: 200, //FIXME: serve this in the frontend
           })
         )

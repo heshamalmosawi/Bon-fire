@@ -80,6 +80,7 @@ export const handleClick = async (endpoint: string, u_id: string, setLoading: (l
             console.log("response.status:", response.status);
         }
         const result = await response.json();
+        console.log("result:", result);
         setData(result);
     } catch (error) {
         setError((error as any).message);

@@ -13,7 +13,7 @@ interface Person {
   user_lname: string;
   profile_exposure: string;
   user_avatar_path: string;
-  is_follower: boolean;
+  is_followed: boolean;
 }
 
 const AllPeopleList = () => {
@@ -66,7 +66,7 @@ const AllPeopleList = () => {
               <div className="mt-2 text-sm">
                 <p className="text-sm text-gray-400">{person.profile_exposure}</p>
               </div>
-              {person.is_follower ? (
+              {person.is_followed ? (
                 <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded"
                   onClick={() => handleFollow(person.user_id)}>
                   UnFollow

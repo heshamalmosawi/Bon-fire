@@ -188,7 +188,7 @@ const ProfilePage = () => {
               {activeTab === 'posts'  && (
                 // data.map((post: any) => (
                 
-               <PostComponent id={"0"} firstName={"Noora"} lastName={"Qasim"} username={"nqasim"} avatarUrl={""} creationDate={"06/06/24"} postTextContent={"My name is noora"} postImageContentUrl={""} postLikeNum={3} postCommentNum={0} />
+               <PostComponent id={"0"} firstName={"Noora"} lastName={"Qasim"} username={"nqasim"} avatarUrl={""} created_at={"06/06/24"} post_content={"My name is noora"} post_image_path={""} post_likecount={3} postCommentNum={0} />
                 )}
             
 

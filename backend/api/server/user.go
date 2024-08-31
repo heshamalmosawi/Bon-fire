@@ -129,7 +129,25 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		response = user_followers
+		var followers []models.UserModel
+		for _, follower := range user_followers {
+			user, err := models.GetUserByID(follower.FollowerID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting user by ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			isFollowing, err := models.IsFollowing(user.UserID, profileUserIDUUID)
+			if err != nil {
+				log.Println("HandleProfile: Error checking if user is a follower", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			user.IsFollowed = isFollowing
+			followers = append(followers, *user)
+		}
+		response = followers
+	
 
 	// Placeholder for followings
 	case "followings":
@@ -139,7 +157,17 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		response = user_followings
+		var followings []models.UserModel
+		for _, following := range user_followings {
+			user, err := models.GetUserByID(following.FollowerID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting user by ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			followings = append(followings, *user)
+		}
+		response = followings
 
 	// Placeholder for comments
 	case "comments":
