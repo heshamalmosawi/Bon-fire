@@ -300,7 +300,7 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Check if follow  already exists, delete if it does
-	followingcheck, err := models.GetFollowingUser(session.User.UserID, uid)
+	followingcheck, err := models.GetFollowingUser(uid, session.User.UserID)
 	if err == nil && followingcheck.UserID != uuid.Nil {
 		followingcheck.Del()
 		log.Println("HandleFollow: Unfollowed user")
