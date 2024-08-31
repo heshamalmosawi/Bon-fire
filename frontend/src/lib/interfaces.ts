@@ -30,11 +30,18 @@ interface PostProps {
 //   profileExposure: string;
 // }
 
-interface Profile {
+export interface Profile {
   fname: string;
   lname: string;
   avatarUrl: string;
   bio: string;
   nickname: string;
   privacy: string;
+}
+
+export interface Group {
+  group_id: string;
+  owner_id: string;
+  group_name: string;
+  group_desc: string;
 }
