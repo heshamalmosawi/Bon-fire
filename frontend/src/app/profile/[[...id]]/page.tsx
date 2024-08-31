@@ -54,12 +54,36 @@ const ProfilePage = () => {
     const fetchData = async () => {
       setLoading(true);
       console.log("fetching data, u_id:", u_id);
+      if (u_id !== undefined) {
       await fetchProfile(u_id, setProfile, setLoading, setError);
       handleClick('Posts', u_id, setLoading, setError, setActiveTab, setData);
+      }
     };
   
     fetchData();
   }, [u_id]);
+
+  const renderContent = () => {
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
+
+    switch (activeTab) {
+      case 'posts':
+        return Array.isArray(data) ? data.map((post: any) => (
+          <PostComponent key={post.id} {...post} />
+        )) : <p>No posts available.</p>;
+      case 'comments':
+        return <p>Comments content will appear here.</p>;
+      case 'likes':
+        return <p>Likes content will appear here.</p>;
+      case 'followers':
+        return <PeopleList onSelectPerson={data} sessionUser={sessionUser} type="Followers" />;
+      case 'following':
+        return <PeopleList onSelectPerson={data} sessionUser={sessionUser} type="Followings" />;
+      default:  
+        return null;
+    }
+  };
 
   useEffect(() => {
     const profileElement = document.getElementById("profile");
@@ -145,8 +169,9 @@ const ProfilePage = () => {
                 </button>
               </div>
               <div className="space-y-8" id="timeline">
-                // TODO: change this so it could be a containor
-                <PeopleList />
+                {/* // TODO: change this so it could be a containor */}
+                {/* <PeopleList /> */}
+                {renderContent()}
               </div>
 
 
