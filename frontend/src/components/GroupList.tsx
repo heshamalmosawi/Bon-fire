@@ -11,11 +11,33 @@ import { Button } from "@/components/ui/button";
 import GroupCreationDialog from "./CreateGroup"; // Import the GroupCreationDialog component
 import { Group } from "@/lib/interfaces";
 import { fetchGroups } from "@/lib/queries/groups";
+import { useRouter } from 'next/navigation';  // Import the useRouter hook
 
 const AllGroupList: React.FC = () => {
   const [filter, setFilter] = useState("all"); // 'all' or 'mine'
   const [groups, setGroups] = useState<Group[]>([]); // State to hold groups
   const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog state
+  const [sessionUser, setSessionUser] = useState<string | null>(null); // State to store the fetched user ID
+  const router = useRouter(); // Initialize router for navigation
+
+  // Fetch the authenticated user's session
+  useEffect(() => {
+    const authenticate = async () => {
+      const response = await fetch(`http://localhost:8080/authenticate`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.status !== 200) {
+        router.push('/auth');
+        return;
+      } else if (response.status === 200) {
+        const data = await response.json();
+        setSessionUser(data.User.user_id);
+      }
+    };
+    authenticate();
+  }, [router]);
 
   // Fetch groups from the backend
   useEffect(() => {
@@ -24,8 +46,8 @@ const AllGroupList: React.FC = () => {
 
   // Filter the groups based on the selected filter
   const filteredGroups = groups.filter((group) => {
-    if (filter === "owned") {
-      return group.owner_id === "2111bf11-e34e-40dc-af50-4fe7900c00e7"; // TODO FIX THIS SHIT
+    if (filter === "mine" && sessionUser) {
+      return group.owner_id === sessionUser;
     }
     return true;
   });
@@ -71,8 +93,8 @@ const AllGroupList: React.FC = () => {
             key={group.group_id}
             name={group.group_name}
             description={group.group_desc}
-            members="0" // might delete
-            isMine={group.owner_id === "2111bf11-e34e-40dc-af50-4fe7900c00e7"} // Replace with actual logic
+            members="0" // You might want to update this with the actual number of members
+            isMine={group.owner_id === sessionUser} // Use the fetched user ID for determining ownership
           />
         ))}
       </div>
