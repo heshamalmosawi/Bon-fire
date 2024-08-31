@@ -26,7 +26,7 @@ const GroupCard: React.FC<GroupCardProps> = ({
       <p className="text-gray-400">{description}</p>
       <p className="text-gray-400">Members: {members}</p>
       {!isMine && !isMember && (
-        <Button className="mt-4" onClick={onJoinClick}>
+        <Button variant="secondary" className="mt-4" onClick={onJoinClick}>
           Join
         </Button>
       )}

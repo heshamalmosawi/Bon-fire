@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import GroupCard from "./GroupCard"; // Import the GroupCard component
+import GroupCard from "./GroupCard"; 
 import {
   Select,
   SelectContent,
@@ -8,20 +8,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import GroupCreationDialog from "./CreateGroup"; // Import the GroupCreationDialog component
-import ConfirmJoinDialog from "./confirmGroupJoin"; // Import the ConfirmJoinDialog component for join confirmation
+import GroupCreationDialog from "./CreateGroup"; 
+import ConfirmJoinDialog from "./confirmGroupJoin"; 
 import { Group } from "@/lib/interfaces";
 import { fetchGroups } from "@/lib/queries/groups";
-import { useRouter } from "next/navigation"; // Import the useRouter hook
+import { useRouter } from "next/navigation"; 
 
 const AllGroupList: React.FC = () => {
-  const [filter, setFilter] = useState("all"); // 'all', 'mine', or 'joined'
-  const [groups, setGroups] = useState<Group[]>([]); // State to hold groups
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog state for group creation
-  const [sessionUser, setSessionUser] = useState<string | null>(null); // State to store the fetched user ID
-  const [isConfirmJoinDialogOpen, setIsConfirmJoinDialogOpen] = useState(false); // Dialog state for join confirmation
-  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null); // State to store selected group for joining
-  const router = useRouter(); // Initialize router for navigation
+  const [filter, setFilter] = useState("all"); 
+  const [groups, setGroups] = useState<Group[]>([]); 
+  const [isDialogOpen, setIsDialogOpen] = useState(false); 
+  const [sessionUser, setSessionUser] = useState<string | null>(null); 
+  const [isConfirmJoinDialogOpen, setIsConfirmJoinDialogOpen] = useState(false); 
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null); 
+  const router = useRouter(); 
 
   // Fetch the authenticated user's session
   useEffect(() => {
