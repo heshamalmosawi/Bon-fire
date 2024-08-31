@@ -79,9 +79,6 @@ func HandleGroupCreate(w http.ResponseWriter, r *http.Request) {
 	// Return a success response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"message": "Group created successfully"})
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
 }
 
 // HandleGroupInvite handles the request for inviting users to a group.

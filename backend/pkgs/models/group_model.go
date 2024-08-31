@@ -25,6 +25,7 @@ type ExtendedGroupModel struct {
 	GroupDescrip string    `json:"group_desc"`
 	IsMember     bool      `json:"is_member"`      
 	TotalMembers int       `json:"total_members"`  
+	IsRequested  bool      `json:"is_requested"`
 }
 
 func (g *GroupModel) Save() error {

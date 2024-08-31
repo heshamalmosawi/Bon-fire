@@ -118,6 +118,7 @@ const AllGroupList: React.FC = () => {
         {filteredGroups.map((group) => (
           <GroupCard
             key={group.group_id}
+            id={group.group_id}
             name={group.group_name}
             description={group.group_desc}
             members={group.total_members} // Updated to use the actual number of members
