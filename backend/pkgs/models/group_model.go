@@ -17,6 +17,16 @@ type GroupModel struct {
 	GroupDescrip string    `json:"group_desc"`
 }
 
+//makes it easier to fetch
+type ExtendedGroupModel struct {
+	GroupID      uuid.UUID `json:"group_id"`
+	OwnerID      uuid.UUID `json:"owner_id"`
+	GroupName    string    `json:"group_name"`
+	GroupDescrip string    `json:"group_desc"`
+	IsMember     bool      `json:"is_member"`      
+	TotalMembers int       `json:"total_members"`  
+}
+
 func (g *GroupModel) Save() error {
 	if g.GroupID == uuid.Nil {
 		uid, err := uuid.NewV4()
@@ -226,4 +236,43 @@ func AddUserToGroup(group *GroupModel, user *UserModel) error {
 		return fmt.Errorf("CreateGroup: failed to insert group: %v", err)
 	}
 	return nil
+}
+
+
+func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
+	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
+	rows, err := utils.Read("`group`", columns, "")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groupResponses []ExtendedGroupModel
+	for rows.Next() {
+		var group ExtendedGroupModel
+		err := rows.Scan(&group.GroupID, &group.OwnerID, &group.GroupName, &group.GroupDescrip)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if the user is in this group
+		inGroup, err := IsUserInGroup(userID, group.GroupID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Set the IsMember field based on the user's membership status
+		group.IsMember = inGroup
+
+		// Get the total number of members in this group
+		totalMembers, err := GetTotalMembers(group.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		group.TotalMembers = totalMembers + 1
+
+		groupResponses = append(groupResponses, group)
+	}
+
+	return groupResponses, nil
 }

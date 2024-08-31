@@ -1,7 +1,9 @@
 package models
 
 import (
+	"bonfire/pkgs/storage"
 	"bonfire/pkgs/utils"
+
 	"github.com/gofrs/uuid"
 )
 
@@ -70,4 +72,35 @@ func DeleteUserFromGroup(userID, groupID uuid.UUID) error {
 	condition := "user_id = ? AND group_id = ?"
 	_, err := utils.Delete("group_user", condition, userID, groupID)
 	return err
+}
+
+func IsUserInGroup(userID, groupID uuid.UUID) (bool, error) {
+	columns := []string{"member_id"}
+	condition := "user_id = ? AND group_id = ?"
+	rows, err := utils.Read("group_user", columns, condition, userID, groupID)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	// If there is at least one row, the user is in the group
+	if rows.Next() {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func GetTotalMembers(groupID uuid.UUID) (int, error) {
+	// Prepare the query to count members
+	query := "SELECT COUNT(*) FROM group_user WHERE group_id = ?"
+	
+	// Execute the query
+	var totalMembers int
+	err := storage.DB.QueryRow(query, groupID).Scan(&totalMembers)
+	if err != nil {
+		return 0, err
+	}
+
+	return totalMembers, nil
 }

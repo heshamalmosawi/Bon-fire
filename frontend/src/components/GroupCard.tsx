@@ -3,7 +3,7 @@ import React from "react";
 interface GroupCardProps {
   name: string;
   description: string;
-  members: string;
+  members: number;
   isMine: boolean;
 }
 

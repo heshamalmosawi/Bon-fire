@@ -93,7 +93,7 @@ const AllGroupList: React.FC = () => {
             key={group.group_id}
             name={group.group_name}
             description={group.group_desc}
-            members="0" // You might want to update this with the actual number of members
+            members={group.total_members} // You might want to update this with the actual number of members
             isMine={group.owner_id === sessionUser} // Use the fetched user ID for determining ownership
           />
         ))}
