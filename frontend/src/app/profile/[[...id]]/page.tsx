@@ -71,21 +71,29 @@ const ProfilePage = () => {
 
     switch (activeTab) {
       case 'posts':
-        return data.response.length > 0 ? data.response.map((post: any) => (
+        return data.response ? data.response.map((post: any) => (
           <PostComponent key={post.id} {...post}   firstName={data.user.user_fname} 
           lastName={data.user.user_lname} 
           username={data.user.user_nickname}  />
         )) : <p>No posts available.</p>;
       case 'comments':
-        return <p>Comments content will appear here.</p>;
+        return data.response ? data.response.map((post: any) => (
+          <PostComponent key={post.id} {...post}   firstName={data.user.user_fname} 
+          lastName={data.user.user_lname} 
+          username={data.user.user_nickname}  />
+        )) : <p>No comments available</p>;
       case 'likes':
-        return <p>Likes content will appear here.</p>;
+        return data.response ? data.response.map((post: any) => (
+          <PostComponent key={post.id} {...post}   firstName={data.user.user_fname} 
+          lastName={data.user.user_lname} 
+          username={data.user.user_nickname}  />
+        )) : <p>No likes available.</p>;
       case 'followers':
-        return data.response.length > 0 ? (
+        return data.response ? (
           <PeopleList onSelectPerson={data.response} />
         ) : <p>No followers available.</p>;
       case 'followings':
-        return data.response.length > 0 ? (
+        return data.response ? (
           <PeopleList onSelectPerson={data.response} />
         ) : <p>No followings available.</p>;
       default:  

@@ -117,7 +117,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Retrieve user-related data based on the query parameter
-	var response interface{}
+	var response any
 
 	switch r.URL.Query().Get("q") {
 
@@ -177,8 +177,22 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		response = user_comments
-
+		var posts []models.PostModel
+		for _, comment := range user_comments {
+			post, err := models.GetPostByPostID(comment.PostID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting post by ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			posts = append(posts, *post)
+		}
+		response = posts
+		// response = map[string]interface{}{
+		// 	"posts": posts,
+		// 	"comments": user_comments,
+		// }
+		
 	// Placeholder for posts liked
 	case "post_likes":
 		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
