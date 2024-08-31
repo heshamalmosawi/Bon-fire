@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getAgo } from "@/lib/utils";
 import { Heart, Send } from "lucide-react";
-
+import {PostProps} from "@/lib/interfaces";
 
 interface CommentDialogProps {
   isOpen: boolean;

@@ -1,7 +1,7 @@
 /**
  * these are properties each post will have
  */
-interface PostProps {
+export interface PostProps {
   id: string;
   firstName: string;
   lastName: string;

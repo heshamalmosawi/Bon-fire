@@ -6,6 +6,7 @@ import { Forward, Heart, MessageSquare } from "lucide-react";
 import ToolTipWrapper from "../ToolTipWrapper";
 import { getAgo } from "@/lib/utils";
 import CommentDialog from "../CommentDialog";  // Import the CommentDialog component
+import {PostProps} from "@/lib/interfaces"
 
 const PostComponent = (props: PostProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
