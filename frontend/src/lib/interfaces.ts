@@ -47,3 +47,12 @@ export interface Group {
   is_member: boolean; 
   total_members: number; // Extended 
 }
+
+export interface GroupProps {
+  groupName: string;
+  ownerName: string;
+  description: string;
+  session_user: string;
+  groupID: string;
+  total_members: number; 
+}

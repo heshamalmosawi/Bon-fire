@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { Group, PeopleList } from "@/components/desktop/groupProfile";
+import { Group } from "@/components/desktop/groupProfile";
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
 import { usePathname, useRouter } from 'next/navigation';
@@ -13,11 +13,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-
+import {GroupProps} from "@/lib/interfaces"
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
-  const [profile, setProfile] = useState<{ fname: string; lname: string; avatarUrl: string; bio: string; nickname: string; privacy: string }>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: "" });
+  const [groupProfile, setGroupProfile] = useState<GroupProps>({
+    groupName: "",
+    ownerName: "",
+    description: "",
+    session_user: "",
+    groupID: "",
+    total_members: 0,
+  });
+
 
   const pathname = usePathname();
   const [u_id, setU_id] = useState(pathname.split("/")[2]);
@@ -69,17 +77,17 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const response = await fetch(`http://localhost:8080/profile/${u_id}`, { credentials: 'include' });
+      const response = await fetch(`http://localhost:8080/group/${u_id}`, { credentials: 'include' });
       if (response.status === 200) {
         const data = await response.json();
-        if (data.user) {
-          setProfile({
-            fname: data.user.user_fname,
-            lname: data.user.user_lname,
-            avatarUrl: data.user.user_avatar_path,
-            bio: data.user.user_about,
-            nickname: data.user.user_nickname,
-            privacy: data.user.user_exposure
+        if (data.group_info) {
+            setGroupProfile({
+            groupName: data.group_info.group_name,
+            ownerName: data.group_info.owner_name,
+            description: data.group_info.group_description,
+            session_user: sessionUser,
+            groupID: data.group_info.group_id,
+            total_members : data.group_info.total_members,
           });
         }
       } else {
@@ -102,16 +110,13 @@ const ProfilePage = () => {
 
           {/* Profile Info */}
           <Group
-            fname={profile.fname}
-            lname={profile.lname}
-            avatarUrl={profile.avatarUrl}
-            bio={profile.bio}
-            nickname={profile.nickname}
+            groupName={groupProfile.groupName}
+            ownerName={groupProfile.ownerName}
+            description={groupProfile.description}
             session_user={sessionUser}
-            u_id={u_id}
-            privacy={profile.privacy}
+            groupID={groupProfile.groupID}
+            totalMembers = {groupProfile.total_members}
           />
-
           <div className="space-y-6">
             {/* Tabs for Posts, Comments, Members, Description */}
             <div className="place-content-center flex space-x-9 border-b border-gray-700 pb-4">

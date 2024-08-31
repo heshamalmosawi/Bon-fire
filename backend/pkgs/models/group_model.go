@@ -118,7 +118,7 @@ func GetAllGroups() ([]GroupModel, error) {
 func GetGroupByID(groupID uuid.UUID) (*GroupModel, error) {
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	condition := "group_id = ?"
-	rows, err := utils.Read("group", columns, condition, groupID)
+	rows, err := utils.Read("`group`", columns, condition, groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +200,7 @@ func CreateGroup(group *GroupModel) error {
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	values := []interface{}{group.GroupID, group.OwnerID, group.GroupName, group.GroupDescrip}
 
-	_, err := utils.Create("group", columns, values)
+	_, err := utils.Create("`group`", columns, values)
 
 	if err != nil {
 		return fmt.Errorf("CreateGroup: failed to insert group: %v", err)
@@ -217,7 +217,7 @@ func DeleteGroup(group *GroupModel) error {
 
 	condition := "group_id = ? AND owner_id = ? AND group_name = ? AND group_desc = ?"
 
-	_, err := utils.Delete("group", condition, values...)
+	_, err := utils.Delete("`group`", condition, values...)
 
 	if err != nil {
 		return fmt.Errorf("CreateGroup: failed to insert group: %v", err)

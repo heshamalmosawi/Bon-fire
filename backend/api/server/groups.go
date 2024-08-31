@@ -3,7 +3,9 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -35,9 +37,97 @@ type GroupCreateRequest struct {
 
 // HandleGroup handles the request for group related operations.
 func HandleGroup(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling error")
+	// Extract the group ID from the URL path
+	urlParts := strings.Split(r.URL.Path, "/")
+	groupIDStr := urlParts[len(urlParts)-1]
+
+	// Convert the group ID string to a UUID
+	groupID, err := uuid.FromString(groupIDStr)
+	if err != nil {
+		http.Error(w, "Invalid group ID", http.StatusBadRequest)
+		return
+	}
+
+	// Get the session cookie to check if the user is logged in
+	sessionID, err := r.Cookie("session_id")
+	var user *models.UserModel
+	if err == nil && sessionID != nil {
+		session, err := pkgs.MainSessionManager.GetSession(sessionID.Value)
+		if err == nil {
+			user = session.User
+		}
+	}
+
+	// Retrieve the group information
+	group, err := models.GetGroupByID(groupID)
+	if err != nil || group == nil {
+		http.Error(w, "Failed to retrieve group information", http.StatusInternalServerError)
+		log.Println("Error retrieving group information:", err)
+		return
+	}
+
+	// Check if the user is a member of the group (if logged in)
+	isMember := false
+	if user != nil {
+		isMember, err = models.IsUserInGroup(user.UserID, groupID)
+		if err != nil {
+			http.Error(w, "Failed to check membership", http.StatusInternalServerError)
+			log.Println("Error checking membership:", err)
+			return
+		}
+	}
+
+	isRequested := false
+
+	// Get the total number of members in the group
+	totalMembers, err := models.GetTotalMembers(groupID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve total members", http.StatusInternalServerError)
+		log.Println("Error retrieving total members:", err)
+		return
+	}
+
+	// Retrieve the posts for the group
+	posts, err := models.GetPostsByGroupID(groupID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve group posts", http.StatusInternalServerError)
+		log.Println("Error retrieving group posts:", err)
+		return
+	}
+
+	// Retrieve the members of the group
+	members, err := models.GetMembersByGroupID(groupID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve group members", http.StatusInternalServerError)
+		log.Println("Error retrieving group members:", err)
+		return
+	}
+
+	// Prepare the response structure
+	response := struct {
+		GroupInfo   models.ExtendedGroupModel `json:"group_info"`
+		Posts       []models.PostModel        `json:"posts"`
+		Members     []models.UserModel        `json:"members"`
+	}{
+		GroupInfo: models.ExtendedGroupModel{
+			GroupID:      group.GroupID,
+			OwnerID:      group.OwnerID,
+			GroupName:    group.GroupName,
+			GroupDescrip: group.GroupDescrip,
+			IsMember:     isMember,
+			TotalMembers: totalMembers + 1,
+			IsRequested:  isRequested,
+		},
+		Posts:   posts,
+		Members: members,
+	}
+
+	// Return the response as JSON
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response to JSON", http.StatusInternalServerError)
+		log.Println("Error encoding response to JSON:", err)
+	}
 }
 
 // HandleGroupCreate handles the request for creating a new group.

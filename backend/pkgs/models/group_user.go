@@ -3,6 +3,7 @@ package models
 import (
 	"bonfire/pkgs/storage"
 	"bonfire/pkgs/utils"
+	"log"
 
 	"github.com/gofrs/uuid"
 )
@@ -103,4 +104,47 @@ func GetTotalMembers(groupID uuid.UUID) (int, error) {
 	}
 
 	return totalMembers, nil
+}
+
+// GetMembersByGroupID retrieves all members of a specific group based on the group ID.
+func GetMembersByGroupID(groupID uuid.UUID) ([]UserModel, error) {
+	// Define the query to get the user details of all members in the group
+	query := `
+	SELECT u.user_id, u.user_fname, u.user_lname, u.user_email, u.user_avatar_path, u.user_nickname, u.user_about
+	FROM user u
+	INNER JOIN group_user gu ON u.user_id = gu.user_id
+	WHERE gu.group_id = ?`
+
+	// Execute the query
+	rows, err := storage.DB.Query(query, groupID)
+	if err != nil {
+		log.Println("Error executing query in GetMembersByGroupID:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Prepare a slice to hold the user details of the group members
+	var members []UserModel
+
+	// Iterate through the result set and populate the slice
+	for rows.Next() {
+		var user UserModel
+		err := rows.Scan(
+			&user.UserID,
+			&user.UserFirstName,
+			&user.UserLastName,
+			&user.UserEmail,
+			&user.UserAvatarPath,
+			&user.UserNickname,
+			&user.UserBio,
+		)
+		if err != nil {
+			log.Println("Error scanning row in GetMembersByGroupID:", err)
+			return nil, err
+		}
+		members = append(members, user)
+	}
+
+	// Return the slice of members
+	return members, nil
 }
