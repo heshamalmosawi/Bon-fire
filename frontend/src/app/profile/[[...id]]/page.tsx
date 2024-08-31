@@ -10,11 +10,11 @@ import { usePathname, useRouter } from 'next/navigation';
 import { fetchProfile, fetchSessionUser, handleClick} from '@/lib/api';
 // import CommentComponent from "@/components/desktop/CommentComponent";
 // import AllPeopleList from "@/components/desktop/CommentComponent";
-
+import { Profile } from "@/lib/schemas/profileSchema";
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
-  const [profile, setProfile] = useState<{ fname: string; lname:string; avatarUrl: string; bio: string; nickname: string; privacy: string}>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: ""});
+  const [profile, setProfile] = useState<Profile>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: ""});
 
   const pathname = usePathname();
   const [u_id, setU_id] = useState(pathname.split("/")[2]);
@@ -122,6 +122,11 @@ const ProfilePage = () => {
   }, []);
   // console.log("profile object:", profile);
 
+  const updateProf = (newprof: Profile)=>{
+    const x = profile.avatarUrl
+    setProfile({...newprof, avatarUrl: x});
+  }
+
   return (
     <div className="bg-neutral-950 min-h-screen text-gray-200">
       <div className="flex">
@@ -133,7 +138,7 @@ const ProfilePage = () => {
 
           <div className="flex items-start space-x-6">
             {/* <!-- Profile Info --> */}
-            <ProfileComponent fname={profile.fname} lname={profile.lname} avatarUrl={profile.avatarUrl} bio={profile.bio} nickname={profile.nickname} session_user={sessionUser} u_id={u_id} privacy={profile.privacy} />
+            <ProfileComponent {...profile} session_user={sessionUser} u_id={u_id} save_changes={updateProf} />
 
 
             {/* <!-- Timeline --> */}

@@ -7,22 +7,17 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Forward, Heart, MessageSquare } from "lucide-react";
 import ToolTipWrapper from "../ToolTipWrapper";
-import EditProfile from "../EditProfile";
-import { fetchProfile, fetchSessionUser, handleClick } from '@/lib/api';
+import EditProfile  from "../EditProfile";
+import { fetchProfile, fetchSessionUser, handleClick} from '@/lib/api';
+import { Profile } from "@/lib/schemas/profileSchema";
 
-
-interface ProfileProps {
-    fname: string;
-    lname: string;
-    avatarUrl: string;
-    bio: string;
-    nickname: string;
-    session_user: string;
-    u_id: string;
-    privacy: string;
+interface ProfileProps extends Profile{
+  session_user: string;
+  u_id: string;
+  save_changes: Function;
 }
 
-export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, avatarUrl, bio, nickname, session_user, u_id, privacy }) => {
+export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, avatarUrl, bio, nickname, session_user, u_id, privacy, save_changes}) => {
     return (
         <div id="profile" className="relative -top-24 w-1/3 space-y-6">
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
@@ -33,7 +28,7 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, avatarU
                 <div className="text-center mt-4">
                     <h2 className="text-2xl font-semibold">{fname} {lname}</h2>
                     <p className="text-gray-400">Full Stack Developer</p>
-                    {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"} />}
+                    {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"} onEdit={save_changes}/>}
                 </div>
             </div>
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">

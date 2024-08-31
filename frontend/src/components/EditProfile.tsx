@@ -21,16 +21,18 @@ interface ProfileFormData {
     username: string;
     bio: string;
     privacy: boolean;
+    onEdit: Function;
 }
 
 
-const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, privacy }) => {
+const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, privacy, onEdit}) => {
     const [profileData, setProfileData] = useState<ProfileFormData>({
         fname,
         lname,
         username,
         bio,
         privacy,
+        onEdit: ()=>{} // empty function just so we can ignore it.
     });
 
     // stupid useeffect cause rendering.
@@ -87,6 +89,13 @@ const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, p
                 throw new Error('Failed to update profile');
             }
             const result = await response.json();
+            onEdit({
+                fname: profileData.fname,
+                lname: profileData.lname,
+                nickname: profileData.username,
+                bio: profileData.bio,
+                privacy: profileData.privacy ? 'Private' : 'Public'
+            });
             console.log('Profile updated:', result);
             // TODO: Handle success (e.g., show a success message or notification)
         } catch (error) {
