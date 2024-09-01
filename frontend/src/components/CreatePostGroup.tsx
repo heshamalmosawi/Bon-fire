@@ -95,11 +95,11 @@ const CreatePostForGroup = ({
   const onSubmit = async (values: z.infer<typeof createPostSchema>) => {
     console.log("Form Submitted", values);
     try {
-      // const payload = {
-      //   ...values,
-      //   post_exposure: "group", // Privacy is automatically set to "group"
-      //   groupId: groupID, // Group ID passed from the props
-      // };
+       const payload = {
+         ...values,
+         post_exposure: "group", // Privacy is automatically set to "group"
+         groupId: groupID, // Group ID passed from the props
+       };
       await HandleCreatePost(values);
 
       setIsDialogOpen(false);
