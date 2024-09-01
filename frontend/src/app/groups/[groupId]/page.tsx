@@ -233,10 +233,10 @@ const GroupPage = () => {
                   <PostComponent
                     key={post.post_id}
                     id={post.post_id}
-                    firstName="" // Adjust as per your data structure
-                    lastName="" // Adjust as per your data structure
-                    username="" // Adjust as per your data structure
-                    avatarUrl="" // Adjust as per your data structure
+                    firstName={post.author.user_fname} 
+                    lastName={post.author.user_lname} 
+                    username={post.author.user_nickname} 
+                    avatarUrl={post.author.user_avatar_path} 
                     creationDate={post.created_at}
                     postTextContent={post.post_content}
                     postImageContentUrl={post.post_image_path}

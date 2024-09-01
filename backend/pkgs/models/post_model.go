@@ -16,6 +16,8 @@ type PostModel struct {
 	PostLikeCount int       `json:"post_likecount"`
 	CreatedAt     string    `json:"created_at"`
 	AuthorID      uuid.UUID `json:"author_id"`
+	Author        *UserModel `json:"author"`
+
 }
 
 // CRUD Operations
@@ -76,6 +78,11 @@ func GetPostsByAuthorID(authorID uuid.UUID) ([]PostModel, error) {
 		if err != nil {
 			return nil, err
 		}
+		post.Author, err = GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+		
 		posts = append(posts, post)
 	}
 
@@ -102,5 +109,9 @@ func GetPostByPostID(postID uuid.UUID) (*PostModel, error) {
 		return nil, err
 	}
 
+	post.Author, err = GetUserByID(post.AuthorID)
+	if err != nil {
+		return nil, err
+	}
 	return &post, nil
 }
