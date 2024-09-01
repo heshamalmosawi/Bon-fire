@@ -5,6 +5,7 @@ import axios from "axios";
 export const createPostSchema = z.object({
   textContent: z.string().min(5),
   imageContent: z.instanceof(File).optional(),
+  groupId: z.string(),
 });
 
 export const HandleCreatePost = async (
@@ -16,7 +17,7 @@ export const HandleCreatePost = async (
       ? await HandleFileUpload(values.imageContent)
       : "",
     post_exposure: "public", // TODO: fix the exposure
-    group_id: "",
+    group_id: values.groupId,
   };
 
   const res = await fetch(`http://localhost:8080/post/create`, {

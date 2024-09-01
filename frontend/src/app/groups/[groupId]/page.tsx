@@ -14,8 +14,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import CreatePost from "@/components/CreatePost";
-
+import CreatePostForGroup from "@/components/CreatePostGroup";
 
 const GroupPage = () => {
   const [sessionUser, setSessionUser] = useState("");
@@ -116,6 +115,7 @@ const GroupPage = () => {
             groupID={groupProfile.groupID}
             totalMembers={groupProfile.total_members}
           />
+          <CreatePostForGroup groupID={groupID} onPostCreated={fetchGroupData} />
           <div className="space-y-6">
             {/* Tabs for Posts, Comments, Members, Description */}
             <div className="place-content-center flex space-x-9 border-b border-gray-700 pb-4">
@@ -222,7 +222,9 @@ const GroupPage = () => {
                     postLikeNum={post.post_likecount}
                     postCommentNum={post.comment_count} // Add a comment count to your post structure
                   />
-                ))}
+                ))
+                
+               }
               {activeTab === "chat" && <p>Chat content will appear here.</p>}
               {activeTab === "members" && <p>Members content will appear here.</p>}
               {activeTab === "description" && (
