@@ -69,7 +69,7 @@ const AllPeopleList = () => {
               {person.is_followed ? (
                 <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded"
                   onClick={() => handleFollow(person.user_id)}>
-                  UnFollow
+                  Unfollow
                 </button>
               ) : (
                 <button

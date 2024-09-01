@@ -165,6 +165,13 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
+			isFollowing, err := models.IsFollowing(profileUserIDUUID, user.UserID)
+			if err != nil {
+				log.Println("HandleProfile: Error checking if user is a follower", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			user.IsFollowed = isFollowing
 			followings = append(followings, *user)
 		}
 		response = followings
@@ -188,10 +195,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			posts = append(posts, *post)
 		}
 		response = posts
-		// response = map[string]interface{}{
-		// 	"posts": posts,
-		// 	"comments": user_comments,
-		// }
 		
 	// Placeholder for posts liked
 	case "post_likes":

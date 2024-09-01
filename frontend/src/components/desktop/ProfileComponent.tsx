@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Forward, Heart, MessageSquare } from "lucide-react";
 import ToolTipWrapper from "../ToolTipWrapper";
 import EditProfile  from "../EditProfile";
-import { fetchProfile, fetchSessionUser, handleClick} from '@/lib/api';
+import { handleFollow, fetchSessionUser, handleClick} from '@/lib/api';
 import { Profile } from "@/lib/schemas/profileSchema";
 
 interface ProfileProps extends Profile{
@@ -178,7 +178,7 @@ export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson }) => {
     if (error) return <p>Error: {error}</p>;
 
     return (
-        <div className="min-h-screen bg-black p-6">
+        <div className="bg-black p-6 rounded-md">
             <div className="ml-1/4 p-2">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl text-white">People  ({onSelectPerson.length})</h2>
@@ -186,24 +186,21 @@ export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {Array.isArray(onSelectPerson) && onSelectPerson.map((person) => (
                         <div key={person.user_id} className="bg-neutral-950 rounded-lg overflow-hidden shadow-md text-white">
-                            <Image
-                                src={person.user_avatar_path}
-                                alt={`${person.user_fname} ${person.user_lname}`}
-                                width={300}
-                                height={200}
-                                className="w-full h-48 object-cover"
-                            />
+                            <Avatar className="w-32 h-32 rounded-full mx-auto object-cover mt-5">
+                                <AvatarImage src={person.user_avatar_path} />
+                                <AvatarFallback>{person.user_fname.charAt(0) + person.user_lname.charAt(0)}</AvatarFallback>
+                            </Avatar>
                             <div className="p-4">
                                 <h3 className="text-lg font-semibold">{person.user_fname} {person.user_lname}</h3>
                                 <div className="mt-2 text-sm">
                                     <p>{person.profile_exposure}</p>
                                 </div>
                                 {person.is_followed ? (
-                                    <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded">
-                                        UnFollow
+                                    <button onClick={() => handleFollow(person.user_id)} className="mt-4 bg-blue-600 text-white w-full py-2 rounded">
+                                        Unfollow
                                     </button>
                                 ) : (
-                                    <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded">
+                                    <button onClick={() => handleFollow(person.user_id)} className="mt-4 bg-blue-600 text-white w-full py-2 rounded">
                                         Follow
                                     </button>
                                 )}

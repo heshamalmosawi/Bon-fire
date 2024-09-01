@@ -57,7 +57,7 @@ const ProfilePage = () => {
       console.log("fetching data, u_id:", u_id);
       if (u_id !== undefined) {
       await fetchProfile(u_id, setProfile, setLoading, setError);
-      handleClick('Posts', u_id, setLoading, setError, setActiveTab, setData);
+      handleClick('posts', u_id, setLoading, setError, setActiveTab, setData);
       }
     };
   
@@ -182,9 +182,9 @@ const ProfilePage = () => {
                   Followers
                 </button>
                 <button
-                  id="following"
+                  id="followings"
                   onClick={() => handleClick('followings', u_id, setLoading, setError, setActiveTab, setData)}
-                  className={`p-2 rounded-lg ${activeTab === 'following' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                  className={`p-2 rounded-lg ${activeTab === 'followings' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
                 >
                   Following
                 </button>
