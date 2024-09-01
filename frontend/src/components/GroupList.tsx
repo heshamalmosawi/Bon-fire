@@ -71,10 +71,32 @@ const AllGroupList: React.FC = () => {
     setIsConfirmJoinDialogOpen(false);
   };
 
-  const handleConfirmJoin = () => {
-    if (selectedGroup) {
-      // Logic to handle the join request goes here
-      console.log(`Request to join group ${selectedGroup.group_name} has been sent.`);
+  const handleConfirmJoin = async () => {
+    if (selectedGroup && sessionUser) {
+      try {
+        const response = await fetch(`http://localhost:8080/group/request`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            group_id: selectedGroup.group_id,
+          }),
+        });
+
+        if (response.ok) {
+          console.log(`Request to join group ${selectedGroup.group_name} has been sent.`);
+          // Optionally, you can show a success message or update the UI
+        } else {
+          console.error("Failed to send join request:", response.statusText);
+          // Optionally, you can show an error message
+        }
+      } catch (error) {
+        console.error("Error sending join request:", error);
+        // Optionally, you can show an error message
+      }
+
       closeConfirmJoinDialog();
     }
   };

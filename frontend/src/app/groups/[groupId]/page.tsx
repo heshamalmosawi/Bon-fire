@@ -83,6 +83,7 @@ const GroupPage = () => {
           total_members: data.group_info.total_members,
         });
 
+        console.log(data.members); //look this is the data
         if (data.posts != null) {
           setPosts(data.posts);
         }

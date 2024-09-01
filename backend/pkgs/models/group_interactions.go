@@ -71,3 +71,26 @@ func GetInteractionByGroup(interactionID string) (*GroupInteractions, error) {
 
 	return &interaction, nil
 }
+
+// GetPendingRequestsByGroupID retrieves all pending join requests for a specific group.
+func GetPendingRequestsByGroupID(groupID uuid.UUID) ([]GroupInteractions, error) {
+	columns := []string{"interaction_ID", "group_id", "user_id", "interaction_Type", "status", "interaction_Time"}
+	condition := "group_id = ? AND interaction_Type = true AND status = 'pending'"
+	rows, err := utils.Read("group_interactions", columns, condition, groupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var requests []GroupInteractions
+	for rows.Next() {
+		var interaction GroupInteractions
+		err := rows.Scan(&interaction.InteractionID, &interaction.GroupID, &interaction.UserID, &interaction.InteractionType, &interaction.Status, &interaction.InteractionTime)
+		if err != nil {
+			return nil, err
+		}
+		requests = append(requests, interaction)
+	}
+
+	return requests, nil
+}
