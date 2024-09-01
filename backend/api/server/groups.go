@@ -95,6 +95,15 @@ func HandleGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	groupUser, err := models.GetGroupByID(groupID)
+	if err != nil {
+		log.Println("HandleProfile: Error getting profile user by ID", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	} else {
+		log.Println("HandleProfile: groupUser", groupUser)
+	}
+
 	// Retrieve the members of the group
 	members, err := models.GetMembersByGroupID(groupID)
 	if err != nil {
@@ -136,6 +145,11 @@ func HandleGroupCreate(w http.ResponseWriter, r *http.Request) {
 	var req GroupCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+	// Check for missing or empty fields
+	if req.GroupName == "" || req.GroupDescrip == "" {
+		http.Error(w, "Group name and description cannot be empty", http.StatusBadRequest)
 		return
 	}
 
@@ -210,6 +224,7 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Group not found", http.StatusNotFound)
 		return
 	}
+	
 
 	// Create a new GroupUser model
 	groupUser := &models.GroupUser{

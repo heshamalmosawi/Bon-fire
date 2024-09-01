@@ -36,7 +36,7 @@ export const Group: React.FC<GroupProps> = ({
 
       <div className="text-center mt-4">
         <h2 className="text-2xl font-semibold">{ownerName}</h2>
-        <p className="text-gray-400 mt-2">{description}</p>
+        {/* <p className="text-gray-400 mt-2">{description}</p> */}
         {/* Example: Allow the group owner to edit the group details */}
         {session_user && session_user === groupID && (
           <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md">

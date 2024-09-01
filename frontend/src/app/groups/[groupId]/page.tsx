@@ -15,6 +15,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import CreatePostForGroup from "@/components/CreatePostGroup";
+import EventsList from "@/components/desktop/EventsList";
 
 const GroupPage = () => {
   const [sessionUser, setSessionUser] = useState("");
@@ -68,14 +69,20 @@ const GroupPage = () => {
       }
       const data = await response.json();
       if (data.group_info) {
+        // console.log("Fetched group description:", data.group_info.group_name); // Debugging log
+        console.log("Fetched group description:", data.group_info.group_desc); // Debugging log
+        console.log("Fetched group description:", data.group_info.owner_name); // Debugging log
+        console.log("Fetched group description:", data.group_info); // Debugging log
+
         setGroupProfile({
           groupName: data.group_info.group_name,
           ownerName: data.group_info.owner_name,
-          description: data.group_info.group_description,
+          description: data.group_info.group_desc,
           session_user: sessionUser,
           groupID: data.group_info.group_id,
           total_members: data.group_info.total_members,
         });
+
         if (data.posts != null) {
           setPosts(data.posts);
         }
@@ -87,12 +94,13 @@ const GroupPage = () => {
     }
   };
 
-  const handleClick = async (endpoint: string) => {
-    console.log("ay");
-  };
   useEffect(() => {
     fetchGroupData();
   }, [groupID]);
+
+  const handleClick = async (endpoint: string) => {
+    console.log("ay");
+  };
 
   return (
     <div className="bg-neutral-950 min-h-screen text-gray-200">
@@ -112,10 +120,12 @@ const GroupPage = () => {
             groupID={groupProfile.groupID}
             totalMembers={groupProfile.total_members}
           />
+
           <CreatePostForGroup
             groupID={groupID}
             onPostCreated={fetchGroupData}
           />
+
           <div className="space-y-6">
             {/* Tabs for Posts, Comments, Members, Description */}
             <div className="place-content-center flex space-x-9 border-b border-gray-700 pb-4">
@@ -162,6 +172,17 @@ const GroupPage = () => {
                 }`}
               >
                 Description
+              </button>
+              <button
+                id="events"
+                onClick={() => setActiveTab("events")}
+                className={`p-2 rounded-lg ${
+                  activeTab === "events"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
+                }`}
+              >
+                Events
               </button>
 
               {/* Leave Button and Sheet */}
@@ -211,7 +232,7 @@ const GroupPage = () => {
                   <PostComponent
                     key={post.post_id}
                     id={post.post_id}
-                    firstName=""// Adjust as per your data structure
+                    firstName="" // Adjust as per your data structure
                     lastName="" // Adjust as per your data structure
                     username="" // Adjust as per your data structure
                     avatarUrl="" // Adjust as per your data structure
@@ -224,10 +245,21 @@ const GroupPage = () => {
                 ))}
               {activeTab === "chat" && <p>Chat content will appear here.</p>}
               {activeTab === "members" && (
-                <p>Members content will appear here.</p>
+                <div>
+                  <p>Members content will appear here.</p>
+                  <h1>{groupProfile.total_members} Members</h1>
+                </div>
               )}
               {activeTab === "description" && (
-                <p>Description content will appear here.</p>
+                <div>
+                  {/* Display the group description */}
+                  <h1>{groupProfile.description}</h1>
+                </div>
+              )}
+              {activeTab === "events" && (
+                <div>
+                  <EventsList />
+                </div>
               )}
             </div>
           </div>
