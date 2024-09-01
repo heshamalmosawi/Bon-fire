@@ -87,17 +87,20 @@ const CreatePostForGroup = ({
 
   const form = useForm<z.infer<typeof createPostSchema>>({
     resolver: zodResolver(createPostSchema),
+    defaultValues: {
+      groupId: groupID
+    }
   });
 
   const onSubmit = async (values: z.infer<typeof createPostSchema>) => {
     console.log("Form Submitted", values);
     try {
-      const payload = {
-        ...values,
-        post_exposure: "group", // Privacy is automatically set to "group"
-        groupId: groupID, // Group ID passed from the props
-      };
-      await HandleCreatePost(payload);
+      // const payload = {
+      //   ...values,
+      //   post_exposure: "group", // Privacy is automatically set to "group"
+      //   groupId: groupID, // Group ID passed from the props
+      // };
+      await HandleCreatePost(values);
 
       setIsDialogOpen(false);
       onPostCreated();
@@ -184,7 +187,6 @@ const CreatePostForGroup = ({
                         id="post-image-input"
                         className="hidden"
                         onChange={handleImageSelection}
-                        // Removed the `value` prop to avoid type mismatch
                       />
                     </FormControl>
                     <FormMessage />

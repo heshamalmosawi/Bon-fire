@@ -76,12 +76,9 @@ const GroupPage = () => {
           groupID: data.group_info.group_id,
           total_members: data.group_info.total_members,
         });
-        if(data.posts != null){
+        if (data.posts != null) {
           setPosts(data.posts);
         }
-
-     
-      
       }
     } catch (error) {
       setError((error as any).message);
@@ -91,8 +88,8 @@ const GroupPage = () => {
   };
 
   const handleClick = async (endpoint: string) => {
-    console.log("ay")
-  }
+    console.log("ay");
+  };
   useEffect(() => {
     fetchGroupData();
   }, [groupID]);
@@ -115,7 +112,10 @@ const GroupPage = () => {
             groupID={groupProfile.groupID}
             totalMembers={groupProfile.total_members}
           />
-          <CreatePostForGroup groupID={groupID} onPostCreated={fetchGroupData} />
+          <CreatePostForGroup
+            groupID={groupID}
+            onPostCreated={fetchGroupData}
+          />
           <div className="space-y-6">
             {/* Tabs for Posts, Comments, Members, Description */}
             <div className="place-content-center flex space-x-9 border-b border-gray-700 pb-4">
@@ -207,7 +207,6 @@ const GroupPage = () => {
             <div className="w-full space-y-8 order-last flex flex-col justify-center items-center">
               {loading && <p>Loading...</p>}
               {activeTab === "posts" &&
-              
                 posts.map((post: any) => (
                   <PostComponent
                     key={post.post_id}
@@ -222,11 +221,11 @@ const GroupPage = () => {
                     postLikeNum={post.post_likecount}
                     postCommentNum={post.comment_count} // Add a comment count to your post structure
                   />
-                ))
-                
-               }
+                ))}
               {activeTab === "chat" && <p>Chat content will appear here.</p>}
-              {activeTab === "members" && <p>Members content will appear here.</p>}
+              {activeTab === "members" && (
+                <p>Members content will appear here.</p>
+              )}
               {activeTab === "description" && (
                 <p>Description content will appear here.</p>
               )}
