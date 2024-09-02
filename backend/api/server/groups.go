@@ -126,6 +126,7 @@ func HandleGroup(w http.ResponseWriter, r *http.Request) {
 			IsMember:     isMember,
 			TotalMembers: totalMembers + 1,
 			IsRequested:  isRequested,
+			Owner: group.Owner,
 		},
 		Posts:   posts,
 		Members: members,

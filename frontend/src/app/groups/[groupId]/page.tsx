@@ -83,6 +83,7 @@ const GroupPage = () => {
           total_members: data.group_info.total_members,
         });
 
+        console.log("owner of the group", data.group_info.owner)
         console.log(data.members); //look this is the data
         if (data.posts != null) {
           setPosts(data.posts);
@@ -235,7 +236,7 @@ const GroupPage = () => {
                     id={post.post_id}
                     firstName={post.author.user_fname} 
                     lastName={post.author.user_lname} 
-                    username={post.author.user_nickname} 
+                    username={post.author.user_lname} 
                     avatarUrl={post.author.user_avatar_path} 
                     creationDate={post.created_at}
                     postTextContent={post.post_content}

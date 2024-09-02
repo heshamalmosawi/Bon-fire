@@ -15,6 +15,7 @@ type GroupModel struct {
 	OwnerID      uuid.UUID `json:"owner_id"`
 	GroupName    string    `json:"group_name"`
 	GroupDescrip string    `json:"group_desc"`
+	Owner		*UserModel `json:"owner"`
 }
 
 //makes it easier to fetch
@@ -26,6 +27,7 @@ type ExtendedGroupModel struct {
 	IsMember     bool      `json:"is_member"`      
 	TotalMembers int       `json:"total_members"`  
 	IsRequested  bool      `json:"is_requested"`
+	Owner		*UserModel `json:"owner"`
 }
 
 func (g *GroupModel) Save() error {
@@ -64,6 +66,7 @@ func (g *GroupModel) Update() error {
 	return err
 }
 
+//fix this later
 func GetOwwnerByGroup(ownerID string) (*GroupModel, error) {
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	condition := " owner_id = ?"
@@ -103,6 +106,7 @@ func GetAllGroups() ([]GroupModel, error) {
 			log.Println("Error scanning row:", err)
 			return nil, err
 		}
+		group.Owner,_ = GetUserByID(group.OwnerID)
 		groups = append(groups, group)
 	}
 
@@ -130,6 +134,7 @@ func GetGroupByID(groupID uuid.UUID) (*GroupModel, error) {
 		if err != nil {
 			return nil, err
 		}
+		group.Owner,_ = GetUserByID(group.OwnerID)
 		return &group, nil
 	}
 
@@ -152,6 +157,7 @@ func GetGroupNameByGroup(groupName string) (*GroupModel, error) {
 			return nil, err
 		}
 	}
+	group.Owner,_ = GetUserByID(group.OwnerID)
 
 	return &group, nil
 }
@@ -173,6 +179,7 @@ func GetGroupDescripByGroup(groupDescrip string) (*GroupModel, error) {
 		}
 	}
 
+	group.Owner,_ = GetUserByID(group.OwnerID)
 	return &group, nil
 }
 
@@ -192,6 +199,7 @@ func GetGroupEverything(groupID, ownerID, groupName, groupDesc string) (*GroupMo
 			return nil, err
 		}
 	}
+	group.Owner,_ = GetUserByID(group.OwnerID)
 	return &group, nil
 }
 
@@ -272,6 +280,7 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 		}
 		group.TotalMembers = totalMembers + 1
 
+		group.Owner,_ = GetUserByID(group.OwnerID)
 		groupResponses = append(groupResponses, group)
 	}
 
