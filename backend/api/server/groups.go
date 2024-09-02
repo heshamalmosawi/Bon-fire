@@ -193,7 +193,6 @@ func HandleGroupInvite(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
 }
 
-
 func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body to get the group ID and user ID
 	var req GroupJoin
@@ -208,7 +207,6 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Invalid group ID", http.StatusBadRequest)
 		log.Println("Invalid group ID:", req.GroupID, err) // Add debugging log
-		log.Println("id",req)
 		return
 	}
 
@@ -232,6 +230,19 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	if group == nil {
 		http.Error(w, "Group not found", http.StatusNotFound)
 		log.Println("Group not found for ID:", groupID) // Add debugging log
+		return
+	}
+
+	// Check if the user is already a member of the group
+	isMember, err := models.IsUserMemberOfGroup(userID, groupID)
+	if err != nil {
+		http.Error(w, "Failed to check group membership", http.StatusInternalServerError)
+		log.Println("Error checking group membership:", err) // Add debugging log
+		return
+	}
+	if isMember {
+		http.Error(w, "User is already a member of the group", http.StatusConflict)
+		log.Println("User is already a member of the group:", userID, "Group ID:", groupID) // Add debugging log
 		return
 	}
 

@@ -148,3 +148,5 @@ func GetMembersByGroupID(groupID uuid.UUID) ([]UserModel, error) {
 	// Return the slice of members
 	return members, nil
 }
+
+

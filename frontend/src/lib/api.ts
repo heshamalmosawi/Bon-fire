@@ -188,4 +188,29 @@ export const joinGroup = async (groupID: string, userId: string): Promise<boolea
     }
   };
   
+  // Function to fetch the groups along with membership status
+export const fetchGroups = async (userId: string): Promise<any[]> => {
+    try {
+      const response = await fetch(`${Yori}/groups?user_id=${userId}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        console.error("Failed to fetch groups:", response.statusText);
+        return [];
+      }
+      const data = await response.json();
+      return data.map((group: any) => ({
+        id: group.group_id,
+        name: group.group_name,
+        description: group.group_desc,
+        members: group.total_members,
+        isMine: group.owner_id === userId,
+        isMember: group.is_member || false, // Ensure the backend provides `is_member` status
+      }));
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+      return [];
+    }
+  };
   

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 
@@ -233,20 +234,46 @@ func DeleteGroup(group *GroupModel) error {
 	return nil
 }
 
-// function to add the user to the group
-func AddUserToGroup(group *GroupModel, user *UserModel) error {
 
+// Function to add a user to a group
+func AddUserToGroup(group *GroupModel, user *UserModel) error {
+	// Check if the user is already a member of the group
+	isMember, err := IsUserMemberOfGroup(user.UserID, group.GroupID)
+	if err != nil {
+		return fmt.Errorf("failed to check if user is a member of the group: %v", err)
+	}
+
+	if isMember {
+		log.Printf("User %s is already a member of group %s", user.UserID, group.GroupID)
+		return fmt.Errorf("user is already a member of the group")
+	}
+
+	// If the user is not a member, proceed to add the user to the group
 	columns := []string{"group_id", "user_id"}
 	values := []interface{}{group.GroupID, user.UserID}
 
-	_, err := utils.Create("group", columns, values)
-
+	_, err = utils.Create("group_user", columns, values)
 	if err != nil {
-		return fmt.Errorf("CreateGroup: failed to insert group: %v", err)
+		return fmt.Errorf("failed to add user to group: %v", err)
 	}
+
+	log.Printf("User %s successfully added to group %s", user.UserID, group.GroupID)
 	return nil
 }
 
+// Check if a user is already a member of the group
+func IsUserMemberOfGroup(userID uuid.UUID, groupID uuid.UUID) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS (SELECT 1 FROM group_user WHERE user_id = $1 AND group_id = $2)`
+
+	err := storage.DB.QueryRow(query, userID, groupID).Scan(&exists)
+	if err != nil && err != sql.ErrNoRows {
+		log.Println("Error checking if user is a member of the group:", err)
+		return false, err
+	}
+
+	return exists, nil
+}
 
 func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}

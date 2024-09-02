@@ -4,13 +4,13 @@ import { getAgo } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RequestProps } from "@/lib/interfaces";
 import { joinGroup } from "@/lib/api"; // Adjust the import path to where joinGroup is defined
-
 const RequestComponent: React.FC<RequestProps> = ({
   id, // User ID
   username,
   creationDate,
   avatarUrl,
   groupID, // Group ID
+  onRequestHandled, // Function to handle request removal
 }) => {
   const [isLoading, setIsLoading] = useState(false); // State to handle loading state
 
@@ -22,6 +22,7 @@ const RequestComponent: React.FC<RequestProps> = ({
 
     if (success) {
       console.log(`User ${id} successfully joined group ${groupID}.`);
+      onRequestHandled(id); // Remove the request from the list
     } else {
       console.error(`Failed to join group ${groupID} for user ${id}.`);
     }
@@ -31,7 +32,7 @@ const RequestComponent: React.FC<RequestProps> = ({
 
   const handleIgnore = () => {
     console.log(`Ignored request for user ${username} (ID: ${id})`);
-    // Add logic to handle ignoring the request here
+    onRequestHandled(id); // Remove the request from the list
   };
 
   return (

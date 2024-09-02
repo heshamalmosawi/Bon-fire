@@ -64,6 +64,8 @@ export interface RequestProps {
   creationDate: string; // When the request was created
   avatarUrl: string; // Optional avatar URL
   groupID: string; // The ID of the group the user wants to join
+  onRequestHandled: (id: string) => void; // Function to handle the request
 }
+
 
 

@@ -17,10 +17,10 @@ import {
 import CreatePostForGroup from "@/components/CreatePostGroup";
 import EventsList from "@/components/desktop/EventsList";
 import RequestComponent from "@/components/desktop/RequestComponent";
-import { fetchRequest } from "@/lib/api";
+import { fetchRequest, fetchGroups, joinGroup, fetchSessionUser } from "@/lib/api";
 
 const GroupPage = () => {
-  const [sessionUser, setSessionUser] = useState("");
+  const [sessionUser, setSessionUser] = useState<string>("");
   const [groupProfile, setGroupProfile] = useState<GroupProps>({
     groupName: "",
     ownerName: "",
@@ -30,57 +30,61 @@ const GroupPage = () => {
     groupID: "",
     total_members: 0,
   });
-
+  const [handledRequests, setHandledRequests] = useState<Set<string>>(new Set());
   const [members, setMembers] = useState<any[]>([]);
-  const pathname = usePathname();
-  const [groupID, setGroupID] = useState(pathname.split("/")[2]);
-  const router = useRouter();
-
   const [posts, setPosts] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]); // State for groups
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("posts");
-
-  // Initialize `requests` as an empty array
   const [requests, setRequests] = useState<RequestProps[]>([]);
+  const pathname = usePathname();
+  const [groupID, setGroupID] = useState<string>(pathname.split("/")[2]);
+  const router = useRouter();
 
+  // Function to handle the removal of requests
+  const handleRequestHandled = (id: string) => {
+    setHandledRequests((prev) => new Set(prev).add(id));
+    setRequests((prevRequests) => prevRequests.filter((request) => request.id !== id));
+  };
+
+  // Function to authenticate the user
   useEffect(() => {
     const authenticate = async () => {
-      const response = await fetch(`http://localhost:8080/authenticate`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (response.status !== 200 && groupID === undefined) {
-        router.push("/auth");
-        return;
-      } else if (response.status === 200) {
-        const data = await response.json();
-        setSessionUser(data.User.user_id);
-        if (groupID === undefined) {
-          setGroupID(data.User.user_id);
+      try {
+        const data = await fetchSessionUser();
+        if (data && data.status === 200) {
+          setSessionUser(data.User.user_id);
+          if (!groupID) {
+            setGroupID(data.User.user_id);
+          }
+        } else {
+          router.push("/auth");
         }
+      } catch (error) {
+        console.error("Authentication failed:", error);
+        router.push("/auth");
       }
     };
     authenticate();
-  }, [router]);
+  }, [router, groupID]);
 
-  // Fetch group requests
+  // Function to fetch group requests
   useEffect(() => {
     const getRequests = async () => {
       setLoading(true);
       try {
         const result = await fetchRequest(groupID);
-        console.log("Fetched requests:", result); // Debugging log
+        console.log("Fetched requests:", result);
         if (Array.isArray(result)) {
-          setRequests(result); // Ensure the result is an array
+          setRequests(result);
         } else {
           console.error("Failed to fetch requests or incorrect data format");
-          setRequests([]); // Reset requests to an empty array if the result is not an array
+          setRequests([]);
         }
       } catch (error) {
         setError("Error fetching requests");
-        console.error("Error fetching requests:", error); // Debugging log
+        console.error("Error fetching requests:", error);
       } finally {
         setLoading(false);
       }
@@ -89,7 +93,44 @@ const GroupPage = () => {
     getRequests();
   }, [groupID]);
 
-  // Fetch group data
+  // Function to fetch all groups
+  useEffect(() => {
+    const loadGroups = async () => {
+      setLoading(true);
+      try {
+        const fetchedGroups = await fetchGroups(sessionUser); // Fetch groups with membership info
+        setGroups(fetchedGroups);
+      } catch (error) {
+        console.error("Failed to load groups:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (sessionUser) {
+      loadGroups();
+    }
+  }, [sessionUser]);
+
+  // Function to handle join group logic
+  const handleJoinClick = async (groupId: string) => {
+    try {
+      const success = await joinGroup(groupId, sessionUser);
+      if (success) {
+        setGroups((prevGroups) =>
+          prevGroups.map((group) =>
+            group.id === groupId ? { ...group, isMember: true } : group
+          )
+        );
+      } else {
+        console.error("Failed to join group");
+      }
+    } catch (error) {
+      console.error("Error joining group:", error);
+    }
+  };
+
+  // Function to fetch group data
   const fetchGroupData = async () => {
     setLoading(true);
     try {
@@ -100,7 +141,8 @@ const GroupPage = () => {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
-      console.log("Fetched group data:", data.members); // Debugging log
+      console.log("Fetched group data:", data.members);
+
       if (data.group_info) {
         setGroupProfile({
           groupName: data.group_info.group_name,
@@ -112,13 +154,8 @@ const GroupPage = () => {
           total_members: data.group_info.total_members,
         });
 
-        if (data.members) {
-          setMembers(data.members);
-        }
-
-        if (data.posts != null) {
-          setPosts(data.posts);
-        }
+        if (data.members) setMembers(data.members);
+        if (data.posts) setPosts(data.posts);
       }
     } catch (error) {
       setError((error as any).message);
@@ -131,7 +168,7 @@ const GroupPage = () => {
     fetchGroupData();
   }, [groupID]);
 
-  const handleClick = async (endpoint: string) => {
+  const handleClick = (endpoint: string) => {
     console.log("Clicked endpoint:", endpoint);
   };
 
@@ -154,21 +191,16 @@ const GroupPage = () => {
             totalMembers={groupProfile.total_members}
           />
 
-          <CreatePostForGroup
-            groupID={groupID}
-            onPostCreated={fetchGroupData}
-          />
+          <CreatePostForGroup groupID={groupID} onPostCreated={fetchGroupData} />
 
           <div className="space-y-6">
-            {/* Tabs for Posts, Comments, Members, Description, Requests */}
+            {/* Tabs for Posts, Chat, Members, Description, Events, Requests */}
             <div className="place-content-center flex space-x-9 border-b border-gray-700 pb-4">
               <button
                 id="posts"
                 onClick={() => setActiveTab("posts")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "posts"
-                    ? "text-white bg-indigo-500"
-                    : "text-gray-400"
+                  activeTab === "posts" ? "text-white bg-indigo-500" : "text-gray-400"
                 }`}
               >
                 Posts
@@ -177,9 +209,7 @@ const GroupPage = () => {
                 id="chat"
                 onClick={() => setActiveTab("chat")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "chat"
-                    ? "text-white bg-indigo-500"
-                    : "text-gray-400"
+                  activeTab === "chat" ? "text-white bg-indigo-500" : "text-gray-400"
                 }`}
               >
                 Chat
@@ -188,9 +218,7 @@ const GroupPage = () => {
                 id="members"
                 onClick={() => setActiveTab("members")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "members"
-                    ? "text-white bg-indigo-500"
-                    : "text-gray-400"
+                  activeTab === "members" ? "text-white bg-indigo-500" : "text-gray-400"
                 }`}
               >
                 Members
@@ -199,9 +227,7 @@ const GroupPage = () => {
                 id="description"
                 onClick={() => setActiveTab("description")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "description"
-                    ? "text-white bg-indigo-500"
-                    : "text-gray-400"
+                  activeTab === "description" ? "text-white bg-indigo-500" : "text-gray-400"
                 }`}
               >
                 Description
@@ -210,9 +236,7 @@ const GroupPage = () => {
                 id="events"
                 onClick={() => setActiveTab("events")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "events"
-                    ? "text-white bg-indigo-500"
-                    : "text-gray-400"
+                  activeTab === "events" ? "text-white bg-indigo-500" : "text-gray-400"
                 }`}
               >
                 Events
@@ -224,9 +248,7 @@ const GroupPage = () => {
                   id="requests"
                   onClick={() => setActiveTab("requests")}
                   className={`p-2 rounded-lg ${
-                    activeTab === "requests"
-                      ? "text-white bg-indigo-500"
-                      : "text-gray-400"
+                    activeTab === "requests" ? "text-white bg-indigo-500" : "text-gray-400"
                   }`}
                 >
                   Requests
@@ -240,9 +262,7 @@ const GroupPage = () => {
                     <button
                       id="leave"
                       className={`p-2 rounded-lg ${
-                        activeTab === "leave"
-                          ? "text-white bg-indigo-500"
-                          : "text-gray-400"
+                        activeTab === "leave" ? "text-white bg-indigo-500" : "text-gray-400"
                       }`}
                     >
                       Leave
@@ -259,9 +279,7 @@ const GroupPage = () => {
                             id="leave"
                             onClick={() => handleClick("leave")}
                             className={`p-2 rounded-lg ${
-                              activeTab === "leave"
-                                ? "text-white bg-black"
-                                : "text-gray-400"
+                              activeTab === "leave" ? "text-white bg-black" : "text-gray-400"
                             }`}
                           >
                             Leave
@@ -296,17 +314,14 @@ const GroupPage = () => {
               {activeTab === "chat" && <p>Chat content will appear here.</p>}
               {activeTab === "members" && (
                 <div>
-                  {/* <h2>{groupProfile.total_members} Members</h2> */}
                   <h3 className="text-lg font-semibold text-white">
-                  Owner: {groupProfile.owner}
-                        </h3>
+                    Owner: {groupProfile.owner}
+                  </h3>
                   <div className="space-y-2">
-                    Members: 
+                    Members:
                     {members.map((member) => (
                       <div key={member.user_id} className="text-center p-2">
-                        <h3 className="text-lg font-semibold text-white">
-                        {member.user_nickname}
-                        </h3>
+                        <h3 className="text-lg font-semibold text-white">{member.user_nickname}</h3>
                         <p className="text-gray-400">{member.user_email}</p>
                         {member.user_avatar_path && (
                           <img
@@ -320,29 +335,23 @@ const GroupPage = () => {
                   </div>
                 </div>
               )}
-
-              {activeTab === "description" && (
-                <div>
-                  <h1>{groupProfile.description}</h1>
-                </div>
-              )}
-              {activeTab === "events" && (
-                <div>
-                  <EventsList />
-                </div>
-              )}
+              {activeTab === "description" && <div><h1>{groupProfile.description}</h1></div>}
+              {activeTab === "events" && <EventsList />}
               {activeTab === "requests" && (
                 <div className="flex flex-wrap gap-4 justify-center">
-                  {requests.map((request) => (
-                    <RequestComponent
-                      key={request.id}
-                      id={request.id}
-                      username={request.username}
-                      creationDate={request.creationDate}
-                      avatarUrl={request.avatarUrl}
-                      groupID={groupProfile.groupID} // Pass the group ID to the component
-                    />
-                  ))}
+                  {requests
+                    .filter((request) => !handledRequests.has(request.id))
+                    .map((request) => (
+                      <RequestComponent
+                        key={request.id}
+                        id={request.id}
+                        username={request.username}
+                        creationDate={request.creationDate}
+                        avatarUrl={request.avatarUrl}
+                        groupID={groupProfile.groupID}
+                        onRequestHandled={handleRequestHandled}
+                      />
+                    ))}
                 </div>
               )}
             </div>
