@@ -30,7 +30,8 @@ import anime from "animejs";
 const SignupForm: FC = () => {
   const { toast } = useToast();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [showAdditionalFields, setShowAdditionalFields] = useState(false); // State to toggle visibility
+  const [showAdditionalFields, setShowAdditionalFields] = useState(false);
+  const [loading, setloading] = useState(false);
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -40,31 +41,12 @@ const SignupForm: FC = () => {
       confirmPassword: "",
       user_fname: "",
       user_lname: "",
-      avatar: undefined,
       user_dob: new Date(),
+      avatar: undefined,
       user_nickname: "",
       user_about: "",
     },
   });
-
-  const onSubmit = async (values: z.infer<typeof signupSchema>) => {
-    console.log("Submitting form with values:", values);
-    console.log(form.formState.errors);
-    try {
-      await HandleSignupSubmission(values);
-      toast({
-        title: "Success!",
-        description: "Signup successful!",
-      });
-    } catch (error) {
-      console.error("Signup submission failed:", error);
-      toast({
-        title: "Error!",
-        description: "Check the logs for more",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleHaveAccountClick = () => {
     anime({
@@ -77,6 +59,29 @@ const SignupForm: FC = () => {
       duration: 3000,
       easing: "easeOutExpo",
     });
+  };
+
+  const onSubmit = async (values: z.infer<typeof signupSchema>) => {
+    console.log("Submitting form with values:", values);
+    console.log(form.formState.errors);
+    try {
+      setloading(true);
+      await HandleSignupSubmission(values);
+      toast({
+        title: "Success!",
+        description: "Signup successful!",
+      });
+      setloading(false);
+      handleHaveAccountClick();
+    } catch (error) {
+      console.error("Signup submission failed:", error);
+      toast({
+        title: "Error!",
+        description: "Check the logs for more",
+        variant: "destructive",
+      });
+      setloading(false);
+    }
   };
 
   const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -140,7 +145,9 @@ const SignupForm: FC = () => {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem className="dark">
-                      <FormLabel className="text-white">Confirm Password</FormLabel>
+                      <FormLabel className="text-white">
+                        Confirm Password
+                      </FormLabel>
                       <FormControl>
                         <Input
                           className="text-white"
@@ -211,9 +218,11 @@ const SignupForm: FC = () => {
                             align="start"
                           >
                             <Calendar
+                              initialFocus
                               mode="single"
                               className="bg-neutral-950 text-white"
-                              {...field}
+                              selected={field.value}
+                              onSelect={field.onChange}
                             />
                           </PopoverContent>
                         </Popover>
@@ -291,7 +300,9 @@ const SignupForm: FC = () => {
                     name="user_about"
                     render={({ field }) => (
                       <FormItem className="dark">
-                        <FormLabel className="text-white">Bio (Optional)</FormLabel>
+                        <FormLabel className="text-white">
+                          Bio (Optional)
+                        </FormLabel>
                         <FormControl>
                           <Textarea
                             className="w-full text-white"
@@ -315,21 +326,22 @@ const SignupForm: FC = () => {
                   <Button
                     className="bg-blue-400 text-white rounded-md py-2 hover:bg-blue-800"
                     type="submit"
+                    disabled={loading}
                   >
                     Complete Sign Up
                   </Button>
                 </div>
               </div>
             )}
-            <Button
-              className="text-white w-full text-center"
-              variant={"link"}
-              onClick={handleHaveAccountClick}
-            >
-              Got an Account?
-            </Button>
           </form>
         </Form>
+        <Button
+          className="text-white w-full text-center"
+          variant={"link"}
+          onClick={handleHaveAccountClick}
+        >
+          Got an Account?
+        </Button>
       </div>
     </main>
   );

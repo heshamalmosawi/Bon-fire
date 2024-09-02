@@ -6,6 +6,7 @@ import { Forward, Heart, MessageSquare } from "lucide-react";
 import ToolTipWrapper from "../ToolTipWrapper";
 import { getAgo } from "@/lib/utils";
 import CommentDialog from "../CommentDialog";  // Import the CommentDialog component
+import {PostProps} from "@/lib/interfaces"
 
 const PostComponent = (props: PostProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -39,6 +40,7 @@ const PostComponent = (props: PostProps) => {
       <div
         id="post-content"
         className="w-full flex flex-col items-center justify-center gap-4"
+        onClick={openDialog}
       >
         <div id="post-text-content" className="text-white text-sm w-full">
           {props.postTextContent}
