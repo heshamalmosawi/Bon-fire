@@ -4,29 +4,35 @@ import (
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
+
 	"github.com/gofrs/uuid"
 )
 
 // FetchGroups handles the request for fetching all groups.
 func FetchGroups(w http.ResponseWriter, r *http.Request) {
 	// Get the session cookie to check if the user is logged in
-	session_id, err := r.Cookie("session_id")
 	var user *models.UserModel
-
-	// Check if there is a session and retrieve the user information
-	if err == nil && session_id != nil {
-		session, err1 := pkgs.MainSessionManager.GetSession(session_id.Value)
-		if err1 == nil {
-			user = session.User
-		}
+	sessionIDCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Session ID cookie not found", http.StatusUnauthorized)
+		return
 	}
 
+	// Get the session from the session manager
+	session, _ := pkgs.MainSessionManager.GetSession(sessionIDCookie.Value)
+
+	// Extract the user ID from the session
+	user = session.User
+
+	fmt.Println(user)
 	var groups []models.ExtendedGroupModel
 	if user != nil {
 		// If the user is logged in, fetch groups with membership information
+		fmt.Println("fetching groups user is logged in")
 		groups, err = models.GetGroupsExtended(user.UserID)
 		if err != nil {
 			http.Error(w, "Failed to fetch groups with membership info", http.StatusInternalServerError)
@@ -34,6 +40,7 @@ func FetchGroups(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
+		fmt.Println("fetching groups user is logged out")
 		// If no session or user is not logged in, fetch groups normally
 		allGroups, err := models.GetAllGroups()
 		if err != nil {

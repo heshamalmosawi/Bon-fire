@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,ChangeEvent } from "react";
 import { Group } from "@/components/desktop/groupProfile";
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
 import { usePathname, useRouter } from "next/navigation";
 import { GroupProps, RequestProps } from "@/lib/interfaces";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sheet,
   SheetContent,
@@ -18,6 +19,7 @@ import CreatePostForGroup from "@/components/CreatePostGroup";
 import EventsList from "@/components/desktop/EventsList";
 import RequestComponent from "@/components/desktop/RequestComponent";
 import { fetchRequest, fetchGroups, joinGroup, fetchSessionUser } from "@/lib/api";
+import { Images } from "lucide-react";
 
 const GroupPage = () => {
   const [sessionUser, setSessionUser] = useState<string>("");
@@ -297,6 +299,7 @@ const GroupPage = () => {
               {loading && <p>Loading...</p>}
               {activeTab === "posts" &&
                 posts.map((post: any) => (
+                  <div className="w-6/12"> {/* Wrapper to ensure full width */}
                   <PostComponent
                     key={post.post_id}
                     id={post.post_id}
@@ -310,36 +313,42 @@ const GroupPage = () => {
                     postLikeNum={post.post_likecount}
                     postCommentNum={post.comment_count}
                   />
+                </div>
                 ))}
               {activeTab === "chat" && <p>Chat content will appear here.</p>}
               {activeTab === "members" && (
-                <div>
-                  <h3 className="text-lg font-semibold text-white">
-                    Owner: {groupProfile.owner}
-                  </h3>
-                  <div className="space-y-2">
-                    Members:
-                    {members.map((member) => (
-                      <div key={member.user_id} className="text-center p-2">
-                        <h3 className="text-lg font-semibold text-white">{member.user_nickname}</h3>
-                        <p className="text-gray-400">{member.user_email}</p>
-                        {member.user_avatar_path && (
-                          <img
-                            src={member.user_avatar_path}
-                            alt={`${member.user_nickname}'s avatar`}
-                            className="w-12 h-12 rounded-full mx-auto"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+  <div className="w-full flex flex-col items-center">
+    <h3 className="text-lg font-semibold text-white mb-4">
+      Owner: {groupProfile.owner}
+    </h3>
+    <div className="space-y-2 w-full px-4">
+      {members.map((member) => (
+        <div key={member.user_id} className="w-11/12 mx-auto flex justify-between items-center p-2 border border-gray-300 rounded-lg bg-black text-white">
+          <div className="flex items-center">
+          <Avatar>
+              <AvatarImage src={member.avatarUrl} />
+              <AvatarFallback>
+                {member.user_fname.charAt(0)}
+                {member.user_lname.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="text-lg font-semibold pl-6">{member.user_nickname}</h3>
+              <p className="text-gray-600 pl-6" >{member.user_email}</p>
+            </div>
+          </div>
+          <p className="font-bold text-gray-600 pr-6">{member.user_id === groupProfile.owner ? "Owner" : "Member"}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
               {activeTab === "description" && <div><h1>{groupProfile.description}</h1></div>}
               {activeTab === "events" && <EventsList />}
               {activeTab === "requests" && (
                 <div className="flex flex-wrap gap-4 justify-center">
-                  {requests
+                  {
+                  requests
                     .filter((request) => !handledRequests.has(request.id))
                     .map((request) => (
                       <RequestComponent

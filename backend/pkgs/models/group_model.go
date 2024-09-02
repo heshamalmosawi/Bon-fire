@@ -297,6 +297,7 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 			return nil, err
 		}
 
+		fmt.Println("hello?")
 		// Set the IsMember field based on the user's membership status
 		group.IsMember = inGroup
 

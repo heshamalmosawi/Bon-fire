@@ -3,6 +3,7 @@ package models
 import (
 	"bonfire/pkgs/storage"
 	"bonfire/pkgs/utils"
+	"fmt"
 	"log"
 
 	"github.com/gofrs/uuid"
@@ -76,6 +77,7 @@ func DeleteUserFromGroup(userID, groupID uuid.UUID) error {
 }
 
 func IsUserInGroup(userID, groupID uuid.UUID) (bool, error) {
+	fmt.Println("we here checking?")
 	columns := []string{"member_id"}
 	condition := "user_id = ? AND group_id = ?"
 	rows, err := utils.Read("group_user", columns, condition, userID, groupID)
@@ -86,6 +88,7 @@ func IsUserInGroup(userID, groupID uuid.UUID) (bool, error) {
 
 	// If there is at least one row, the user is in the group
 	if rows.Next() {
+		fmt.Println("we here its true?")
 		return true, nil
 	}
 
