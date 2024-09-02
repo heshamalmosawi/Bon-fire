@@ -1,6 +1,6 @@
 import { Group } from "../interfaces";
 
-export const fetchGroups = async ():Promise<Group[] | undefined> => {
+export const fetchGroups = async (): Promise<Group[] | undefined> => {
   try {
     const response = await fetch("http://localhost:8080/fetchGroups");
     if (!response.ok) {
@@ -9,7 +9,7 @@ export const fetchGroups = async ():Promise<Group[] | undefined> => {
 
     const data: Group[] = await response.json();
 
-    return data
+    return data ? data : [];
   } catch (error) {
     console.error("Error fetching groups:", error);
   }
