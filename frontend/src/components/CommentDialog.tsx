@@ -1,12 +1,12 @@
 import React, { useState } from "react"; 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getAgo } from "@/lib/utils";
-import { Heart, Send } from "lucide-react";
-
+import { Heart, Send } from "lucide-react"; 
+import { PostProps } from "@/lib/interfaces";
 
 interface CommentDialogProps {
   isOpen: boolean;
@@ -14,34 +14,38 @@ interface CommentDialogProps {
   post: PostProps;
 }
 
+export const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, post }) => {
+  const [likes, setLikes] = useState(23);
+  const [liked, setLiked] = useState(false);
 
-const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, post }) => {
-    // Example state for likes
-    const [likes, setLikes] = useState(23);
-    const [liked, setLiked] = useState(false);
-  
-    const toggleLike = () => {
-      setLiked(!liked);
-      setLikes(liked ? likes - 1 : likes + 1);
-    };
+  const toggleLike = () => {
+    setLiked(!liked);
+    setLikes(liked ? likes - 1 : likes + 1);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-black rounded-lg p-0 max-w-6xl mx-auto flex overflow-hidden  h-[90vh]">
+      <DialogContent className="bg-black rounded-lg p-0 max-w-6xl mx-auto flex overflow-hidden h-[90vh]">
         {/* Left Section - Placeholder or Image */}
         <div className="flex-1 bg-gray-800 flex items-center justify-center">
-          (
-            <Image
-              src="/landing.jpg"  // Use the dynamic image URL
-              alt="post image"
-              width={700}
-              height={900}
-              className="object-cover h-full w-full"
-            />
-          ) 
+          <Image
+            src="/landing.jpg"
+            alt="post image"
+            width={700}
+            height={900}
+            className="object-cover h-full w-full"
+          />
         </div>
 
-         {/* Right Section - Comments and Details */}
-         <div className="flex-1 flex flex-col justify-between p-6 bg-black overflow-y-auto">
+        {/* Right Section - Comments and Details */}
+        <div className="flex-1 flex flex-col justify-between p-6 bg-black overflow-y-auto relative">
+          <Button 
+            variant="ghost" 
+            className="absolute top-4 right-4 text-white hover:text-gray-400 focus:outline-none z-10"
+            onClick={onClose}
+          >
+            Close
+          </Button>
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <Avatar>
@@ -56,7 +60,6 @@ const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, post }) 
               </div>
             </div>
             <div className="text-white text-sm">{post.postTextContent}</div>
-            {/* Example Comments */}
             <div className="mt-4 space-y-4 max-h-[300px] overflow-y-auto">
               <div className="flex gap-2">
                 <Avatar>
@@ -71,11 +74,9 @@ const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, post }) 
                       <Heart className={`w-4 h-4 ${liked ? "text-red-600 fill-current" : "text-white"}`} />
                       <span>{likes} Likes</span>
                     </div>
-
                   </div>
                 </div>
               </div>
-              {/* Additional comments can be added here */}
             </div>
           </div>
           <div className="mt-4">

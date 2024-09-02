@@ -32,6 +32,10 @@ func GetViewablePosts(userID uuid.UUID) ([]PostModel, error) {
 		if err != nil {
 			return nil, err
 		}
+		post.Author, err = GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
 		posts = append(posts, post)
 	}
 	return posts, nil
@@ -58,6 +62,10 @@ func GetAllPublicPosts() ([]PostModel, error) {
 		if err != nil {
 			return nil, err
 		}
+		post.Author, err = GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
 		posts = append(posts, post)
 	}
 	return posts, nil
@@ -80,6 +88,10 @@ func GetPostsByGroupID(groupID uuid.UUID) ([]PostModel, error) {
 	for rows.Next() {
 		var post PostModel
 		err := rows.Scan(&post.PostID, &post.PostContent, &post.PostImagePath, &post.PostExposure, &post.GroupID, &post.PostLikeCount, &post.CreatedAt, &post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+		post.Author, err = GetUserByID(post.AuthorID)
 		if err != nil {
 			return nil, err
 		}

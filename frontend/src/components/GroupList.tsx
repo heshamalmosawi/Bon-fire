@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import GroupCard from "./GroupCard"; // Import the GroupCard component
+import GroupCard from "./GroupCard"; 
 import {
   Select,
   SelectContent,
@@ -8,14 +8,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import GroupCreationDialog from "./CreateGroup"; // Import the GroupCreationDialog component
+import GroupCreationDialog from "./CreateGroup"; 
+import ConfirmJoinDialog from "./confirmGroupJoin"; 
 import { Group } from "@/lib/interfaces";
 import { fetchGroups } from "@/lib/queries/groups";
+import { useRouter } from "next/navigation"; 
 
 const AllGroupList: React.FC = () => {
-  const [filter, setFilter] = useState("all"); // 'all' or 'mine'
-  const [groups, setGroups] = useState<Group[]>([]); // State to hold groups
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog state
+  const [filter, setFilter] = useState("all"); 
+  const [groups, setGroups] = useState<Group[]>([]); 
+  const [isDialogOpen, setIsDialogOpen] = useState(false); 
+  const [sessionUser, setSessionUser] = useState<string | null>(null); 
+  const [isConfirmJoinDialogOpen, setIsConfirmJoinDialogOpen] = useState(false); 
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null); 
+  const router = useRouter(); 
+
+  // Fetch the authenticated user's session
+  useEffect(() => {
+    const authenticate = async () => {
+      const response = await fetch(`http://localhost:8080/authenticate`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.status !== 200) {
+        router.push("/auth");
+        return;
+      } else if (response.status === 200) {
+        const data = await response.json();
+        setSessionUser(data.User.user_id);
+      }
+    };
+    authenticate();
+  }, [router]);
 
   // Fetch groups from the backend
   useEffect(() => {
@@ -24,14 +49,57 @@ const AllGroupList: React.FC = () => {
 
   // Filter the groups based on the selected filter
   const filteredGroups = groups.filter((group) => {
-    if (filter === "owned") {
-      return group.owner_id === "2111bf11-e34e-40dc-af50-4fe7900c00e7"; // TODO FIX THIS SHIT
+    if (filter === "mine" && sessionUser) {
+      return group.owner_id === sessionUser;
+    }
+    if (filter === "joined" && sessionUser) {
+      return group.is_member;
     }
     return true;
   });
 
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
+
+  const openConfirmJoinDialog = (group: Group) => {
+    setSelectedGroup(group);
+    setIsConfirmJoinDialogOpen(true);
+  };
+
+  const closeConfirmJoinDialog = () => {
+    setSelectedGroup(null);
+    setIsConfirmJoinDialogOpen(false);
+  };
+
+  const handleConfirmJoin = async () => {
+    if (selectedGroup && sessionUser) {
+      try {
+        const response = await fetch(`http://localhost:8080/group/request`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            group_id: selectedGroup.group_id,
+          }),
+        });
+
+        if (response.ok) {
+          console.log(`Request to join group ${selectedGroup.group_name} has been sent.`);
+          // Optionally, you can show a success message or update the UI
+        } else {
+          console.error("Failed to send join request:", response.statusText);
+          // Optionally, you can show an error message
+        }
+      } catch (error) {
+        console.error("Error sending join request:", error);
+        // Optionally, you can show an error message
+      }
+
+      closeConfirmJoinDialog();
+    }
+  };
 
   return (
     <div className="ml-1/4 p-2">
@@ -46,11 +114,14 @@ const AllGroupList: React.FC = () => {
                 <SelectValue placeholder="All Groups" />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 text-white border border-gray-600">
+                <SelectItem className="hover:bg-gray-700" value="all">
+                  All Groups
+                </SelectItem>
                 <SelectItem className="hover:bg-gray-700" value="mine">
                   My Groups
                 </SelectItem>
-                <SelectItem className="hover:bg-gray-700" value="owned">
-                  All Groups
+                <SelectItem className="hover:bg-gray-700" value="joined">
+                  Joined Groups
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -69,16 +140,26 @@ const AllGroupList: React.FC = () => {
         {filteredGroups.map((group) => (
           <GroupCard
             key={group.group_id}
+            id={group.group_id}
             name={group.group_name}
             description={group.group_desc}
-            members="0" // might delete
-            isMine={group.owner_id === "2111bf11-e34e-40dc-af50-4fe7900c00e7"} // Replace with actual logic
+            members={group.total_members} // Updated to use the actual number of members
+            isMine={group.owner_id === sessionUser} // Determine ownership
+            isMember={group.is_member} // Determine membership
+            onJoinClick={() => openConfirmJoinDialog(group)} // Pass the group to the confirmation dialog
           />
         ))}
       </div>
 
       {/* Group Creation Dialog */}
       <GroupCreationDialog isOpen={isDialogOpen} onClose={closeDialog} />
+
+      {/* Confirm Join Dialog */}
+      <ConfirmJoinDialog
+        isOpen={isConfirmJoinDialogOpen}
+        onClose={closeConfirmJoinDialog}
+        onConfirm={handleConfirmJoin}
+      />
     </div>
   );
 };

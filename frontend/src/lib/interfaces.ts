@@ -1,7 +1,7 @@
 /**
  * these are properties each post will have
  */
-interface PostProps {
+export interface PostProps {
   id: string;
   firstName: string;
   lastName: string;
@@ -44,4 +44,15 @@ export interface Group {
   owner_id: string;
   group_name: string;
   group_desc: string;
+  is_member: boolean; 
+  total_members: number; // Extended 
+}
+
+export interface GroupProps {
+  groupName: string;
+  ownerName: string;
+  description: string;
+  session_user: string;
+  groupID: string;
+  total_members: number; 
 }
