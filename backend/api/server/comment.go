@@ -19,7 +19,7 @@ import (
 	- HandleComment: to retrieve a all the comments for a post
 	- HandleCreateComment: to create a comment
 	- HandleLikeComment: to like a comment and update the like count
- */
+*/
 
 // HandleComment handles the HTTP request for retrieving a comment.
 func HandleComment(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func HandleComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Extract the comment ID from the request
-	postIDStr := r.URL.Query().Get("post_id")
+	postIDStr := r.PathValue("id")
 	if postIDStr == "" {
 		http.Error(w, "post_id is required", http.StatusBadRequest)
 		return

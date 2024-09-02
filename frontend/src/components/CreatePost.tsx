@@ -122,6 +122,10 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
 
   const form = useForm<z.infer<typeof createPostSchema>>({
     resolver: zodResolver(createPostSchema),
+    defaultValues: {
+      textContent: "",
+      imageContent: undefined,
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof createPostSchema>) => {
@@ -134,6 +138,7 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
       await HandleCreatePost(payload);
 
       setIsDialogOpen(false);
+      form.reset();
       onPostCreated();
     } catch (error) {
       toast({

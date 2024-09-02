@@ -51,8 +51,7 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
               <div className="flex flex-col">
                 <h2 className="text-white font-bold">{`${post.firstName} ${post.lastName}`}</h2>
                 <h6 className="text-[#ffffff66]">
-                  {post.username ? `@${post.username}` : ""} |{" "}
-                  {getAgo(post.creationDate)}
+                  {post.username ? `@${post.username}` : ""} | {getAgo(post.creationDate)}
                 </h6>
               </div>
             </div>
@@ -69,6 +68,13 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
                     This city looks amazing, the buildings, nature, people all
                     are beautiful, I highly recommend to visit!
                   </p>
+                  <Image
+                    src={`/landing.jpg`}
+                    alt="post image"
+                    width={70}
+                    height={90}
+                    className="object-cover h-[200px] w-[150px] rounded-lg"
+                  />
                   <div className="flex items-center gap-4 text-xs text-[#ffffff66] mt-2">
                     <div
                       className="flex items-center gap-1 cursor-pointer"
@@ -86,19 +92,17 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
               </div>
             </div>
           </div>
-          <div className="mt-4">
+          <div className="w-full flex items-center justify-around gap-3 mt-4">
             <Input
-              className="w-full bg-transparent text-white border-[0.1px] border-[#3838386f] mt-4"
+              className="w-[80%] bg-transparent text-white border-[0.1px] border-[#3838386f]"
               placeholder="Add a comment..."
             />
-            <div className="flex justify-end mt-4">
-              <Button
-                variant="ghost"
-                className="text-white flex items-center gap-2"
-              >
-                <Send size={16} /> Submit
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              className="text-white flex items-center gap-2"
+            >
+              <Send size={16} /> Submit
+            </Button>
           </div>
         </div>
       </DialogContent>
@@ -107,3 +111,4 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
 };
 
 export default CommentDialog;
+

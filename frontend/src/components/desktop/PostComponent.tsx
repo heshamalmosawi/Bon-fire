@@ -48,7 +48,7 @@ const PostComponent = (props: PostProps) => {
         {props.postImageContentUrl ? (
           <Image
             src={props.postImageContentUrl}
-            className="w-full h-[200px] rounded-lg"
+            className="w-full h-[200px] rounded-lg object-cover"
             alt="post image"
             width={400}
             height={400}
