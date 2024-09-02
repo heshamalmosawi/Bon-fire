@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofrs/uuid"
 
+	"bonfire/api/middleware"
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
@@ -19,7 +20,7 @@ import (
 	- HandleComment: to retrieve a all the comments for a post
 	- HandleCreateComment: to create a comment
 	- HandleLikeComment: to like a comment and update the like count
- */
+*/
 
 // HandleComment handles the HTTP request for retrieving a comment.
 func HandleComment(w http.ResponseWriter, r *http.Request) {
@@ -29,9 +30,18 @@ func HandleComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Extract the comment ID from the request
-	postIDStr := r.URL.Query().Get("post_id")
+	postIDStr := r.PathValue("id")
 	if postIDStr == "" {
 		http.Error(w, "post_id is required", http.StatusBadRequest)
+		return
+	}
+
+	session, err := middleware.Auth(r)
+	if err != nil {
+		http.Error(w, "error getting session", http.StatusBadRequest)
+		return
+	} else if session == nil {
+		http.Error(w, "session not found", http.StatusUnauthorized)
 		return
 	}
 
@@ -49,9 +59,19 @@ func HandleComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for i, v := range comments {
+		v.IsLiked, err = models.GetIsCommentLiked(v.CommentID, session.User.UserID)
+		if err != nil {
+			http.Error(w, "Error retrieving post isLiked", http.StatusInternalServerError)
+			return
+		}
+
+		comments[i] = v
+	}
+
 	// Return the comment as JSON
 	utils.EncodeJSON(w, map[string]interface{}{
-		"message":    "Comment retrieved successfully",
+		"message":  "Comment retrieved successfully",
 		"comments": comments,
 	})
 }
@@ -60,21 +80,30 @@ func HandleComment(w http.ResponseWriter, r *http.Request) {
 func HandleCreateComment(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling comment creation")
 
+	session, err := middleware.Auth(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
 	// Set the response header to JSON
 	w.Header().Set("Content-Type", "application/json")
 
 	// Parse the incoming JSON request
 	var comment models.Comment
-	err := json.NewDecoder(r.Body).Decode(&comment)
+	err = json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	comment.AuthorID = session.User.UserID
+
 	// Generate a new UUID for the comment if not provided
 	if comment.CommentID == uuid.Nil {
 		comment.CommentID, err = uuid.NewV4()
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -83,6 +112,7 @@ func HandleCreateComment(w http.ResponseWriter, r *http.Request) {
 	// Save the comment to the database
 	err = comment.Save()
 	if err != nil {
+		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -96,8 +126,9 @@ func HandleLikeComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Extract comment ID and user ID from the request
-	commentIDStr := r.URL.Query().Get("comment_id")
+	// commentIDStr := r.URL.Query().Get("comment_id")
 	// userIDStr := r.URL.Query().Get("user_id")
+	commentIDStr := r.PathValue("id")
 
 	if commentIDStr == "" {
 		http.Error(w, "Missing comment_id or user_id", http.StatusBadRequest)
