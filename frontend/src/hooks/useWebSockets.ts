@@ -1,46 +1,88 @@
 import { useEffect, useRef, useState } from "react";
 
 interface Message {
+  message_id: string;
   from: string;
   to: string;
   message: string;
+  message_timestamp: string;
 }
 
-const useWebSocket = (url: string) => {
+interface History {
+  type: string;
+  payload: {
+    user1: string;
+    user2: string;
+    msgs: Message[];
+  };
+}
+
+
+const useWebSocket = (url: string, user1: string | null, user2: string | null) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const ws = useRef<WebSocket | null>(null);
+  const [ws, setWs] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    ws.current = new WebSocket(url);
+    const socket = new WebSocket(url);
+    setWs(socket);
 
-    ws.current.onopen = () => {
+    socket.onopen = () => {
       console.log("WebSocket connected");
+      // send a history request
+      if (user1 && user2) {
+        const historyRequest = {
+          type: 'history',
+          payload: {
+            user1: user1,
+            user2: user2,
+            msgs: [],
+          }
+        }
+
+        socket.send(JSON.stringify(historyRequest));
+      }
+
     };
 
-    ws.current.onmessage = (event) => {
-      const message: Message = JSON.parse(event.data);
-      setMessages((prevMessages) => [...prevMessages, message]);
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'history') {
+        setMessages(data.payload.msgs);
+      } else {
+        setMessages((prevMessages) => [...prevMessages, data.payload as Message]);
+      }
     };
 
-    ws.current.onclose = () => {
+    socket.onclose = () => {
       console.log("WebSocket disconnected");
     };
 
-    ws.current.onerror = (error) => {
+    socket.onerror = (error) => {
       console.error("WebSocket error:", error);
     };
 
     return () => {
-      ws.current?.close();
+      socket.close();
     };
-  }, [url]);
+  }, [url, user1, user2]);
+
+console.log("messages:", messages);
 
   const sendMessage = (message: string) => {
-    ws.current?.send(message);
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      JSON.parse(message) as Message,
-    ]);
+    console.log("ws:", ws);
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      const chatMessage = {
+        type: 'chat',
+        payload: JSON.parse(message),
+      };
+      ws.send(JSON.stringify(chatMessage));
+      setMessages((prevMessages = []) => [
+        ...prevMessages,
+        chatMessage.payload,
+      ]);
+    } else {
+      console.error("WebSocket is not connected or still connecting");
+    }
   };
 
   return { messages, sendMessage };
