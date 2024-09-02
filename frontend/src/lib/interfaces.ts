@@ -11,6 +11,7 @@ export interface PostProps {
   postTextContent: string;
   postImageContentUrl: string;
   postLikeNum: number;
+  postIsLiked: boolean;
   postCommentNum: number;
 }
 
@@ -20,6 +21,7 @@ export interface CommentModel {
   comment_content: string;
   comment_likecount: number;
   created_at: string;
+  comment_is_liked: boolean;
   comment_image_path: string;
 
   full_user: UserModel;

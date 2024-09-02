@@ -25,6 +25,7 @@ export const getFeed = async (): Promise<PostProps[] | string | undefined> => {
               username: item.author.user_nickname,
               avatarUrl: item.author.user_avatar_path,
               creationDate: item.post.created_at,
+              postIsLiked: item.post.is_liked,
               postTextContent: item.post.post_content,
               postImageContentUrl: item.post.post_image_path,
               postLikeNum: item.post.post_likecount,

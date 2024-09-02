@@ -36,6 +36,7 @@ func GetViewablePosts(userID uuid.UUID) ([]PostModel, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		posts = append(posts, post)
 	}
 	return posts, nil

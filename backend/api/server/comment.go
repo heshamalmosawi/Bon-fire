@@ -36,6 +36,15 @@ func HandleComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	session, err := middleware.Auth(r)
+	if err != nil {
+		http.Error(w, "error getting session", http.StatusBadRequest)
+		return
+	} else if session == nil {
+		http.Error(w, "session not found", http.StatusUnauthorized)
+		return
+	}
+
 	// Parse the comment ID
 	postID, err := uuid.FromString(postIDStr)
 	if err != nil {
@@ -48,6 +57,16 @@ func HandleComment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	for i, v := range comments {
+		v.IsLiked, err = models.GetIsCommentLiked(v.CommentID, session.User.UserID)
+		if err != nil {
+			http.Error(w, "Error retrieving post isLiked", http.StatusInternalServerError)
+			return
+		}
+
+		comments[i] = v
 	}
 
 	// Return the comment as JSON
@@ -107,8 +126,9 @@ func HandleLikeComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Extract comment ID and user ID from the request
-	commentIDStr := r.URL.Query().Get("comment_id")
+	// commentIDStr := r.URL.Query().Get("comment_id")
 	// userIDStr := r.URL.Query().Get("user_id")
+	commentIDStr := r.PathValue("id")
 
 	if commentIDStr == "" {
 		http.Error(w, "Missing comment_id or user_id", http.StatusBadRequest)

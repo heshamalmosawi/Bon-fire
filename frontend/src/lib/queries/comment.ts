@@ -19,6 +19,7 @@ export const getComments = async (
             author_id: item.author_id,
             comment_likecount: item.comment_likecount,
             comment_content: item.comment_content,
+            comment_is_liked: item.is_liked,
             comment_image_path: item.comment_image_path || "",
             created_at: item.created_at,
             full_user: {

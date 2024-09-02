@@ -23,6 +23,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import CommentComponent from "./desktop/CommentComponent";
 
 interface CommentDialogProps {
   children: ReactNode;
@@ -72,11 +73,6 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
     if (file) {
       form.setValue("comment_image_path", file);
     }
-  };
-
-  const toggleLike = () => {
-    setLiked(!liked);
-    setLikes(liked ? likes - 1 : likes + 1);
   };
 
   useEffect(() => {
@@ -129,45 +125,7 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
             <div className="text-white text-sm">{post.postTextContent}</div>
             <div className="mt-4 space-y-7 h-[400px] overflow-y-auto">
               {comments ? (
-                comments.map((item) => (
-                  <div className="flex gap-2">
-                    <Avatar>
-                      <AvatarImage src={item.full_user.user_avatar_path} />
-                      <AvatarFallback>
-                        {item.full_user.user_fname[0]}
-                        {item.full_user.user_lname[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <h6 className="text-white font-semibold">
-                        {item.full_user.user_fname} {item.full_user.user_lname}
-                      </h6>
-                      <p className="text-[#ffffff66]">{item.comment_content}</p>
-                      {item.comment_image_path && (
-                        <Image
-                          src={item.comment_image_path}
-                          alt="comment image"
-                          width={70}
-                          height={70}
-                          className="object-cover h-[200px] w-[150px] rounded-lg"
-                        />
-                      )}
-                      <div className="flex items-center gap-4 text-xs text-[#ffffff66] mt-2">
-                        <div
-                          className="flex items-center gap-1 cursor-pointer"
-                          onClick={toggleLike}
-                        >
-                          <Heart
-                            className={`w-4 h-4 ${
-                              liked ? "text-red-600 fill-current" : "text-white"
-                            }`}
-                          />
-                          <span>{item.comment_likecount} Likes</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                comments.map((item) => <CommentComponent {...item} />)
               ) : (
                 <></>
               )}

@@ -11,6 +11,7 @@ type Comment struct {
 	AuthorID         uuid.UUID `json:"author_id"`
 	PostID           uuid.UUID `json:"post_id"`
 	CommentContent   string    `json:"comment_content"`
+	IsLiked          bool      `json:"is_liked"`
 	CommentLikeCount int       `json:"comment_likecount"`
 	CreatedAt        string    `json:"created_at"`
 	CommentImagePath string    `json:"comment_image_path"`

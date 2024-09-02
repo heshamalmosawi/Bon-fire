@@ -16,6 +16,7 @@ type PostModel struct {
 	PostLikeCount int        `json:"post_likecount"`
 	CreatedAt     string     `json:"created_at"`
 	AuthorID      uuid.UUID  `json:"author_id"`
+	IsLiked       bool       `json:"is_liked"`
 	Author        *UserModel `json:"author"`
 }
 
