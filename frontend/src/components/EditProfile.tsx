@@ -100,7 +100,7 @@ const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, p
             // TODO: Handle success (e.g., show a success message or notification)
         } catch (error) {
             console.error('Error updating profile:', error);
-            // Handle error (e.g., show an error message)
+            // TODO: Handle error (e.g., show an error message)
         }
     };
     return (

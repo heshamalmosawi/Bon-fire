@@ -1,15 +1,11 @@
 'use client';
 
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ProfileComponent, PeopleList } from "@/components/desktop/ProfileComponent";
-// import AllPeopleList from "@/components/desktop/ProfileComponent";
 import PostComponent from "@/components/desktop/PostComponent";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/desktop/Navbar";
 import { usePathname, useRouter } from 'next/navigation';
 import { fetchProfile, fetchSessionUser, handleClick} from '@/lib/api';
-// import CommentComponent from "@/components/desktop/CommentComponent";
-// import AllPeopleList from "@/components/desktop/CommentComponent";
 import { Profile } from "@/lib/schemas/profileSchema";
 
 const ProfilePage = () => {
@@ -35,7 +31,6 @@ const ProfilePage = () => {
         router.push('/auth');
         return;
       } else if (data.status === 200) { // if user is authenticated and u_id is defined in URL
-        // const data = await user.json();
         console.log("authentication data:", data.User.user_id);
         setSessionUser(data.User.user_id);
         console.log("u_id:", u_id);
@@ -109,7 +104,7 @@ const ProfilePage = () => {
       console.log("scrolling");
       if (profileElement) {
         const rect = profileElement.getBoundingClientRect();
-        if (rect.top <= 16) { // 1rem = 16px
+        if (rect.top <= 16) { 
           profileElement.classList.add("sticky");
           profileElement.classList.add("top-4");
           profileElement.classList.remove("relative");
@@ -128,7 +123,6 @@ const ProfilePage = () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-  // console.log("profile object:", profile);
 
   const updateProf = (newprof: Profile)=>{
     const x = profile.avatarUrl
@@ -190,7 +184,6 @@ const ProfilePage = () => {
                 </button>
               </div>
               <div className="space-y-8" id="timeline">
-                {/* // TODO: change this so it could be a containor */}
                 {/* <PeopleList /> */}
                 {renderContent()}
               </div>
