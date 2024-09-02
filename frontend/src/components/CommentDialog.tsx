@@ -1,5 +1,5 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import React, { ChangeEvent, ReactNode, useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -25,19 +25,19 @@ import {
 } from "@/components/ui/form";
 
 interface CommentDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  children: ReactNode;
   post: PostProps;
 }
 
 export const CommentDialog: React.FC<CommentDialogProps> = ({
-  isOpen,
-  onClose,
+  children,
   post,
 }) => {
   const [likes, setLikes] = useState(0);
   const [comments, setcomments] = useState<CommentModel[]>();
   const [liked, setLiked] = useState(false);
+  const [created, setcreated] = useState(false);
+  const [loading, setloading] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof CommentCreationSchema>>({
@@ -52,9 +52,13 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
   const onSubmit = async (values: z.infer<typeof CommentCreationSchema>) => {
     console.log("Form Submitted", values); // Add this line
     try {
+      setloading(true);
       await HandleCommentCreation(values);
       form.reset();
+      setcreated(true);
+      setloading(false);
     } catch (error) {
+      setloading(false);
       toast({
         variant: "destructive",
         title: "Error",
@@ -86,13 +90,15 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
           });
         } else {
           setcomments(data);
+          setcreated(false);
         }
       }
     });
-  }, [post.id]);
+  }, [post.id, created]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="bg-black rounded-lg p-0 max-w-6xl mx-auto flex overflow-hidden h-[90vh]">
         {/* Left Section - Placeholder or Image */}
         <div className="flex-1 bg-gray-800 flex items-center justify-center">
