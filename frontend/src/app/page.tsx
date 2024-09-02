@@ -13,7 +13,7 @@ export default function Home() {
     if (!Cookies.get("session_id")) {
       router.replace("/auth")
     }
-  }, []);
+  });
 
   return (
     <div className="w-screen h-screen flex items-center justify-evenly bg-neutral-950">
