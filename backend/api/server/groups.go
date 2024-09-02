@@ -193,12 +193,13 @@ func HandleGroupInvite(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
 }
 
-// HandleGroupJoin handles the request for joining a group.
+
 func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body to get the group ID and user ID
 	var req GroupJoin
 	if err := utils.DecodeJSON(r, &req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		log.Println("Error decoding request body:", err) // Add debugging log
 		return
 	}
 
@@ -206,26 +207,33 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	groupID, err := uuid.FromString(req.GroupID)
 	if err != nil {
 		http.Error(w, "Invalid group ID", http.StatusBadRequest)
+		log.Println("Invalid group ID:", req.GroupID, err) // Add debugging log
+		log.Println("id",req)
 		return
 	}
 
 	userID, err := uuid.FromString(req.UserID)
 	if err != nil {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		log.Println("Invalid user ID:", req.UserID, err) // Add debugging log
 		return
 	}
+
+	log.Println("Group ID:", groupID) // Add debugging log
+	log.Println("User ID:", userID)   // Add debugging log
 
 	// Get the group details to ensure it exists
 	group, err := models.GetGroupByID(groupID)
 	if err != nil {
 		http.Error(w, "Failed to retrieve group details", http.StatusInternalServerError)
+		log.Println("Error retrieving group details:", err) // Add debugging log
 		return
 	}
 	if group == nil {
 		http.Error(w, "Group not found", http.StatusNotFound)
+		log.Println("Group not found for ID:", groupID) // Add debugging log
 		return
 	}
-	
 
 	// Create a new GroupUser model
 	groupUser := &models.GroupUser{
@@ -236,10 +244,11 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	// Save the user to the group_user table
 	if err := groupUser.Save(); err != nil {
 		http.Error(w, "Failed to join group", http.StatusInternalServerError)
+		log.Println("Error saving user to group:", err) // Add debugging log
 		return
 	}
 
-	//create a group notification that will be displayed in chat
+	// Create a group notification that will be displayed in chat
 	notification := models.GroupNotificationModel{
 		GroupID:     group.GroupID,
 		NotiType:    "group_join",
@@ -251,16 +260,21 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	// Save the notification to the database
 	if err := notification.Save(); err != nil {
 		http.Error(w, "Failed to send notification to group admin", http.StatusInternalServerError)
+		log.Println("Error saving notification:", err) // Add debugging log
 		return
 	}
+
+	log.Println("User successfully joined the group:", req.UserID, "Group ID:", req.GroupID) // Success log
 
 	// Respond with a success message
 	response := map[string]string{"response": "Successfully joined the group"}
 	if err := utils.EncodeJSON(w, response); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		log.Println("Error encoding response to JSON:", err) // Add debugging log
 		return
 	}
 }
+
 
 func HandleGroupLeave(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body to get the group ID

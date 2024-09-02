@@ -58,11 +58,12 @@ export interface GroupProps {
   total_members: number; 
 }
 
-
 export interface RequestProps {
-  id: string;
-  username: string;
-  creationDate: string;
+  id: string; // The ID of the user making the request
+  username: string; // The username of the user
+  creationDate: string; // When the request was created
   avatarUrl: string; // Optional avatar URL
+  groupID: string; // The ID of the group the user wants to join
 }
+
 

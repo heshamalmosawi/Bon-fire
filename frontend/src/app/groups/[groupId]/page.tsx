@@ -100,7 +100,7 @@ const GroupPage = () => {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
-      console.log("Fetched group data:", data); // Debugging log
+      console.log("Fetched group data:", data.members); // Debugging log
       if (data.group_info) {
         setGroupProfile({
           groupName: data.group_info.group_name,
@@ -154,7 +154,10 @@ const GroupPage = () => {
             totalMembers={groupProfile.total_members}
           />
 
-          <CreatePostForGroup groupID={groupID} onPostCreated={fetchGroupData} />
+          <CreatePostForGroup
+            groupID={groupID}
+            onPostCreated={fetchGroupData}
+          />
 
           <div className="space-y-6">
             {/* Tabs for Posts, Comments, Members, Description, Requests */}
@@ -163,7 +166,9 @@ const GroupPage = () => {
                 id="posts"
                 onClick={() => setActiveTab("posts")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "posts" ? "text-white bg-indigo-500" : "text-gray-400"
+                  activeTab === "posts"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
                 }`}
               >
                 Posts
@@ -172,7 +177,9 @@ const GroupPage = () => {
                 id="chat"
                 onClick={() => setActiveTab("chat")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "chat" ? "text-white bg-indigo-500" : "text-gray-400"
+                  activeTab === "chat"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
                 }`}
               >
                 Chat
@@ -181,7 +188,9 @@ const GroupPage = () => {
                 id="members"
                 onClick={() => setActiveTab("members")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "members" ? "text-white bg-indigo-500" : "text-gray-400"
+                  activeTab === "members"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
                 }`}
               >
                 Members
@@ -190,7 +199,9 @@ const GroupPage = () => {
                 id="description"
                 onClick={() => setActiveTab("description")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "description" ? "text-white bg-indigo-500" : "text-gray-400"
+                  activeTab === "description"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
                 }`}
               >
                 Description
@@ -199,7 +210,9 @@ const GroupPage = () => {
                 id="events"
                 onClick={() => setActiveTab("events")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "events" ? "text-white bg-indigo-500" : "text-gray-400"
+                  activeTab === "events"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
                 }`}
               >
                 Events
@@ -211,7 +224,9 @@ const GroupPage = () => {
                   id="requests"
                   onClick={() => setActiveTab("requests")}
                   className={`p-2 rounded-lg ${
-                    activeTab === "requests" ? "text-white bg-indigo-500" : "text-gray-400"
+                    activeTab === "requests"
+                      ? "text-white bg-indigo-500"
+                      : "text-gray-400"
                   }`}
                 >
                   Requests
@@ -225,7 +240,9 @@ const GroupPage = () => {
                     <button
                       id="leave"
                       className={`p-2 rounded-lg ${
-                        activeTab === "leave" ? "text-white bg-indigo-500" : "text-gray-400"
+                        activeTab === "leave"
+                          ? "text-white bg-indigo-500"
+                          : "text-gray-400"
                       }`}
                     >
                       Leave
@@ -242,7 +259,9 @@ const GroupPage = () => {
                             id="leave"
                             onClick={() => handleClick("leave")}
                             className={`p-2 rounded-lg ${
-                              activeTab === "leave" ? "text-white bg-black" : "text-gray-400"
+                              activeTab === "leave"
+                                ? "text-white bg-black"
+                                : "text-gray-400"
                             }`}
                           >
                             Leave
@@ -277,10 +296,31 @@ const GroupPage = () => {
               {activeTab === "chat" && <p>Chat content will appear here.</p>}
               {activeTab === "members" && (
                 <div>
-                  <h2>{groupProfile.total_members} Members</h2>
-                  <h2>Owner: {groupProfile.owner}</h2>
+                  {/* <h2>{groupProfile.total_members} Members</h2> */}
+                  <h3 className="text-lg font-semibold text-white">
+                  Owner: {groupProfile.owner}
+                        </h3>
+                  <div className="space-y-2">
+                    Members: 
+                    {members.map((member) => (
+                      <div key={member.user_id} className="text-center p-2">
+                        <h3 className="text-lg font-semibold text-white">
+                        {member.user_nickname}
+                        </h3>
+                        <p className="text-gray-400">{member.user_email}</p>
+                        {member.user_avatar_path && (
+                          <img
+                            src={member.user_avatar_path}
+                            alt={`${member.user_nickname}'s avatar`}
+                            className="w-12 h-12 rounded-full mx-auto"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
+
               {activeTab === "description" && (
                 <div>
                   <h1>{groupProfile.description}</h1>
@@ -300,6 +340,7 @@ const GroupPage = () => {
                       username={request.username}
                       creationDate={request.creationDate}
                       avatarUrl={request.avatarUrl}
+                      groupID={groupProfile.groupID} // Pass the group ID to the component
                     />
                   ))}
                 </div>

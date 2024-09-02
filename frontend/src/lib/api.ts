@@ -122,7 +122,7 @@ export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) 
 // Function to fetch the group requests
 export const fetchRequest = async (groupID: string): Promise<RequestProps[] | null> => {
     try {
-      const response = await fetch(`http://localhost:8080/requests/${groupID}`, {
+      const response = await fetch(`${Yori}/requests/${groupID}`, {
         method: 'GET', // Use GET to fetch data
         credentials: 'include',
       });
@@ -150,6 +150,41 @@ export const fetchRequest = async (groupID: string): Promise<RequestProps[] | nu
     } catch (error) {
       console.error("Error fetching requests:", error);
       return null;
+    }
+  };
+  
+// Function to join a group
+export const joinGroup = async (groupID: string, userId: string): Promise<boolean> => {
+    console.log(`Attempting to join group ${groupID} with user ${userId}.`); // Debugging log
+  
+    try {
+      const response = await fetch(`${Yori}/group/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ group_id: groupID, user_id: userId }),
+      });
+  
+      console.log("Request sent to /group/join:", {
+        method: 'POST',
+        url: `${Yori}/group/join`,
+        headers: { 'Content-Type': 'application/json' },
+        body: { group_id: groupID, user_id: userId }
+      });
+  
+      if (response.ok) {
+        console.log(`User ${userId} successfully joined group ${groupID}.`);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to join group:", response.statusText, "Response Body:", errorText); // Detailed error log
+        return false;
+      }
+    } catch (error) {
+      console.error("Error joining group:", error, "Group ID:", groupID, "User ID:", userId); // Detailed error log with parameters
+      return false;
     }
   };
   

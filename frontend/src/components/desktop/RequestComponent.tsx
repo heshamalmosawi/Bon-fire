@@ -1,23 +1,37 @@
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { getAgo } from "@/lib/utils";
-import { Button } from "@/components/ui/button"; // Importing Button component
+import { Button } from "@/components/ui/button";
 import { RequestProps } from "@/lib/interfaces";
+import { joinGroup } from "@/lib/api"; // Adjust the import path to where joinGroup is defined
 
-const RequestComponent = (props: RequestProps) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+const RequestComponent: React.FC<RequestProps> = ({
+  id, // User ID
+  username,
+  creationDate,
+  avatarUrl,
+  groupID, // Group ID
+}) => {
+  const [isLoading, setIsLoading] = useState(false); // State to handle loading state
 
-  const openDialog = () => setIsDialogOpen(true);
-  const closeDialog = () => setIsDialogOpen(false);
+  const handleAccept = async () => {
+    console.log(`Attempting to join group ${groupID} for user ${id}`);
+    setIsLoading(true); // Set loading state to true
 
-  const handleAccept = () => {
-    console.log(`Accepted request from ${props.username}`);
-    // Add logic to handle accept request here
+    const success = await joinGroup(groupID, id); // Use userId and groupID for the joinGroup function
+
+    if (success) {
+      console.log(`User ${id} successfully joined group ${groupID}.`);
+    } else {
+      console.error(`Failed to join group ${groupID} for user ${id}.`);
+    }
+
+    setIsLoading(false); // Reset loading state
   };
 
   const handleIgnore = () => {
-    console.log(`Ignored request from ${props.username}`);
-    // Add logic to handle ignore request here
+    console.log(`Ignored request for user ${username} (ID: ${id})`);
+    // Add logic to handle ignoring the request here
   };
 
   return (
@@ -25,18 +39,22 @@ const RequestComponent = (props: RequestProps) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Avatar>
-            <AvatarImage src={props.avatarUrl} />
-            <AvatarFallback>{props.username.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={avatarUrl} />
+            <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <h2 className="text-white font-semibold">{props.username}</h2>
-            <h6 className="text-sm text-gray-400">{getAgo(props.creationDate)}</h6>
+            <h2 className="text-white font-semibold">{username}</h2>
+            <h6 className="text-sm text-gray-400">{getAgo(creationDate)}</h6>
           </div>
         </div>
       </div>
       <div className="flex justify-between mt-4">
-        <Button onClick={handleAccept} className="bg-green-600 text-white hover:bg-green-700">
-          Accept
+        <Button
+          onClick={handleAccept}
+          className="bg-green-600 text-white hover:bg-green-700"
+          disabled={isLoading} // Disable button while loading
+        >
+          {isLoading ? "Joining..." : "Accept"}
         </Button>
         <Button onClick={handleIgnore} className="bg-red-600 text-white hover:bg-red-700">
           Ignore
