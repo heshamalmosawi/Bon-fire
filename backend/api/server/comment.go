@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofrs/uuid"
 
+	"bonfire/api/middleware"
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
@@ -51,7 +52,7 @@ func HandleComment(w http.ResponseWriter, r *http.Request) {
 
 	// Return the comment as JSON
 	utils.EncodeJSON(w, map[string]interface{}{
-		"message":    "Comment retrieved successfully",
+		"message":  "Comment retrieved successfully",
 		"comments": comments,
 	})
 }
@@ -60,21 +61,30 @@ func HandleComment(w http.ResponseWriter, r *http.Request) {
 func HandleCreateComment(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling comment creation")
 
+	session, err := middleware.Auth(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
 	// Set the response header to JSON
 	w.Header().Set("Content-Type", "application/json")
 
 	// Parse the incoming JSON request
 	var comment models.Comment
-	err := json.NewDecoder(r.Body).Decode(&comment)
+	err = json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	comment.AuthorID = session.User.UserID
+
 	// Generate a new UUID for the comment if not provided
 	if comment.CommentID == uuid.Nil {
 		comment.CommentID, err = uuid.NewV4()
 		if err != nil {
+			fmt.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -83,6 +93,7 @@ func HandleCreateComment(w http.ResponseWriter, r *http.Request) {
 	// Save the comment to the database
 	err = comment.Save()
 	if err != nil {
+		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
