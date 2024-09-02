@@ -81,9 +81,9 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
   useEffect(() => {
     const getSessionUser = async () => {
       const data = await fetchSessionUser();
-      console.log("user:", data, "status:", data.status);
-      if (data.status !== 200 && u_id === undefined) {
-        console.log(`Failed to authenticate user: ${data.status}`);
+      // console.log("user:", data, "status:", data.status);
+      if (!data) {
+        console.log(`Failed to authenticate user`);
         router.push("/auth");
         return;
       } else if (data.status === 200) {

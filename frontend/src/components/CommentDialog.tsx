@@ -1,20 +1,24 @@
-import React, { useState } from "react"; 
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getAgo } from "@/lib/utils";
-import { Heart, Send } from "lucide-react"; 
+import { Heart, Send } from "lucide-react";
 import { PostProps } from "@/lib/interfaces";
 
 interface CommentDialogProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: Dispatch<SetStateAction<boolean>>;
   post: PostProps;
 }
 
-export const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, post }) => {
+export const CommentDialog: React.FC<CommentDialogProps> = ({
+  isOpen,
+  onClose,
+  post,
+}) => {
   const [likes, setLikes] = useState(23);
   const [liked, setLiked] = useState(false);
 
@@ -36,16 +40,8 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, p
             className="object-cover h-full w-full"
           />
         </div>
-
         {/* Right Section - Comments and Details */}
         <div className="flex-1 flex flex-col justify-between p-6 bg-black overflow-y-auto relative">
-          <Button 
-            variant="ghost" 
-            className="absolute top-4 right-4 text-white hover:text-gray-400 focus:outline-none z-10"
-            onClick={onClose}
-          >
-            Close
-          </Button>
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <Avatar>
@@ -55,7 +51,8 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, p
               <div className="flex flex-col">
                 <h2 className="text-white font-bold">{`${post.firstName} ${post.lastName}`}</h2>
                 <h6 className="text-[#ffffff66]">
-                  {post.username ? `@${post.username}` : ""} | {getAgo(post.creationDate)}
+                  {post.username ? `@${post.username}` : ""} |{" "}
+                  {getAgo(post.creationDate)}
                 </h6>
               </div>
             </div>
@@ -68,10 +65,20 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, p
                 </Avatar>
                 <div className="flex flex-col">
                   <h6 className="text-white font-semibold">Allison Vaccaro</h6>
-                  <p className="text-[#ffffff66]">This city looks amazing, the buildings, nature, people all are beautiful, I highly recommend to visit!</p>
+                  <p className="text-[#ffffff66]">
+                    This city looks amazing, the buildings, nature, people all
+                    are beautiful, I highly recommend to visit!
+                  </p>
                   <div className="flex items-center gap-4 text-xs text-[#ffffff66] mt-2">
-                    <div className="flex items-center gap-1 cursor-pointer" onClick={toggleLike}>
-                      <Heart className={`w-4 h-4 ${liked ? "text-red-600 fill-current" : "text-white"}`} />
+                    <div
+                      className="flex items-center gap-1 cursor-pointer"
+                      onClick={toggleLike}
+                    >
+                      <Heart
+                        className={`w-4 h-4 ${
+                          liked ? "text-red-600 fill-current" : "text-white"
+                        }`}
+                      />
                       <span>{likes} Likes</span>
                     </div>
                   </div>
@@ -85,7 +92,10 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({ isOpen, onClose, p
               placeholder="Add a comment..."
             />
             <div className="flex justify-end mt-4">
-              <Button variant="ghost" className="text-white flex items-center gap-2">
+              <Button
+                variant="ghost"
+                className="text-white flex items-center gap-2"
+              >
                 <Send size={16} /> Submit
               </Button>
             </div>
