@@ -14,6 +14,8 @@ type GroupInteractions struct {
 	InteractionType bool    `json:"interaction_Type"`
 	Status string `json:"status"`
 	InteractionTime time.Time `json:"interaction_Time"`
+
+	FullUser *UserModel   `json:"user_sent"`
 }
 
 func (gi *GroupInteractions) Save() error {
@@ -89,6 +91,7 @@ func GetPendingRequestsByGroupID(groupID uuid.UUID) ([]GroupInteractions, error)
 		if err != nil {
 			return nil, err
 		}
+		interaction.FullUser,_ = GetUserByID(interaction.UserID)
 		requests = append(requests, interaction)
 	}
 

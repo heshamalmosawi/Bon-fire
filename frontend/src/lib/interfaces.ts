@@ -51,8 +51,18 @@ export interface Group {
 export interface GroupProps {
   groupName: string;
   ownerName: string;
+  owner:string;
   description: string;
   session_user: string;
   groupID: string;
   total_members: number; 
 }
+
+
+export interface RequestProps {
+  id: string;
+  username: string;
+  creationDate: string;
+  avatarUrl: string; // Optional avatar URL
+}
+

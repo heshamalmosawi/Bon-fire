@@ -1,3 +1,5 @@
+import { RequestProps } from "./interfaces";
+
 export const Yori = "http://localhost:8080";
 
 // a function to fetch the session user
@@ -116,3 +118,39 @@ export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) 
         setLoading(false);
     }
 };
+
+// Function to fetch the group requests
+export const fetchRequest = async (groupID: string): Promise<RequestProps[] | null> => {
+    try {
+      const response = await fetch(`http://localhost:8080/requests/${groupID}`, {
+        method: 'GET', // Use GET to fetch data
+        credentials: 'include',
+      });
+  
+      if (!response.ok) {
+        console.error(`Failed to fetch group requests: ${response.statusText}`);
+        return null;
+      }
+  
+      const data = await response.json();
+      console.log("Received request data:", data); // Debugging log
+  
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        return data.map((item) => ({
+          id: item.user_sent.user_id,
+          username: item.user_sent.user_nickname, // Ensure you map the correct fields
+          creationDate: new Date(item.InteractionTime).toLocaleString(),
+          avatarUrl: item.user_sent.userAvatarPath || "default-avatar-url.png" // Fallback for missing avatar
+        }));
+      } else {
+        console.error("Unexpected data format:", data);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+      return null;
+    }
+  };
+  
+  

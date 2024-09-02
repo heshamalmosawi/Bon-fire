@@ -89,7 +89,11 @@ func HandleFetchGroupRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return the requests as JSON
+	// Log the fetched requests for debugging
+	log.Printf("Fetched %d requests for group ID %s\n", len(requests), groupID.String())
+	log.Printf("Requests: %+v\n", requests) // Log the actual requests
+
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(requests); err != nil {
 		http.Error(w, "Failed to encode response to JSON", http.StatusInternalServerError)
