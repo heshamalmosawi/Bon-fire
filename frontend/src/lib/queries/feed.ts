@@ -19,7 +19,7 @@ export const getFeed = async (): Promise<PostProps[] | string | undefined> => {
       return res.data
         ? res.data.map(
             (item: any): PostProps => ({
-              id: item.post_id,
+              id: item.post.post_id,
               firstName: item.author.user_fname,
               lastName: item.author.user_lname,
               username: item.author.user_nickname,
