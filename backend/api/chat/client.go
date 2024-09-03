@@ -31,7 +31,7 @@ func NewClient(userID, sessionID string, conn *websocket.Conn) *Client {
 
 // startSessionChecker checks if the session is still valid.
 func (c *Client) startSessionChecker() {
-	ticker := time.NewTicker(time.Minute)
+	ticker := time.NewTicker(time.Second * 20)
 	defer ticker.Stop()
 
 	for {
