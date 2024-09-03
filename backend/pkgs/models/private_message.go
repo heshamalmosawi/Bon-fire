@@ -78,11 +78,12 @@ func LoadChatHistory(user1, user2 string) ([]PrivateMessage, error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	rowCount := 0
 	for rows.Next() {
 		rowCount++
 	}
-	print("rows", rowCount)
+
 	var messages []PrivateMessage
 	for rows.Next() {
 		var message PrivateMessage
@@ -91,7 +92,6 @@ func LoadChatHistory(user1, user2 string) ([]PrivateMessage, error) {
 			return nil, err
 		}
 		messages = append(messages, message)
-		// eturn messages, nil
 	}
 	return messages, nil
 }
