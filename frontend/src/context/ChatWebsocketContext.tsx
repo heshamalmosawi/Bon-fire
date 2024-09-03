@@ -1,3 +1,11 @@
+/**
+ * This file defines a context and provider for managing the WebSocket connection
+ * used for chatting in the application.
+ *
+ * The context allows components to access the WebSocket connection and register
+ * callback functions that will handle incoming messages.
+ */
+
 import React, {
   createContext,
   useContext,
@@ -6,11 +14,14 @@ import React, {
   ReactNode,
 } from "react";
 
+// Defines the shape of the WebSocket context, providing access to the WebSocket connection
+// and a function to set the callback for handling incoming messages.
 interface WebSocketContextType {
   socket: WebSocket | null;
   setOnMessage: (callback: (event: MessageEvent) => void) => void;
 }
 
+// Creates the context with an initial undefined value.
 const ChatWebSocketContext = createContext<WebSocketContextType | undefined>(
   undefined
 );
@@ -19,6 +30,12 @@ interface WebSocketProviderProps {
   children: ReactNode;
 }
 
+/**
+ * ChatWebSocketProvider is a React component that wraps its children with the WebSocket context.
+ * It manages the lifecycle of the WebSocket connection to the chat server.
+ *
+ * @param {ReactNode} children - The child components that will have access to the WebSocket context.
+ */
 export const ChatWebSocketProvider: React.FC<WebSocketProviderProps> = ({
   children,
 }) => {
@@ -63,6 +80,12 @@ export const ChatWebSocketProvider: React.FC<WebSocketProviderProps> = ({
     };
   }, [onMessageCallback]);
 
+  /**
+   * setOnMessage is a function that allows components to set a callback
+   * function to handle incoming WebSocket messages.
+   *
+   * @param {function} callback - The callback function to handle incoming messages.
+   */
   const setOnMessage = (callback: (event: MessageEvent) => void) => {
     setOnMessageCallback(() => callback);
   };
@@ -74,6 +97,12 @@ export const ChatWebSocketProvider: React.FC<WebSocketProviderProps> = ({
   );
 };
 
+/**
+ * useChatWebSocket is a custom hook that allows components to access the
+ * WebSocket context and interact with the chat WebSocket connection.
+ *
+ * @returns {WebSocketContextType} The WebSocket connection and the setOnMessage function.
+ */
 export const useChatWebSocket = () => {
   const context = useContext(ChatWebSocketContext);
   if (context === undefined) {

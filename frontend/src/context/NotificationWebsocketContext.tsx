@@ -1,3 +1,11 @@
+/**
+ * This file defines a context and provider for managing the WebSocket connection
+ * specifically used for receiving notifications from the server.
+ *
+ * The context provides access to the WebSocket connection and allows components
+ * to register callback functions that handle incoming notification messages.
+ */
+
 import React, {
   createContext,
   useContext,
@@ -19,6 +27,13 @@ interface WebSocketProviderProps {
   children: ReactNode;
 }
 
+/**
+ * NotificationWebSocketProvider is a React component that wraps its children with the
+ * NotificationWebSocket context. It manages the lifecycle of the WebSocket connection
+ * to the notifications endpoint on the server.
+ *
+ * @param {ReactNode} children - The child components that will have access to the WebSocket context.
+ */
 export const NotificationWebSocketProvider: React.FC<
   WebSocketProviderProps
 > = ({ children }) => {
