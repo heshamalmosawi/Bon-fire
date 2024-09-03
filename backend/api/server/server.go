@@ -6,8 +6,9 @@ import (
 	"log"
 	"net/http"
 
+	"bonfire/api/chat"
 	"bonfire/api/middleware"
-	"bonfire/api/websockets"
+	"bonfire/api/notify"
 	"bonfire/pkgs/utils"
 )
 
@@ -48,7 +49,8 @@ func Routers() {
 	mux.HandleFunc("GET /fetchGroups", FetchGroups)
 
 	mux.HandleFunc("POST /authenticate", authenticate)
-	mux.HandleFunc("GET /ws", websockets.HandleConnections)
+	mux.HandleFunc("GET /ws", chat.HandleConnections)
+	mux.HandleFunc("GET /subscribe", notify.HandleSubscription)
 
 	// handle cors
 	cors_mux := middleware.CORS(mux)

@@ -220,10 +220,44 @@ func AddUserToGroup(group *GroupModel, user *UserModel) error {
 	columns := []string{"group_id", "user_id"}
 	values := []interface{}{group.GroupID, user.UserID}
 
-	_, err := utils.Create("group", columns, values)
+	_, err := utils.Create("group_user", columns, values)
 
 	if err != nil {
 		return fmt.Errorf("CreateGroup: failed to insert group: %v", err)
 	}
 	return nil
+}
+
+func GetGroupMembers(groupID string) ([]UserModel, error) {
+	var users []UserModel
+
+	columns := []string{"user_id"}
+	condition := "group_id = ?"
+	args := []interface{}{groupID}
+
+	rows, err := utils.Read("group_user", columns, condition, args)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var userid string
+		if err := rows.Scan(&userid); err != nil {
+			return nil, err
+		}
+
+		parsedUserId, err := uuid.FromString(userid)
+		if err != nil {
+			return nil, err
+		}
+
+		user, err := GetUserByID(parsedUserId)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, *user)
+	}
+
+	return users, nil
 }
