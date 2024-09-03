@@ -4,13 +4,16 @@ import React, { useEffect, useState } from "react";
 import { ProfileComponent, PeopleList } from "@/components/desktop/ProfileComponent";
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
-import { usePathname, useRouter } from 'next/navigation';
+import { notFound, usePathname, useRouter } from 'next/navigation';
 import { fetchProfile, fetchSessionUser, handleClick } from '@/lib/api';
 import { Profile } from "@/lib/interfaces";
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
   const [profile, setProfile] = useState<Profile>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: "", is_followed: false });
+
+  // just used as a flag.
+  let [fetched, setFetched] = useState(false);
 
   const pathname = usePathname();
   const [u_id, setU_id] = useState(pathname.split("/")[2]);
@@ -51,12 +54,17 @@ const ProfilePage = () => {
       console.log("fetching data, u_id:", u_id);
       if (u_id !== undefined) {
         await fetchProfile(u_id, setProfile, setLoading, setError);
+        setFetched(true);
         handleClick('posts', u_id, setLoading, setError, setActiveTab, setData);
       }
     };
 
     fetchData();
   }, [u_id]);
+
+  if (fetched && profile.privacy === "") {
+    notFound();
+  }
 
   useEffect(() => {
     if (!data) {
@@ -74,7 +82,7 @@ const ProfilePage = () => {
     console.log("data:", data, Array.isArray(data), data);
 
     // data response only returns private, if the public is private and the user is not the user in session
-    if (data.response === "Private") {
+    if (data && data.response === "Private") {
       return <p>This user's profile is private</p>;
     }
 

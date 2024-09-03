@@ -76,7 +76,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println("the user id:", profileUserID)
 			log.Println("HandleProfile: Error converting profileUserID to UUID", err, profileUserID)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
 	}
@@ -84,7 +84,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	profileUser, err := models.GetUserByID(profileUserIDUUID)
 	if err != nil {
 		log.Println("HandleProfile: Error getting profile user by ID", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	} else {
 		log.Println("HandleProfile: profileUser", profileUser)

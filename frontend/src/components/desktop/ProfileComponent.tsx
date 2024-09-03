@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import EditProfile  from "../EditProfile";
 import { handleFollow } from '@/lib/api';
-import { Profile } from "@/lib/schemas/profileSchema";
+import { Profile } from "@/lib/interfaces";
 
 interface ProfileProps extends Profile{
   session_user: string;
