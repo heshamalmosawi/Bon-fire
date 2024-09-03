@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	// "net/url"
 	"reflect"
 	"strings"
 	"time"
@@ -52,15 +51,8 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	// if err != nil || session == nil {
-	// 	log.Println("HandleProfile: Error getting session", err)
-	// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
-	// 	return
-	// }
 
 	theUrl := r.URL.Path
-
-	log.Println("HandleProfile: theUrl", theUrl)
 
 	urlParts := strings.Split(theUrl, "/")
 	if len(urlParts) < 3 || urlParts[2] == "" {
@@ -99,7 +91,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the profile is private
-	if profileUser.ProfileExposure == "private" && user != nil {
+	if profileUser.ProfileExposure == "Private" && user != nil {
 		// Check if the session user is one of the profile's followers
 		isFollower, err := models.IsFollower(user.UserID, profileUserIDUUID)
 		if err != nil {
@@ -108,11 +100,20 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if !isFollower {
-			http.Error(w, "Forbidden", http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+			utils.EncodeJSON(w, map[string]interface{}{
+				"user":     profileUser,
+				"response": "Private",
+			})
 			return
 		}
-	} else if profileUser.ProfileExposure == "private" && user == nil {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		profileUser.IsFollowed = isFollower
+	} else if profileUser.ProfileExposure == "Private" && user == nil {
+		w.WriteHeader(http.StatusForbidden)
+		utils.EncodeJSON(w, map[string]interface{}{
+			"user":     profileUser,
+			"response": "Private",
+		})
 		return
 	}
 
@@ -147,7 +148,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			followers = append(followers, *user)
 		}
 		response = followers
-	
 
 	// Placeholder for followings
 	case "followings":

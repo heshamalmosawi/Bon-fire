@@ -112,7 +112,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 // 	    "user_avatar_path": "/path/to/avatar",
 // 	    "user_nickname": "johnny",
 // 	    "user_about": "Just a regular John Doe",
-// 	    "profile_exposure": "public"
+// 	    "profile_exposure": "Public"
 // 	}
 
 func HandleSignup(w http.ResponseWriter, r *http.Request) {

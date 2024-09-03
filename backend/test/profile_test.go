@@ -5,21 +5,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-
-	// "os"
 	"reflect"
 	"strings"
 	"testing"
-
-	// "github.com/gofrs/uuid"
-	// _ "github.com/lib/pq"
-
-	// "bonfire/pkgs/models"
 	"bonfire/api/server"
 	"bonfire/pkgs/storage"
 )
-
-// var SessionManager = pkgs.NewSessionManager(time.Hour * 24)
 
 var db *sql.DB
 
@@ -38,30 +29,6 @@ func teardown() {
 func TestHandleProfile(t *testing.T) {
 	setup()
 	defer teardown()
-
-	// incase someone deleted the database
-	// // Create a new user by calling the HandleSignup function
-	// signupPayload := `{
-	//     "user_email": "johndoe@example.com",
-	//     "user_password": "password123",
-	//     "user_fname": "John",
-	//     "user_lname": "Doe",
-	//     "user_dob": "1990-01-01",
-	//     "user_avatar_path": "/path/to/avatar",
-	//     "user_nickname": "johnny",
-	//     "user_about": "Just a regular John Doe",
-	//     "profile_exposure": "public"
-	// }`
-	// signupReq, err := http.NewRequest("POST", "/signup", strings.NewReader(signupPayload))
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// signupReq.Header.Set("Content-Type", "application/json")
-	// signupRR := httptest.NewRecorder()
-	// server.HandleSignup(signupRR, signupReq)
-	// if signupRR.Code != http.StatusCreated {
-	// 	t.Fatalf("expected status code %d, got %d", http.StatusCreated, signupRR.Code)
-	// }
 
 	// Authenticate the user by calling the HandleLogin function
 	loginPayload := `{

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { Group, PeopleList } from "@/components/desktop/groupProfile";
+import { Group } from "@/components/desktop/groupProfile";
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
 import { usePathname, useRouter } from 'next/navigation';

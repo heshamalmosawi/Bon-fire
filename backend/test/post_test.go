@@ -51,7 +51,7 @@ func TestHandleCreatePosts(t *testing.T) {
 	//     "user_avatar_path": "/path/to/avatar",
 	//     "user_nickname": "johnny",
 	//     "user_about": "Just a regular John Doe",
-	//     "profile_exposure": "public"
+	//     "profile_exposure": "Public"
 	// }`
 	// signupReq, err := http.NewRequest("POST", "/signup", strings.NewReader(signupPayload))
 	// if err != nil {
@@ -87,7 +87,7 @@ func TestHandleCreatePosts(t *testing.T) {
 	form := url.Values{}
 	form.Add("post_content", "Test post content")
 	form.Add("post_image_path", "/path/to/image.jpg")
-	form.Add("post_exposure", "public")
+	form.Add("post_exposure", "Public")
 	req, err := http.NewRequest("POST", "/create-post", strings.NewReader(form.Encode()))
 	if err != nil {
 		t.Fatal(err)

@@ -5,12 +5,12 @@ import { ProfileComponent, PeopleList } from "@/components/desktop/ProfileCompon
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
 import { usePathname, useRouter } from 'next/navigation';
-import { fetchProfile, fetchSessionUser, handleClick} from '@/lib/api';
-import { Profile } from "@/lib/schemas/profileSchema";
+import { fetchProfile, fetchSessionUser, handleClick } from '@/lib/api';
+import { Profile } from "@/lib/interfaces";
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
-  const [profile, setProfile] = useState<Profile>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: ""});
+  const [profile, setProfile] = useState<Profile>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: "" , is_followed: false});
 
   const pathname = usePathname();
   const [u_id, setU_id] = useState(pathname.split("/")[2]);
@@ -24,13 +24,12 @@ const ProfilePage = () => {
 
 
   useEffect(() => {
-
     const getSessionUser = async () => {
       const data = await fetchSessionUser();
       if (!data && u_id === undefined) {
         router.push('/auth');
         return;
-      } else if (data.status === 200) { // if user is authenticated and u_id is defined in URL
+      } else if (data && data.status === 200) { // if user is authenticated and u_id is defined in URL
         console.log("authentication data:", data.User.user_id);
         setSessionUser(data.User.user_id);
         console.log("u_id:", u_id);

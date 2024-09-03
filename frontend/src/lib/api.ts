@@ -1,3 +1,4 @@
+import { Profile } from "@/lib/interfaces";
 export const Yori = "http://localhost:8080";
 
 // a function to fetch the session user
@@ -102,7 +103,8 @@ export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) 
                     avatarUrl: data.user.user_avatar_path,
                     bio: data.user.user_about,
                     nickname: data.user.user_nickname,
-                    privacy: data.user.profile_exposure
+                    privacy: data.user.profile_exposure,
+                    is_followed: data.user.is_followed,
                 });
             } else {
                 console.error("User data is null or undefined", data);
