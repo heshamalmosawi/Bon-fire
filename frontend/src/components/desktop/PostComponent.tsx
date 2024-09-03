@@ -14,43 +14,45 @@ const PostComponent = (props: PostProps) => {
   const [liked, setliked] = useState(props.postIsLiked);
   const { toast } = useToast();
 
- const togglePostLike = async () => {
-   // Optimistically update the like state
-   setliked((prevLiked) => {
-     const newLikedState = !prevLiked;
-     setlikes((prevLikes) => (newLikedState ? prevLikes + 1 : prevLikes - 1));
-     return newLikedState;
-   });
-
-   try {
-     const res = await fetch(`http://localhost:8080/like_post/${props.id}`, {
-       method: "POST",
-       credentials: "include",
-       headers: {
-         "Content-Type": "application/json",
-       },
-     });
-
-     if (res.status !== 200) {
-       throw new Error("Failed to toggle like");
-     }
-   } catch (error) {
-     // Revert the like state if there's an error
-     setliked((prevLiked) => {
-       const newLikedState = !prevLiked;
-       setlikes((prevLikes) => (newLikedState ? prevLikes + 1 : prevLikes - 1));
-       return newLikedState;
-     });
-
-     toast({
-       variant: "destructive",
-       title: "Error",
-       description: "There was an error toggling the like of the post",
-     });
-   }
- };
-
-
+  const togglePostLike = async () => {
+    // Optimistically update the like state
+    setliked((prevLiked) => {
+      const newLikedState = !prevLiked;
+      // Temporarily updating likes without changing the count here
+      return newLikedState;
+    });
+  
+    try {
+      const res = await fetch(`http://localhost:8080/like_post/${props.id}`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (res.status !== 200) {
+        throw new Error("Failed to toggle like");
+      }
+  
+      // Get the updated like count from the response
+      const data = await res.json();
+      setlikes(data.like_count); // Set the like count from the server response
+  
+    } catch (error) {
+      // Revert the like state if there's an error
+      setliked((prevLiked) => {
+        return !prevLiked;
+      });
+  
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "There was an error toggling the like of the post",
+      });
+    }
+  };
+  
   return (
     <div
       className={`max-h-[540px] bg-black rounded-lg flex flex-col items-center justify-center px-4 py-4 gap-4`}

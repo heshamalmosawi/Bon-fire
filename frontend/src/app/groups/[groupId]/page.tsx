@@ -357,6 +357,7 @@ const GroupPage = () => {
                       postImageContentUrl={post.post_image_path}
                       postLikeNum={post.post_likecount}
                       postCommentNum={post.comment_count}
+                      postIsLiked = {post.is_liked}
                     />
                   </div>
                 ))}
