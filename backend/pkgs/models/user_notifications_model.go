@@ -2,17 +2,19 @@ package models
 
 import (
 	"bonfire/pkgs/utils"
+	"time"
+
 	"github.com/gofrs/uuid"
 )
 
 // UserNotificationModel represents the structure of the user_notification table
 type UserNotificationModel struct {
-	NotiID      uuid.UUID `json:"noti_id"`
-	ReceiverID  uuid.UUID `json:"receiver_id"`
+	NotiID      uuid.UUID `json:"noti_id,omitempty"`
+	ReceiverID  uuid.UUID `json:"receiver_id,omitempty"`
 	NotiType    string    `json:"noti_type"`
 	NotiContent string    `json:"noti_content"`
-	NotiTime    string    `json:"noti_time"`
-	NotiStatus  string    `json:"noti_status"`
+	NotiTime    time.Time    `json:"noti_time"`
+	NotiStatus  string    `json:"noti_status,omitempty"`
 }
 
 // CRUD Operations

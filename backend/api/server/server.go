@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 
+	"bonfire/api/chat"
 	"bonfire/api/middleware"
+	"bonfire/api/notify"
 	"bonfire/pkgs/utils"
 )
 
@@ -47,7 +49,8 @@ func Routers() {
 	mux.HandleFunc("GET /fetchGroups", FetchGroups)
 	
 	mux.HandleFunc("POST /authenticate", authenticate)
-	mux.HandleFunc("GET /ws", handleConnections)
+	mux.HandleFunc("GET /ws", chat.HandleConnections)
+	mux.HandleFunc("GET /subscribe", notify.HandleSubscription)
 
 	mux.HandleFunc("GET /requests/{group_id}", HandleFetchGroupRequests)
 

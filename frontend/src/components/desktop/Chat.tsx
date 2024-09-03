@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useWebSocket from "@/hooks/useWebSockets";
 import chat from "../../../public/chat.png";
 import { User } from "@/components/desktop/UserList";
@@ -10,7 +10,27 @@ interface ChatProps {
 
 const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
   const [newMessage, setNewMessage] = useState<string>("");
-  const { messages, sendMessage } = useWebSocket("ws://localhost:8080/ws");
+  const { messages, sendMessage } = useWebSocket("ws://localhost:8080/ws", selectedUser?.user_id ?? null, sessionUser);
+
+
+  useEffect(() => {
+    if (selectedUser) {
+      handleChatClick();
+    }
+  }, [selectedUser]);
+
+  const handleChatClick = () => {
+    if (selectedUser) {
+      const historyRequest = {
+        type: 'history',
+        payload: {
+          user1: sessionUser,
+          user2: selectedUser.user_id,
+        },
+      };
+      sendMessage(JSON.stringify(historyRequest));
+    }
+  };
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -21,6 +41,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
       };
       sendMessage(JSON.stringify(messageObject));
       setNewMessage("");
+      handleChatClick();
     }
   };
 
@@ -41,7 +62,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
       <div className="flex-1 overflow-y-auto space-y-4  border border- p-4">
 
         {selectedUser ? (
-          messages
+          Array.isArray(messages) && messages
             .filter((msg) => (msg.from === selectedUser.user_id && msg.to === sessionUser) || (msg.from === sessionUser && msg.to === selectedUser.user_id)) // Filter messages based on selectedUser
             .map((msg, index) => (
               <div

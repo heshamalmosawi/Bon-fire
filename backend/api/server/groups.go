@@ -414,7 +414,7 @@ func HandleGroupRequests(w http.ResponseWriter, r *http.Request) {
 		ReceiverID:  group.OwnerID,
 		NotiType:    "join_request",
 		NotiContent: session.User.UserNickname + " has requested to join your group.", //discuss later
-		NotiTime:    time.Now().Format(time.RFC3339),
+		NotiTime:    time.Now(),
 		NotiStatus:  "unread",
 	}
 

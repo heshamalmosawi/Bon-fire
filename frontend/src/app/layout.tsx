@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { ChatWebSocketProvider } from "@/context/ChatWebsocketContext";
+import { NotificationWebSocketProvider } from "@/context/NotificationWebsocketContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 
 export const metadata: Metadata = {
   title: "Bonfire",
@@ -15,7 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <main>{children}</main>
+        <ChatWebSocketProvider>
+          <NotificationWebSocketProvider>
+            <NotificationProvider>{children}</NotificationProvider>
+          </NotificationWebSocketProvider>
+        </ChatWebSocketProvider>
         <Toaster />
       </body>
     </html>

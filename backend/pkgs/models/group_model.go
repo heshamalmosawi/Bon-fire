@@ -293,11 +293,7 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 
 		// Check if the user is in this group
 		inGroup, err := IsUserInGroup(userID, group.GroupID)
-		if err != nil {
-			return nil, err
-		}
-
-		fmt.Println("hello?")
+    fmt.Println("hello?")
 		// Set the IsMember field based on the user's membership status
 		group.IsMember = inGroup
 
@@ -313,4 +309,38 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 	}
 
 	return groupResponses, nil
+}
+
+func GetGroupMembers(groupID string) ([]UserModel, error) {
+	var users []UserModel
+
+	columns := []string{"user_id"}
+	condition := "group_id = ?"
+	args := []interface{}{groupID}
+
+	rows, err := utils.Read("group_user", columns, condition, args)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var userid string
+		if err := rows.Scan(&userid); err != nil {
+			return nil, err
+		}
+
+		parsedUserId, err := uuid.FromString(userid)
+		if err != nil {
+			return nil, err
+		}
+
+		user, err := GetUserByID(parsedUserId)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, *user)
+	}
+
+	return users, nil
 }
