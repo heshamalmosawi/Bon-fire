@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ChatWebSocketProvider } from "@/context/ChatWebsocketContext";
 import { NotificationWebSocketProvider } from "@/context/NotificationWebsocketContext";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { CookieCheckProvider } from "@/context/CookieCheckContext";
 
 export const metadata: Metadata = {
   title: "Bonfire",
@@ -18,12 +19,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ChatWebSocketProvider>
-          <NotificationWebSocketProvider>
-            <NotificationProvider>{children}</NotificationProvider>
-          </NotificationWebSocketProvider>
-        </ChatWebSocketProvider>
-        <Toaster />
+        <CookieCheckProvider>
+          <ChatWebSocketProvider>
+            <NotificationWebSocketProvider>
+              <NotificationProvider>{children}</NotificationProvider>
+            </NotificationWebSocketProvider>
+          </ChatWebSocketProvider>
+          <Toaster />
+        </CookieCheckProvider>
       </body>
     </html>
   );
