@@ -214,3 +214,38 @@ export const fetchGroups = async (userId: string): Promise<any[]> => {
     }
   };
   
+  // Function to leave a group
+  export const leaveGroup = async (groupID: string, userId: string): Promise<boolean> => {
+    console.log(`Attempting to leave group ${groupID} with user ${userId}.`); // Debugging log
+  
+    try {
+      const response = await fetch(`${Yori}/group/leave`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ group_id: groupID, user_id: userId }),
+      });
+  
+      console.log("Request sent to /group/leave:", {
+        method: 'POST',
+        url: `${Yori}/group/leave`,
+        headers: { 'Content-Type': 'application/json' },
+        body: { group_id: groupID, user_id: userId }
+      });
+  
+      if (response.ok) {
+        console.log(`User ${userId} successfully left group ${groupID}.`);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to leave group:", response.statusText, "Response Body:", errorText); // Detailed error log
+        return false;
+      }
+    } catch (error) {
+      console.error("Error leaving group:", error, "Group ID:", groupID, "User ID:", userId); // Detailed error log with parameters
+      return false;
+    }
+  };
+  

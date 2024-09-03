@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState,ChangeEvent } from "react";
+import React, { useEffect, useState, ChangeEvent } from "react";
 import { Group } from "@/components/desktop/groupProfile";
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
@@ -18,7 +18,13 @@ import {
 import CreatePostForGroup from "@/components/CreatePostGroup";
 import EventsList from "@/components/desktop/EventsList";
 import RequestComponent from "@/components/desktop/RequestComponent";
-import { fetchRequest, fetchGroups, joinGroup, fetchSessionUser } from "@/lib/api";
+import {
+  fetchRequest,
+  fetchGroups,
+  joinGroup,
+  fetchSessionUser,
+  leaveGroup,
+} from "@/lib/api";
 import { Images } from "lucide-react";
 
 const GroupPage = () => {
@@ -27,12 +33,15 @@ const GroupPage = () => {
     groupName: "",
     ownerName: "",
     owner: "",
+    ownerEmail:"",
     description: "",
     session_user: "",
     groupID: "",
     total_members: 0,
   });
-  const [handledRequests, setHandledRequests] = useState<Set<string>>(new Set());
+  const [handledRequests, setHandledRequests] = useState<Set<string>>(
+    new Set()
+  );
   const [members, setMembers] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [groups, setGroups] = useState<any[]>([]); // State for groups
@@ -47,7 +56,19 @@ const GroupPage = () => {
   // Function to handle the removal of requests
   const handleRequestHandled = (id: string) => {
     setHandledRequests((prev) => new Set(prev).add(id));
-    setRequests((prevRequests) => prevRequests.filter((request) => request.id !== id));
+    setRequests((prevRequests) =>
+      prevRequests.filter((request) => request.id !== id)
+    );
+  };
+
+  const handleLeaveClick = async () => {
+    const success = await leaveGroup(groupID, sessionUser);
+    if (success) {
+      console.log(`User ${sessionUser} left the group ${groupID}.`);
+      router.push("/groups");
+    } else {
+      console.error("Failed to leave group.");
+    }
   };
 
   // Function to authenticate the user
@@ -143,13 +164,16 @@ const GroupPage = () => {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
+
       console.log("Fetched group data:", data.members);
+      console.log("Fetched owner data:", data.group_info.owner);
 
       if (data.group_info) {
         setGroupProfile({
           groupName: data.group_info.group_name,
           ownerName: data.group_info.owner_name || data.group_info.owner_id,
           owner: data.group_info.owner.user_nickname,
+          ownerEmail:data.group_info.owner.user_email,
           description: data.group_info.group_desc,
           session_user: sessionUser,
           groupID: data.group_info.group_id,
@@ -193,7 +217,10 @@ const GroupPage = () => {
             totalMembers={groupProfile.total_members}
           />
 
-          <CreatePostForGroup groupID={groupID} onPostCreated={fetchGroupData} />
+          <CreatePostForGroup
+            groupID={groupID}
+            onPostCreated={fetchGroupData}
+          />
 
           <div className="space-y-6">
             {/* Tabs for Posts, Chat, Members, Description, Events, Requests */}
@@ -202,7 +229,9 @@ const GroupPage = () => {
                 id="posts"
                 onClick={() => setActiveTab("posts")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "posts" ? "text-white bg-indigo-500" : "text-gray-400"
+                  activeTab === "posts"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
                 }`}
               >
                 Posts
@@ -211,7 +240,9 @@ const GroupPage = () => {
                 id="chat"
                 onClick={() => setActiveTab("chat")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "chat" ? "text-white bg-indigo-500" : "text-gray-400"
+                  activeTab === "chat"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
                 }`}
               >
                 Chat
@@ -220,7 +251,9 @@ const GroupPage = () => {
                 id="members"
                 onClick={() => setActiveTab("members")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "members" ? "text-white bg-indigo-500" : "text-gray-400"
+                  activeTab === "members"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
                 }`}
               >
                 Members
@@ -229,7 +262,9 @@ const GroupPage = () => {
                 id="description"
                 onClick={() => setActiveTab("description")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "description" ? "text-white bg-indigo-500" : "text-gray-400"
+                  activeTab === "description"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
                 }`}
               >
                 Description
@@ -238,7 +273,9 @@ const GroupPage = () => {
                 id="events"
                 onClick={() => setActiveTab("events")}
                 className={`p-2 rounded-lg ${
-                  activeTab === "events" ? "text-white bg-indigo-500" : "text-gray-400"
+                  activeTab === "events"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
                 }`}
               >
                 Events
@@ -250,7 +287,9 @@ const GroupPage = () => {
                   id="requests"
                   onClick={() => setActiveTab("requests")}
                   className={`p-2 rounded-lg ${
-                    activeTab === "requests" ? "text-white bg-indigo-500" : "text-gray-400"
+                    activeTab === "requests"
+                      ? "text-white bg-indigo-500"
+                      : "text-gray-400"
                   }`}
                 >
                   Requests
@@ -263,8 +302,10 @@ const GroupPage = () => {
                   <SheetTrigger asChild>
                     <button
                       id="leave"
-                      className={`p-2 rounded-lg ${
-                        activeTab === "leave" ? "text-white bg-indigo-500" : "text-gray-400"
+                      className={`p-2 rounded-lg transition-colors duration-200 ${
+                        activeTab === "leave"
+                          ? "text-white bg-indigo-500 hover:bg-black"
+                          : "text-gray-400 hover:bg-black"
                       }`}
                     >
                       Leave
@@ -279,9 +320,11 @@ const GroupPage = () => {
                         <div className="mt-3 place-content-center">
                           <button
                             id="leave"
-                            onClick={() => handleClick("leave")}
-                            className={`p-2 rounded-lg ${
-                              activeTab === "leave" ? "text-white bg-black" : "text-gray-400"
+                            onClick={() => handleLeaveClick()} // Call the leave handler
+                            className={`p-2 rounded-lg transition-colors duration-200 ${
+                              activeTab === "leave"
+                                ? "text-white bg-indigo-500 hover:bg-black"
+                                : "text-gray-400 hover:bg-black"
                             }`}
                           >
                             Leave
@@ -299,56 +342,88 @@ const GroupPage = () => {
               {loading && <p>Loading...</p>}
               {activeTab === "posts" &&
                 posts.map((post: any) => (
-                  <div className="w-6/12"> {/* Wrapper to ensure full width */}
-                  <PostComponent
-                    key={post.post_id}
-                    id={post.post_id}
-                    firstName={post.author.user_fname}
-                    lastName={post.author.user_lname}
-                    username={post.author.user_nickname}
-                    avatarUrl={post.author.user_avatar_path}
-                    creationDate={post.created_at}
-                    postTextContent={post.post_content}
-                    postImageContentUrl={post.post_image_path}
-                    postLikeNum={post.post_likecount}
-                    postCommentNum={post.comment_count}
-                  />
-                </div>
+                  <div className="w-6/12">
+                    {" "}
+                    {/* Wrapper to ensure full width */}
+                    <PostComponent
+                      key={post.post_id}
+                      id={post.post_id}
+                      firstName={post.author.user_fname}
+                      lastName={post.author.user_lname}
+                      username={post.author.user_nickname}
+                      avatarUrl={post.author.user_avatar_path}
+                      creationDate={post.created_at}
+                      postTextContent={post.post_content}
+                      postImageContentUrl={post.post_image_path}
+                      postLikeNum={post.post_likecount}
+                      postCommentNum={post.comment_count}
+                    />
+                  </div>
                 ))}
               {activeTab === "chat" && <p>Chat content will appear here.</p>}
               {activeTab === "members" && (
-  <div className="w-full flex flex-col items-center">
-    <h3 className="text-lg font-semibold text-white mb-4">
-      Owner: {groupProfile.owner}
-    </h3>
-    <div className="space-y-2 w-full px-4">
-      {members.map((member) => (
-        <div key={member.user_id} className="w-11/12 mx-auto flex justify-between items-center p-2 border border-gray-300 rounded-lg bg-black text-white">
-          <div className="flex items-center">
-          <Avatar>
-              <AvatarImage src={member.avatarUrl} />
-              <AvatarFallback>
-                {member.user_fname.charAt(0)}
-                {member.user_lname.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="text-lg font-semibold pl-6">{member.user_nickname}</h3>
-              <p className="text-gray-600 pl-6" >{member.user_email}</p>
-            </div>
-          </div>
-          <p className="font-bold text-gray-600 pr-6">{member.user_id === groupProfile.owner ? "Owner" : "Member"}</p>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-              {activeTab === "description" && <div><h1>{groupProfile.description}</h1></div>}
+                <div className="w-full flex flex-col items-center">
+                  <div className="space-y-2 w-full px-4">
+                    {/* Render Owner */}
+                    <div className="w-11/12 mx-auto flex justify-between items-center p-2 border border-gray-300 rounded-lg bg-black text-white">
+                      <div className="flex items-center">
+                        <Avatar>
+                          <AvatarFallback>
+                            {groupProfile.owner.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h3 className="text-lg font-semibold pl-6">
+                            {groupProfile.owner}
+                          </h3>
+                          <p className="text-gray-600 pl-6">{groupProfile.ownerEmail}</p>
+                        </div>
+                      </div>
+                      <p className="font-bold text-gray-600 pr-6">Owner</p>
+                    </div>
+
+                    {/* Render Members */}
+                    {members.map((member) => (
+                      <div
+                        key={member.user_id}
+                        className="w-11/12 mx-auto flex justify-between items-center p-2 border border-gray-300 rounded-lg bg-black text-white"
+                      >
+                        <div className="flex items-center">
+                          <Avatar>
+                            <AvatarImage src={member.avatarUrl} />
+                            <AvatarFallback>
+                              {member.user_fname.charAt(0)}
+                              {member.user_lname.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="text-lg font-semibold pl-6">
+                              {member.user_nickname}
+                            </h3>
+                            <p className="text-gray-600 pl-6">
+                              {member.user_email}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="font-bold text-gray-600 pr-6">
+                          {member.user_id === groupProfile.owner
+                            ? "Owner"
+                            : "Member"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {activeTab === "description" && (
+                <div>
+                  <h1>{groupProfile.description}</h1>
+                </div>
+              )}
               {activeTab === "events" && <EventsList />}
               {activeTab === "requests" && (
                 <div className="flex flex-wrap gap-4 justify-center">
-                  {
-                  requests
+                  {requests
                     .filter((request) => !handledRequests.has(request.id))
                     .map((request) => (
                       <RequestComponent

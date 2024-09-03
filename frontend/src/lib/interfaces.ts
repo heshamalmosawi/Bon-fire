@@ -52,6 +52,7 @@ export interface GroupProps {
   groupName: string;
   ownerName: string;
   owner:string;
+  ownerEmail:string;
   description: string;
   session_user: string;
   groupID: string;
