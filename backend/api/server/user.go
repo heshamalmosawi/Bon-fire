@@ -362,7 +362,7 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 		ReceiverID:  uid,
 		NotiType:    notiType,
 		NotiContent: noti,
-		NotiTime:    time.Now().Format(time.RFC3339),
+		NotiTime:    time.Now(),
 		NotiStatus:  "unread",
 	}
 	if err := notification.Save(); err != nil {
@@ -428,7 +428,7 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 			ReceiverID:  followreq.RequesterID,
 			NotiType:    "follow_response",
 			NotiContent: followreq.UserID.String() + " has accepted your follow request!",
-			NotiTime:    time.Now().Format(time.RFC3339),
+			NotiTime:    time.Now(),
 			NotiStatus:  "unread",
 		}
 		notification.Save()
@@ -438,7 +438,7 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 			ReceiverID:  followreq.UserID,
 			NotiType:    "follow",
 			NotiContent: followreq.UserID.String() + " has followed your account!",
-			NotiTime:    time.Now().Format(time.RFC3339),
+			NotiTime:    time.Now(),
 			NotiStatus:  "unread",
 		}
 		notification.Save()
