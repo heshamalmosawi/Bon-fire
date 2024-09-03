@@ -1,4 +1,4 @@
-package websockets
+package chat
 
 import (
 	"bonfire/pkgs/models"
