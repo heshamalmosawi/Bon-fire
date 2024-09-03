@@ -83,6 +83,7 @@ const ProfilePage = () => {
 
     // data response only returns private, if the public is private and the user is not the user in session
     if (data && data.response === "Private") {
+      setProfile({ ...profile, privacy: "Private", is_followed: data.user.is_followed }); // unnecessary but just in case 
       return <p>This user's profile is private</p>;
     }
 

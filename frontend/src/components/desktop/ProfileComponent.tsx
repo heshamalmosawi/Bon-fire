@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import EditProfile from "../EditProfile";
 import { handleFollow } from '@/lib/api';
@@ -10,7 +10,22 @@ interface ProfileProps extends Profile {
     save_changes: Function;
 }
 
-export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, dob, avatarUrl, bio, nickname, session_user, u_id, privacy, save_changes }) => {
+export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, dob, avatarUrl, bio, nickname, session_user, u_id, privacy, is_followed, save_changes }) => {
+    const [followbtn_message, setFollowbtn_message] = useState("");
+    console.log("is followed:", is_followed, privacy);
+    useEffect(() => {
+        if (session_user && session_user !== u_id) {
+            if (is_followed === true) {
+                setFollowbtn_message("Unfollow");
+            } else {
+                if (privacy === "Private") {
+                    setFollowbtn_message("Request to Follow");
+                } else {
+                    setFollowbtn_message("Follow");
+                } 
+            }
+    }}, [is_followed, privacy]);
+
     return (
         <div id="profile" className="relative -top-24 w-1/3 space-y-6">
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
@@ -22,6 +37,7 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, 
                     <h2 className="text-2xl font-semibold">{fname} {lname}</h2>
                     <p className="text-gray-400">{nickname !== "" ? `@${nickname}` : 'Nickname? Who needs one!'}</p>
                     {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"} onEdit={save_changes} />}
+                    {session_user && session_user !== u_id && <button onClick={() => handleFollow(u_id)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">{followbtn_message}</button>}
                 </div>
             </div>
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">

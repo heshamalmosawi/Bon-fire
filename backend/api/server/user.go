@@ -252,6 +252,17 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		response = user_posts
 	}
 
+	// if profile is public it is not getting it, so we need to check if the user is following the profile user
+	// this is necessary in case of non-early return from the function.
+	if user != nil && user.UserID != uuid.Nil {
+		profileUser.IsFollowed, err = models.IsFollowing(user.UserID, profileUser.UserID)
+		if err != nil {
+			log.Println("HandleProfile: Error checking if user is a follower", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	}
+
 	// Serve the JSON of the user profile
 	utils.EncodeJSON(w, map[string]interface{}{
 		"user":     profileUser,
