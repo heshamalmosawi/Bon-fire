@@ -11,24 +11,34 @@ export interface PostProps {
   postTextContent: string;
   postImageContentUrl: string;
   postLikeNum: number;
+  postIsLiked: boolean;
   postCommentNum: number;
 }
 
-/**
- * interface representing a user
- */
-// interface UserModel {
-//   userId: string;
-//   userEmail: string;
-//   userPassword: string;
-//   userFirstName: string;
-//   userLastName: string;
-//   userDOB: string;
-//   userAvatarPath: string;
-//   userNickname: string;
-//   userBio: string;
-//   profileExposure: string;
-// }
+export interface CommentModel {
+  comment_id: string;
+  author_id: string;
+  comment_content: string;
+  comment_likecount: number;
+  created_at: string;
+  comment_is_liked: boolean;
+  comment_image_path: string;
+
+  full_user: UserModel;
+}
+
+export interface UserModel {
+  user_id: string;
+  user_email: string;
+  user_password: string;
+  user_fname: string;
+  user_lname: string;
+  user_dob: string;
+  user_avatar_path: string;
+  user_nickname: string;
+  user_about: string;
+  profile_exposure: string;
+}
 
 export interface Profile {
   fname: string;
@@ -44,8 +54,8 @@ export interface Group {
   owner_id: string;
   group_name: string;
   group_desc: string;
-  is_member: boolean; 
-  total_members: number; // Extended 
+  is_member: boolean;
+  total_members: number; // Extended
 }
 
 export interface GroupProps {
@@ -56,7 +66,7 @@ export interface GroupProps {
   description: string;
   session_user: string;
   groupID: string;
-  total_members: number; 
+  total_members: number;
 }
 
 export interface RequestProps {

@@ -7,6 +7,7 @@ import EventsList from "./EventsList";
 import { useToast } from "../ui/use-toast";
 import { getFeed } from "@/lib/queries/feed";
 import BirthdayList from "./BirthdayList";
+import { PostProps } from "@/lib/interfaces";
 
 const FeedDesktop: FC = () => {
   const { toast } = useToast();
@@ -15,14 +16,16 @@ const FeedDesktop: FC = () => {
 
   const fetchFeed = () => {
     getFeed().then((data) => {
-      if (typeof data === "string") {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: `There was an error getting your feed: ${data}`,
-        });
-      } else {
-        setposts(data);
+      if (data) {
+        if (typeof data === "string") {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: `There was an error getting your feed: ${data}`,
+          });
+        } else {
+          setposts(data);
+        }
       }
     });
   };

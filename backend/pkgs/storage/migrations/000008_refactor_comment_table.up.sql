@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS comment;
+
 CREATE TABLE comment (
     comment_id TEXT NOT NULL,
     author_id TEXT,

@@ -1,4 +1,4 @@
-import { RequestProps } from "./interfaces";
+import { Profile } from "./interfaces";
 
 export const Yori = "http://localhost:8080";
 

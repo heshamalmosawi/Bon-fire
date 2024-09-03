@@ -81,9 +81,9 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
   useEffect(() => {
     const getSessionUser = async () => {
       const data = await fetchSessionUser();
-      console.log("user:", data, "status:", data.status);
-      if (data.status !== 200 && u_id === undefined) {
-        console.log(`Failed to authenticate user: ${data.status}`);
+      // console.log("user:", data, "status:", data.status);
+      if (!data) {
+        console.log(`Failed to authenticate user`);
         router.push("/auth");
         return;
       } else if (data.status === 200) {
@@ -122,6 +122,10 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
 
   const form = useForm<z.infer<typeof createPostSchema>>({
     resolver: zodResolver(createPostSchema),
+    defaultValues: {
+      textContent: "",
+      imageContent: undefined,
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof createPostSchema>) => {
@@ -134,6 +138,7 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
       await HandleCreatePost(payload);
 
       setIsDialogOpen(false);
+      form.reset();
       onPostCreated();
     } catch (error) {
       toast({

@@ -35,7 +35,7 @@ func Routers() {
 	mux.HandleFunc("POST /like_post/{id}", HandleLikePost)      // ✅
 	mux.HandleFunc("GET /comment/{id}", HandleComment)          // ✅
 	mux.HandleFunc("POST /comment/create", HandleCreateComment) // ✅
-	mux.HandleFunc("POST /like_comment", HandleLikeComment)     // ✅
+	mux.HandleFunc("POST /like_comment/{id}", HandleLikeComment)     // ✅
 	mux.HandleFunc("GET /group/{id}", HandleGroup)
 	mux.HandleFunc("POST /group/create", HandleGroupCreate)
 	mux.HandleFunc("POST /group/invite", HandleGroupInvite)

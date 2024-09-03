@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/gofrs/uuid"
 	"bonfire/pkgs/utils"
+	"github.com/gofrs/uuid"
 )
 
 // Comment represents a comment made by a user.
@@ -11,6 +11,7 @@ type Comment struct {
 	AuthorID         uuid.UUID `json:"author_id"`
 	PostID           uuid.UUID `json:"post_id"`
 	CommentContent   string    `json:"comment_content"`
+	IsLiked          bool      `json:"is_liked"`
 	CommentLikeCount int       `json:"comment_likecount"`
 	CreatedAt        string    `json:"created_at"`
 	CommentImagePath string    `json:"comment_image_path"`
@@ -45,11 +46,11 @@ func (c *Comment) Del() error {
 // Update updates the fields of an existing comment in the database.
 func (c *Comment) Update() error {
 	updates := map[string]interface{}{
-		"author_id":         c.AuthorID,
-		"post_id":           c.PostID,
-		"comment_content":   c.CommentContent,
-		"comment_likecount": c.CommentLikeCount,
-		"created_at":        c.CreatedAt,
+		"author_id":          c.AuthorID,
+		"post_id":            c.PostID,
+		"comment_content":    c.CommentContent,
+		"comment_likecount":  c.CommentLikeCount,
+		"created_at":         c.CreatedAt,
 		"comment_image_path": c.CommentImagePath,
 	}
 	condition := "comment_id = ?"

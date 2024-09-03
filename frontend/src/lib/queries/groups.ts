@@ -13,6 +13,7 @@ export const fetchGroups = async (): Promise<Group[] | undefined> => {
     console.log(data);
     return data;
 
+    return data ? data : [];
   } catch (error) {
     console.error("Error fetching groups:", error);
   }
