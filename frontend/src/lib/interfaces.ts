@@ -50,7 +50,9 @@ interface PostProps {
 export interface Profile {
   fname: string;
   lname: string;
+  email: string;
   avatarUrl: string;
+  dob: string;
   bio: string;
   nickname: string;
   privacy: string;

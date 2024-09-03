@@ -10,7 +10,7 @@ import { Profile } from "@/lib/interfaces";
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
-  const [profile, setProfile] = useState<Profile>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: "", is_followed: false });
+  const [profile, setProfile] = useState<Profile>({ fname: "", lname: "", email: "", dob: "", avatarUrl: "", bio: "", nickname: "", privacy: "", is_followed: false });
 
   // just used as a flag.
   let [fetched, setFetched] = useState(false);

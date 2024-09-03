@@ -100,6 +100,8 @@ export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) 
                 setProfile({
                     fname: data.user.user_fname,
                     lname: data.user.user_lname,
+                    email: data.user.user_email,
+                    dob: data.user.user_dob,
                     avatarUrl: data.user.user_avatar_path,
                     bio: data.user.user_about,
                     nickname: data.user.user_nickname,

@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import EditProfile  from "../EditProfile";
+import EditProfile from "../EditProfile";
 import { handleFollow } from '@/lib/api';
 import { Profile } from "@/lib/interfaces";
 
-interface ProfileProps extends Profile{
-  session_user: string;
-  u_id: string;
-  save_changes: Function;
+interface ProfileProps extends Profile {
+    session_user: string;
+    u_id: string;
+    save_changes: Function;
 }
 
-export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, avatarUrl, bio, nickname, session_user, u_id, privacy, save_changes}) => {
+export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, dob, avatarUrl, bio, nickname, session_user, u_id, privacy, save_changes }) => {
     return (
         <div id="profile" className="relative -top-24 w-1/3 space-y-6">
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
@@ -20,13 +20,23 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, avatarU
                 </Avatar>
                 <div className="text-center mt-4">
                     <h2 className="text-2xl font-semibold">{fname} {lname}</h2>
-                    <p className="text-gray-400">Full Stack Developer</p>
-                    {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"} onEdit={save_changes}/>}
+                    <p className="text-gray-400">{nickname !== "" ? `@${nickname}` : 'Nickname? Who needs one!'}</p>
+                    {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"} onEdit={save_changes} />}
                 </div>
             </div>
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
-                <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-4">About</h3>
+                <div className="my-1">
+                    <h3 className="text-lg font-semibold mb-2">Email</h3>
+                    <span className="mb-4">
+                        {email}
+                    </span>
+                    <br /> <br />
+                    <h3 className="text-lg font-semibold mb-2">Birthday</h3>
+                    <span className="mb-4">
+                    {new Date(dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </span>
+                    <br /> <br />
+                    <h3 className="text-lg font-semibold mb-2">About</h3>
                     <span>
                         {bio}
                     </span>
