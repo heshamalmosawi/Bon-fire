@@ -37,7 +37,7 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, 
                     <h2 className="text-2xl font-semibold">{fname} {lname}</h2>
                     <p className="text-gray-400">{nickname !== "" ? `@${nickname}` : 'Nickname? Who needs one!'}</p>
                     {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"} onEdit={save_changes} />}
-                    {session_user && session_user !== u_id && <button onClick={() => handleFollow(u_id)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">{followbtn_message}</button>}
+                    {session_user && session_user !== u_id && <button onClick={() => handleFollow(u_id)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded-full ">{followbtn_message}</button>}
                 </div>
             </div>
             <div className="bg-black p-4 rounded-lg shadow-lg w-5/6 mx-auto">
