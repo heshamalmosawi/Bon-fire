@@ -9,6 +9,7 @@ import (
 	"bonfire/api/chat"
 	"bonfire/api/middleware"
 	"bonfire/api/notify"
+	"bonfire/pkgs"
 	"bonfire/pkgs/utils"
 )
 
@@ -57,6 +58,10 @@ func Routers() {
 
 	// handle cors
 	cors_mux := middleware.CORS(mux)
+
+	go pkgs.MainSessionManager.CleanupExpiredSessions()
+	go chat.RemoveExpiredChatClients()
+	go notify.RemoveExpiredSubscriber()
 
 	utils.BonfireLogger.Info("HTTP server is listening on http://localhost:8080")
 

@@ -1,9 +1,7 @@
 package chat
 
 import (
-	"bonfire/pkgs"
 	"log"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -25,27 +23,7 @@ func NewClient(userID, sessionID string, conn *websocket.Conn) *Client {
 		Closed:    make(chan bool),
 	}
 
-	go client.startSessionChecker()
 	return client
-}
-
-// startSessionChecker checks if the session is still valid.
-func (c *Client) startSessionChecker() {
-	ticker := time.NewTicker(time.Second * 20)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			session, err := pkgs.MainSessionManager.GetSession(c.SessionID)
-			if err != nil || session == nil {
-				c.CloseConnection()
-				return
-			}
-		case <-c.Closed:
-			return
-		}
-	}
 }
 
 // CloseConnection closes the WebSocket connection and unregisters the client.

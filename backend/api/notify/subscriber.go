@@ -60,3 +60,10 @@ func SubscriptionByUser(user *models.UserModel) *websocket.Conn {
 
 	return ws
 }
+
+// removes expired subscriber when his session expires
+func RemoveExpiredSubscriber() {
+	for {
+		UnregisterSubscriber(<-pkgs.ExpiredSessionSubscriberChan)
+	}
+}
