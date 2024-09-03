@@ -93,12 +93,13 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Check if the profile is private
 	if profileUser.ProfileExposure == "Private" && user != nil {
 		// Check if the session user is one of the profile's followers
-		isFollower, err := models.IsFollower(user.UserID, profileUserIDUUID)
+		isFollower, err := models.IsFollower(profileUserIDUUID, user.UserID)
 		if err != nil {
 			log.Println("HandleProfile: Error checking if user is a follower", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+		profileUser.IsFollowed = isFollower
 		if !isFollower && user.UserID != profileUser.UserID {
 			w.WriteHeader(http.StatusForbidden)
 			utils.EncodeJSON(w, map[string]interface{}{
@@ -107,7 +108,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-		profileUser.IsFollowed = isFollower
 	} else if profileUser.ProfileExposure == "Private" && user == nil {
 		w.WriteHeader(http.StatusForbidden)
 		utils.EncodeJSON(w, map[string]interface{}{
@@ -144,7 +144,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
-			user.IsFollowed = isFollowing
+			profileUser.IsFollowed = isFollowing
 			followers = append(followers, *user)
 		}
 		response = followers
@@ -171,7 +171,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
-			user.IsFollowed = isFollowing
+			profileUser.IsFollowed = isFollowing
 			followings = append(followings, *user)
 		}
 		response = followings
@@ -195,7 +195,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			posts = append(posts, *post)
 		}
 		response = posts
-		
 	// Placeholder for posts liked
 	case "post_likes":
 		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
@@ -533,7 +532,7 @@ func HandlePeople(w http.ResponseWriter, r *http.Request) {
 		}
 
 		userResponses = append(userResponses, UserResponse{
-			UserModel:  user,
+			UserModel:   user,
 			IsFollowing: isFollowing,
 		})
 	}

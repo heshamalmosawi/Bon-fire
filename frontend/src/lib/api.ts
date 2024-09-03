@@ -74,7 +74,7 @@ export const handleClick = async (endpoint: string, u_id: string, setLoading: (l
     setActiveTab(endpoint);
     try {
         const response = await fetch(`${Yori}/profile/${u_id}?q=${endpoint}`, { credentials: 'include' });
-        if (!response.ok) {
+        if (!response.ok && response.status != 403) {
             throw new Error('Network response was not ok');
         } else {
             console.log("response:", response);
@@ -94,7 +94,7 @@ export const handleClick = async (endpoint: string, u_id: string, setLoading: (l
 export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) => void, setLoading: (loading: boolean) => void, setError: (error: string) => void) => {
     try {
         const response = await fetch(`${Yori}/profile/${u_id}`);
-        if (response.ok) {
+        if (response.ok || response.status === 403) {
             const data = await response.json();
             if (data.user) {
                 setProfile({

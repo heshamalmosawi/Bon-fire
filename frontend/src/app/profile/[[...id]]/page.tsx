@@ -10,7 +10,7 @@ import { Profile } from "@/lib/interfaces";
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
-  const [profile, setProfile] = useState<Profile>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: "" , is_followed: false});
+  const [profile, setProfile] = useState<Profile>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: "", is_followed: false });
 
   const pathname = usePathname();
   const [u_id, setU_id] = useState(pathname.split("/")[2]);
@@ -44,43 +44,58 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!u_id){
+      if (!u_id) {
         return;
       }
       setLoading(true);
       console.log("fetching data, u_id:", u_id);
       if (u_id !== undefined) {
-      await fetchProfile(u_id, setProfile, setLoading, setError);
-      handleClick('posts', u_id, setLoading, setError, setActiveTab, setData);
+        await fetchProfile(u_id, setProfile, setLoading, setError);
+        handleClick('posts', u_id, setLoading, setError, setActiveTab, setData);
       }
     };
-  
+
     fetchData();
   }, [u_id]);
+
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+    setProfile({
+      ...profile,
+      is_followed: data.user.is_followed
+    });
+  }, [data]);
 
   const renderContent = () => {
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     console.log("data:", data, Array.isArray(data), data);
 
+    // data response only returns private, if the public is private and the user is not the user in session
+    if (data.response === "Private") {
+      return <p>This user's profile is private</p>;
+    }
+
     switch (activeTab) {
       case 'posts':
         return data.response ? data.response.map((post: any) => (
-          <PostComponent key={post.id} {...post}   firstName={data.user.user_fname} 
-          lastName={data.user.user_lname} 
-          username={data.user.user_nickname}  />
+          <PostComponent key={post.id} {...post} firstName={data.user.user_fname}
+            lastName={data.user.user_lname}
+            username={data.user.user_nickname} />
         )) : <p>No posts available.</p>;
       case 'comments':
         return data.response ? data.response.map((post: any) => (
-          <PostComponent key={post.id} {...post}   firstName={data.user.user_fname} 
-          lastName={data.user.user_lname} 
-          username={data.user.user_nickname}  />
+          <PostComponent key={post.id} {...post} firstName={data.user.user_fname}
+            lastName={data.user.user_lname}
+            username={data.user.user_nickname} />
         )) : <p>No comments available</p>;
       case 'likes':
         return data.response ? data.response.map((post: any) => (
-          <PostComponent key={post.id} {...post}   firstName={data.user.user_fname} 
-          lastName={data.user.user_lname} 
-          username={data.user.user_nickname}  />
+          <PostComponent key={post.id} {...post} firstName={data.user.user_fname}
+            lastName={data.user.user_lname}
+            username={data.user.user_nickname} />
         )) : <p>No likes available.</p>;
       case 'followers':
         return data.response ? (
@@ -90,7 +105,7 @@ const ProfilePage = () => {
         return data.response ? (
           <PeopleList onSelectPerson={data.response} />
         ) : <p>No followings available.</p>;
-      default:  
+      default:
         return null;
     }
   };
@@ -103,7 +118,7 @@ const ProfilePage = () => {
       console.log("scrolling");
       if (profileElement) {
         const rect = profileElement.getBoundingClientRect();
-        if (rect.top <= 16) { 
+        if (rect.top <= 16) {
           profileElement.classList.add("sticky");
           profileElement.classList.add("top-4");
           profileElement.classList.remove("relative");
@@ -123,9 +138,9 @@ const ProfilePage = () => {
     };
   }, []);
 
-  const updateProf = (newprof: Profile)=>{
+  const updateProf = (newprof: Profile) => {
     const x = profile.avatarUrl
-    setProfile({...newprof, avatarUrl: x});
+    setProfile({ ...newprof, avatarUrl: x });
   }
 
   return (
@@ -141,54 +156,54 @@ const ProfilePage = () => {
             {/* <!-- Profile Info --> */}
             <ProfileComponent {...profile} session_user={sessionUser} u_id={u_id} save_changes={updateProf} />
 
-
             {/* <!-- Timeline --> */}
-            <div className="w-2/3 space-y-6">
-              {/* <!-- Timeline Tabs --> */}
-              <div className="flex space-x-6 border-b border-gray-700 pb-4">
-                <button
-                  id="posts"
-                  onClick={() => handleClick('posts', u_id, setLoading, setError, setActiveTab, setData)}
-                  className={`p-2 rounded-lg ${activeTab === 'posts' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
-                >
-                  Posts
-                </button>
-                <button
-                  id="comments"
-                  onClick={() => handleClick('comments', u_id, setLoading, setError, setActiveTab, setData)}
-                  className={`p-2 rounded-lg ${activeTab === 'comments' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
-                >
-                  Comments
-                </button>
-                <button
-                  id="likes"
-                  onClick={() => handleClick('likes', u_id, setLoading, setError, setActiveTab, setData)}
-                  className={`p-2 rounded-lg ${activeTab === 'likes' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
-                >
-                  Likes
-                </button>
-                <button
-                  id="followers"
-                  onClick={() => handleClick('followers', u_id, setLoading, setError, setActiveTab, setData)}
-                  className={`p-2 rounded-lg ${activeTab === 'followers' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
-                >
-                  Followers
-                </button>
-                <button
-                  id="followings"
-                  onClick={() => handleClick('followings', u_id, setLoading, setError, setActiveTab, setData)}
-                  className={`p-2 rounded-lg ${activeTab === 'followings' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
-                >
-                  Following
-                </button>
+            {(profile.privacy == "Public" || u_id === sessionUser || profile.is_followed) ? (
+              <div className="w-2/3 space-y-6">
+                {/* <!-- Timeline Tabs --> */}
+                <div className="flex space-x-6 border-b border-gray-700 pb-4">
+                  <button
+                    id="posts"
+                    onClick={() => handleClick('posts', u_id, setLoading, setError, setActiveTab, setData)}
+                    className={`p-2 rounded-lg ${activeTab === 'posts' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                  >
+                    Posts
+                  </button>
+                  <button
+                    id="comments"
+                    onClick={() => handleClick('comments', u_id, setLoading, setError, setActiveTab, setData)}
+                    className={`p-2 rounded-lg ${activeTab === 'comments' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                  >
+                    Comments
+                  </button>
+                  <button
+                    id="likes"
+                    onClick={() => handleClick('likes', u_id, setLoading, setError, setActiveTab, setData)}
+                    className={`p-2 rounded-lg ${activeTab === 'likes' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                  >
+                    Likes
+                  </button>
+                  <button
+                    id="followers"
+                    onClick={() => handleClick('followers', u_id, setLoading, setError, setActiveTab, setData)}
+                    className={`p-2 rounded-lg ${activeTab === 'followers' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                  >
+                    Followers
+                  </button>
+                  <button
+                    id="followings"
+                    onClick={() => handleClick('followings', u_id, setLoading, setError, setActiveTab, setData)}
+                    className={`p-2 rounded-lg ${activeTab === 'followings' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                  >
+                    Following
+                  </button>
+                </div>
+                <div className="space-y-8" id="timeline">
+                  {/* <PeopleList /> */}
+                  {renderContent()}
+                </div>
               </div>
-              <div className="space-y-8" id="timeline">
-                {/* <PeopleList /> */}
-                {renderContent()}
-              </div>
+            ) : <p className="text-3xl bg-black p-4 rounded-lg"> Profile is private. </p>}
 
-
-            </div>
           </div>
         </main>
       </div>
