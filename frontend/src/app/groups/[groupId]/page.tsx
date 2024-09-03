@@ -1,10 +1,12 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from "react";
-import { Group, PeopleList } from "@/components/desktop/groupProfile";
+import React, { useEffect, useState, ChangeEvent } from "react";
+import { Group } from "@/components/desktop/groupProfile";
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from "next/navigation";
+import { GroupProps, RequestProps } from "@/lib/interfaces";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sheet,
   SheetContent,
@@ -12,54 +14,175 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
+import CreatePostForGroup from "@/components/CreatePostGroup";
+import EventsList from "@/components/desktop/EventsList";
+import RequestComponent from "@/components/desktop/RequestComponent";
+import {
+  fetchRequest,
+  fetchGroups,
+  joinGroup,
+  fetchSessionUser,
+  leaveGroup,
+} from "@/lib/api";
+import { Images } from "lucide-react";
 
-
-const ProfilePage = () => {
-  const [sessionUser, setSessionUser] = useState("");
-  const [profile, setProfile] = useState<{ fname: string; lname: string; avatarUrl: string; bio: string; nickname: string; privacy: string }>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: "" });
-
-  const pathname = usePathname();
-  const [u_id, setU_id] = useState(pathname.split("/")[2]);
-  const router = useRouter();
-
-  const [data, setData] = useState<any>(null);
+const GroupPage = () => {
+  const [sessionUser, setSessionUser] = useState<string>("");
+  const [groupProfile, setGroupProfile] = useState<GroupProps>({
+    groupName: "",
+    ownerName: "",
+    owner: "",
+    ownerEmail:"",
+    description: "",
+    session_user: "",
+    groupID: "",
+    total_members: 0,
+  });
+  const [handledRequests, setHandledRequests] = useState<Set<string>>(
+    new Set()
+  );
+  const [members, setMembers] = useState<any[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]); // State for groups
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('posts');
+  const [activeTab, setActiveTab] = useState("posts");
+  const [requests, setRequests] = useState<RequestProps[]>([]);
+  const pathname = usePathname();
+  const [groupID, setGroupID] = useState<string>(pathname.split("/")[2]);
+  const router = useRouter();
 
+  // Function to handle the removal of requests
+  const handleRequestHandled = (id: string) => {
+    setHandledRequests((prev) => new Set(prev).add(id));
+    setRequests((prevRequests) =>
+      prevRequests.filter((request) => request.id !== id)
+    );
+  };
+
+  const handleLeaveClick = async () => {
+    const success = await leaveGroup(groupID, sessionUser);
+    if (success) {
+      console.log(`User ${sessionUser} left the group ${groupID}.`);
+      router.push("/groups");
+    } else {
+      console.error("Failed to leave group.");
+    }
+  };
+
+  // Function to authenticate the user
   useEffect(() => {
     const authenticate = async () => {
-      const response = await fetch(`http://localhost:8080/authenticate`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (response.status !== 200 && u_id === undefined) {
-        router.push('/auth');
-        return;
-      } else if (response.status === 200) {
-        const data = await response.json();
-        setSessionUser(data.User.user_id);
-        if (u_id === undefined) {
-          setU_id(data.User.user_id);
+      try {
+        const data = await fetchSessionUser();
+        if (data && data.status === 200) {
+          setSessionUser(data.User.user_id);
+          if (!groupID) {
+            setGroupID(data.User.user_id);
+          }
+        } else {
+          router.push("/auth");
         }
+      } catch (error) {
+        console.error("Authentication failed:", error);
+        router.push("/auth");
       }
     };
     authenticate();
-  }, [router]);
+  }, [router, groupID]);
 
-  const handleClick = async (endpoint: string) => {
-    setLoading(true);
-    // setError(null);
-    setActiveTab(endpoint);
-    try {
-      const response = await fetch(`/profile/${u_id}/${endpoint}`, { credentials: 'include' });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+  // Function to fetch group requests
+  useEffect(() => {
+    const getRequests = async () => {
+      setLoading(true);
+      try {
+        const result = await fetchRequest(groupID);
+        console.log("Fetched requests:", result);
+        if (Array.isArray(result)) {
+          setRequests(result);
+        } else {
+          console.error("Failed to fetch requests or incorrect data format");
+          setRequests([]);
+        }
+      } catch (error) {
+        setError("Error fetching requests");
+        console.error("Error fetching requests:", error);
+      } finally {
+        setLoading(false);
       }
-      const result = await response.json();
-      setData(result);
+    };
+
+    getRequests();
+  }, [groupID]);
+
+  // Function to fetch all groups
+  useEffect(() => {
+    const loadGroups = async () => {
+      setLoading(true);
+      try {
+        const fetchedGroups = await fetchGroups(sessionUser); // Fetch groups with membership info
+        setGroups(fetchedGroups);
+      } catch (error) {
+        console.error("Failed to load groups:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (sessionUser) {
+      loadGroups();
+    }
+  }, [sessionUser]);
+
+  // Function to handle join group logic
+  const handleJoinClick = async (groupId: string) => {
+    try {
+      const success = await joinGroup(groupId, sessionUser);
+      if (success) {
+        setGroups((prevGroups) =>
+          prevGroups.map((group) =>
+            group.id === groupId ? { ...group, isMember: true } : group
+          )
+        );
+      } else {
+        console.error("Failed to join group");
+      }
+    } catch (error) {
+      console.error("Error joining group:", error);
+    }
+  };
+
+  // Function to fetch group data
+  const fetchGroupData = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:8080/group/${groupID}`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch group data");
+      }
+      const data = await response.json();
+
+      console.log("Fetched group data:", data.members);
+      console.log("Fetched owner data:", data.group_info.owner);
+
+      if (data.group_info) {
+        setGroupProfile({
+          groupName: data.group_info.group_name,
+          ownerName: data.group_info.owner_name || data.group_info.owner_id,
+          owner: data.group_info.owner.user_nickname,
+          ownerEmail:data.group_info.owner.user_email,
+          description: data.group_info.group_desc,
+          session_user: sessionUser,
+          groupID: data.group_info.group_id,
+          total_members: data.group_info.total_members,
+        });
+
+        if (data.members) setMembers(data.members);
+        if (data.posts) setPosts(data.posts);
+      }
     } catch (error) {
       setError((error as any).message);
     } finally {
@@ -68,28 +191,12 @@ const ProfilePage = () => {
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const response = await fetch(`http://localhost:8080/profile/${u_id}`, { credentials: 'include' });
-      if (response.status === 200) {
-        const data = await response.json();
-        if (data.user) {
-          setProfile({
-            fname: data.user.user_fname,
-            lname: data.user.user_lname,
-            avatarUrl: data.user.user_avatar_path,
-            bio: data.user.user_about,
-            nickname: data.user.user_nickname,
-            privacy: data.user.user_exposure
-          });
-        }
-      } else {
-        console.error(`Failed to fetch profile: ${response.status}`);
-      }
-    };
+    fetchGroupData();
+  }, [groupID]);
 
-    fetchProfile();
-    handleClick('posts');
-  }, [u_id]);
+  const handleClick = (endpoint: string) => {
+    console.log("Clicked endpoint:", endpoint);
+  };
 
   return (
     <div className="bg-neutral-950 min-h-screen text-gray-200">
@@ -100,107 +207,244 @@ const ProfilePage = () => {
             {/* Placeholder content for background */}
           </div>
 
-          {/* Profile Info */}
+          {/* Group Info */}
           <Group
-            fname={profile.fname}
-            lname={profile.lname}
-            avatarUrl={profile.avatarUrl}
-            bio={profile.bio}
-            nickname={profile.nickname}
+            groupName={groupProfile.groupName}
+            ownerName={groupProfile.ownerName}
+            description={groupProfile.description}
             session_user={sessionUser}
-            u_id={u_id}
-            privacy={profile.privacy}
+            groupID={groupProfile.groupID}
+            totalMembers={groupProfile.total_members}
+          />
+
+          <CreatePostForGroup
+            groupID={groupID}
+            onPostCreated={fetchGroupData}
           />
 
           <div className="space-y-6">
-            {/* Tabs for Posts, Comments, Members, Description */}
+            {/* Tabs for Posts, Chat, Members, Description, Events, Requests */}
             <div className="place-content-center flex space-x-9 border-b border-gray-700 pb-4">
               <button
                 id="posts"
-                onClick={() => handleClick('posts')}
-                className={`p-2 rounded-lg ${activeTab === 'posts' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                onClick={() => setActiveTab("posts")}
+                className={`p-2 rounded-lg ${
+                  activeTab === "posts"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
+                }`}
               >
                 Posts
               </button>
               <button
                 id="chat"
-                onClick={() => handleClick('chat')}
-                className={`p-2 rounded-lg ${activeTab === 'chat' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                onClick={() => setActiveTab("chat")}
+                className={`p-2 rounded-lg ${
+                  activeTab === "chat"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
+                }`}
               >
                 Chat
               </button>
               <button
                 id="members"
-                onClick={() => handleClick('members')}
-                className={`p-2 rounded-lg ${activeTab === 'members' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                onClick={() => setActiveTab("members")}
+                className={`p-2 rounded-lg ${
+                  activeTab === "members"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
+                }`}
               >
                 Members
               </button>
               <button
                 id="description"
-                onClick={() => handleClick('description')}
-                className={`p-2 rounded-lg ${activeTab === 'description' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
+                onClick={() => setActiveTab("description")}
+                className={`p-2 rounded-lg ${
+                  activeTab === "description"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
+                }`}
               >
                 Description
               </button>
-
-          
-   {/* Leave Button and Sheet */}
-   <Sheet>
-        {/* Connect the button to open the sheet */}
-        <SheetTrigger asChild>
-          <button
-            id="leave"
-            onClick={() => handleClick('leave')}
-            className={`p-2 rounded-lg ${activeTab === 'leave' ? 'text-white bg-indigo-500' : 'text-gray-400'}`}
-          >
-            Leave
-          </button>
-        </SheetTrigger>
-
-        {/* Sheet content */}
-        <SheetContent side="bottom">
-          <SheetHeader>
-            <SheetTitle>Are you absolutely sure?</SheetTitle>
-            <SheetDescription className="m-8 place-content-center">
-              Are you sure you want to leave the group ?
-              <div className="mt-3 place-content-center">
               <button
-            id="leave"
-            onClick={() => handleClick('leave')}
-            className={`p-2 rounded-lg ${activeTab === 'leave' ? 'text-white bg-black' : 'text-gray-400'}`}
-          >
-            Leave
-          </button>
-          </div>
-            </SheetDescription>
-          </SheetHeader>
-        </SheetContent>
-      </Sheet>
-  
+                id="events"
+                onClick={() => setActiveTab("events")}
+                className={`p-2 rounded-lg ${
+                  activeTab === "events"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
+                }`}
+              >
+                Events
+              </button>
+
+              {/* Show the "Requests" button only if the user is the owner */}
+              {groupProfile.ownerName === sessionUser && (
+                <button
+                  id="requests"
+                  onClick={() => setActiveTab("requests")}
+                  className={`p-2 rounded-lg ${
+                    activeTab === "requests"
+                      ? "text-white bg-indigo-500"
+                      : "text-gray-400"
+                  }`}
+                >
+                  Requests
+                </button>
+              )}
+
+              {/* Show the "Leave" button only if the user is not the owner */}
+              {groupProfile.ownerName !== sessionUser && (
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <button
+                      id="leave"
+                      className={`p-2 rounded-lg transition-colors duration-200 ${
+                        activeTab === "leave"
+                          ? "text-white bg-indigo-500 hover:bg-black"
+                          : "text-gray-400 hover:bg-black"
+                      }`}
+                    >
+                      Leave
+                    </button>
+                  </SheetTrigger>
+
+                  <SheetContent side="bottom">
+                    <SheetHeader>
+                      <SheetTitle>Are you absolutely sure?</SheetTitle>
+                      <SheetDescription className="m-8 place-content-center">
+                        Are you sure you want to leave the group?
+                        <div className="mt-3 place-content-center">
+                          <button
+                            id="leave"
+                            onClick={() => handleLeaveClick()} // Call the leave handler
+                            className={`p-2 rounded-lg transition-colors duration-200 ${
+                              activeTab === "leave"
+                                ? "text-white bg-indigo-500 hover:bg-black"
+                                : "text-gray-400 hover:bg-black"
+                            }`}
+                          >
+                            Leave
+                          </button>
+                        </div>
+                      </SheetDescription>
+                    </SheetHeader>
+                  </SheetContent>
+                </Sheet>
+              )}
             </div>
 
             {/* Conditionally Render Content Based on Active Tab */}
             <div className="w-full space-y-8 order-last flex flex-col justify-center items-center">
               {loading && <p>Loading...</p>}
-              {/* {error && <p>Error: {error}</p>} */}
-              
-              {activeTab === 'posts'  && (
-                // data.map((post: any) => (
-                
-               <PostComponent id={"0"} firstName={"Noora"} lastName={"Qasim"} username={"nqasim"} avatarUrl={""} creationDate={"06/06/24"} postTextContent={"My name is noora"} postImageContentUrl={""} postLikeNum={3} postCommentNum={0} />
-                )}
-            
+              {activeTab === "posts" &&
+                posts.map((post: any) => (
+                  <div className="w-6/12">
+                    {" "}
+                    {/* Wrapper to ensure full width */}
+                    <PostComponent
+                      key={post.post_id}
+                      id={post.post_id}
+                      firstName={post.author.user_fname}
+                      lastName={post.author.user_lname}
+                      username={post.author.user_nickname}
+                      avatarUrl={post.author.user_avatar_path}
+                      creationDate={post.created_at}
+                      postTextContent={post.post_content}
+                      postImageContentUrl={post.post_image_path}
+                      postLikeNum={post.post_likecount}
+                      postCommentNum={post.comment_count}
+                      postIsLiked = {post.is_liked}
+                    />
+                  </div>
+                ))}
+              {activeTab === "chat" && <p>Chat content will appear here.</p>}
+              {activeTab === "members" && (
+                <div className="w-full flex flex-col items-center">
+                  <div className="space-y-2 w-full px-4">
+                    {/* Render Owner */}
+                    <div className="w-11/12 mx-auto flex justify-between items-center p-2 border border-gray-300 rounded-lg bg-black text-white">
+                      <div className="flex items-center">
+                        <Avatar>
+                          <AvatarFallback>
+                            {groupProfile.owner.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h3 className="text-lg font-semibold pl-6">
+                            {groupProfile.owner}
+                          </h3>
+                          <p className="text-gray-600 pl-6">{groupProfile.ownerEmail}</p>
+                        </div>
+                      </div>
+                      <p className="font-bold text-gray-600 pr-6">Owner</p>
+                    </div>
 
-              {activeTab === 'chat' && <p>chat content will appear here.</p>}
-              {activeTab === 'members' && <p>Members content will appear here.</p>}
-              {activeTab === 'description' && <p>Description content will appear here.</p>}
+                    {/* Render Members */}
+                    {members.map((member) => (
+                      <div
+                        key={member.user_id}
+                        className="w-11/12 mx-auto flex justify-between items-center p-2 border border-gray-300 rounded-lg bg-black text-white"
+                      >
+                        <div className="flex items-center">
+                          <Avatar>
+                            <AvatarImage src={member.avatarUrl} />
+                            <AvatarFallback>
+                              {member.user_fname.charAt(0)}
+                              {member.user_lname.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="text-lg font-semibold pl-6">
+                              {member.user_nickname}
+                            </h3>
+                            <p className="text-gray-600 pl-6">
+                              {member.user_email}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="font-bold text-gray-600 pr-6">
+                          {member.user_id === groupProfile.owner
+                            ? "Owner"
+                            : "Member"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {activeTab === "description" && (
+                <div>
+                  <h1>{groupProfile.description}</h1>
+                </div>
+              )}
+              {activeTab === "events" && <EventsList />}
+              {activeTab === "requests" && (
+                <div className="flex flex-wrap gap-4 justify-center">
+                  {requests
+                    .filter((request) => !handledRequests.has(request.id))
+                    .map((request) => (
+                      <RequestComponent
+                        key={request.id}
+                        id={request.id}
+                        username={request.username}
+                        creationDate={request.creationDate}
+                        avatarUrl={request.avatarUrl}
+                        groupID={groupProfile.groupID}
+                        onRequestHandled={handleRequestHandled}
+                      />
+                    ))}
+                </div>
+              )}
             </div>
           </div>
         </main>
       </div>
     </div>
   );
-}
+};
 
-export default ProfilePage;
+export default GroupPage;

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 
@@ -15,6 +16,19 @@ type GroupModel struct {
 	OwnerID      uuid.UUID `json:"owner_id"`
 	GroupName    string    `json:"group_name"`
 	GroupDescrip string    `json:"group_desc"`
+	Owner		*UserModel `json:"owner"`
+}
+
+//makes it easier to fetch
+type ExtendedGroupModel struct {
+	GroupID      uuid.UUID `json:"group_id"`
+	OwnerID      uuid.UUID `json:"owner_id"`
+	GroupName    string    `json:"group_name"`
+	GroupDescrip string    `json:"group_desc"`
+	IsMember     bool      `json:"is_member"`      
+	TotalMembers int       `json:"total_members"`  
+	IsRequested  bool      `json:"is_requested"`
+	Owner		*UserModel `json:"owner"`
 }
 
 func (g *GroupModel) Save() error {
@@ -53,6 +67,7 @@ func (g *GroupModel) Update() error {
 	return err
 }
 
+//fix this later
 func GetOwwnerByGroup(ownerID string) (*GroupModel, error) {
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	condition := " owner_id = ?"
@@ -92,6 +107,7 @@ func GetAllGroups() ([]GroupModel, error) {
 			log.Println("Error scanning row:", err)
 			return nil, err
 		}
+		group.Owner,_ = GetUserByID(group.OwnerID)
 		groups = append(groups, group)
 	}
 
@@ -107,7 +123,7 @@ func GetAllGroups() ([]GroupModel, error) {
 func GetGroupByID(groupID uuid.UUID) (*GroupModel, error) {
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	condition := "group_id = ?"
-	rows, err := utils.Read("group", columns, condition, groupID)
+	rows, err := utils.Read("`group`", columns, condition, groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -119,6 +135,7 @@ func GetGroupByID(groupID uuid.UUID) (*GroupModel, error) {
 		if err != nil {
 			return nil, err
 		}
+		group.Owner,_ = GetUserByID(group.OwnerID)
 		return &group, nil
 	}
 
@@ -141,6 +158,7 @@ func GetGroupNameByGroup(groupName string) (*GroupModel, error) {
 			return nil, err
 		}
 	}
+	group.Owner,_ = GetUserByID(group.OwnerID)
 
 	return &group, nil
 }
@@ -162,6 +180,7 @@ func GetGroupDescripByGroup(groupDescrip string) (*GroupModel, error) {
 		}
 	}
 
+	group.Owner,_ = GetUserByID(group.OwnerID)
 	return &group, nil
 }
 
@@ -181,6 +200,7 @@ func GetGroupEverything(groupID, ownerID, groupName, groupDesc string) (*GroupMo
 			return nil, err
 		}
 	}
+	group.Owner,_ = GetUserByID(group.OwnerID)
 	return &group, nil
 }
 
@@ -189,7 +209,7 @@ func CreateGroup(group *GroupModel) error {
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	values := []interface{}{group.GroupID, group.OwnerID, group.GroupName, group.GroupDescrip}
 
-	_, err := utils.Create("group", columns, values)
+	_, err := utils.Create("`group`", columns, values)
 
 	if err != nil {
 		return fmt.Errorf("CreateGroup: failed to insert group: %v", err)
@@ -206,7 +226,7 @@ func DeleteGroup(group *GroupModel) error {
 
 	condition := "group_id = ? AND owner_id = ? AND group_name = ? AND group_desc = ?"
 
-	_, err := utils.Delete("group", condition, values...)
+	_, err := utils.Delete("`group`", condition, values...)
 
 	if err != nil {
 		return fmt.Errorf("CreateGroup: failed to insert group: %v", err)
@@ -214,18 +234,81 @@ func DeleteGroup(group *GroupModel) error {
 	return nil
 }
 
-// function to add the user to the group
-func AddUserToGroup(group *GroupModel, user *UserModel) error {
 
+// Function to add a user to a group
+func AddUserToGroup(group *GroupModel, user *UserModel) error {
+	// Check if the user is already a member of the group
+	isMember, err := IsUserMemberOfGroup(user.UserID, group.GroupID)
+	if err != nil {
+		return fmt.Errorf("failed to check if user is a member of the group: %v", err)
+	}
+
+	if isMember {
+		log.Printf("User %s is already a member of group %s", user.UserID, group.GroupID)
+		return fmt.Errorf("user is already a member of the group")
+	}
+
+	// If the user is not a member, proceed to add the user to the group
 	columns := []string{"group_id", "user_id"}
 	values := []interface{}{group.GroupID, user.UserID}
 
-	_, err := utils.Create("group_user", columns, values)
-
+	_, err = utils.Create("group_user", columns, values)
 	if err != nil {
-		return fmt.Errorf("CreateGroup: failed to insert group: %v", err)
+		return fmt.Errorf("failed to add user to group: %v", err)
 	}
+
+	log.Printf("User %s successfully added to group %s", user.UserID, group.GroupID)
 	return nil
+}
+
+// Check if a user is already a member of the group
+func IsUserMemberOfGroup(userID uuid.UUID, groupID uuid.UUID) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS (SELECT 1 FROM group_user WHERE user_id = $1 AND group_id = $2)`
+
+	err := storage.DB.QueryRow(query, userID, groupID).Scan(&exists)
+	if err != nil && err != sql.ErrNoRows {
+		log.Println("Error checking if user is a member of the group:", err)
+		return false, err
+	}
+
+	return exists, nil
+}
+
+func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
+	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
+	rows, err := utils.Read("`group`", columns, "")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groupResponses []ExtendedGroupModel
+	for rows.Next() {
+		var group ExtendedGroupModel
+		err := rows.Scan(&group.GroupID, &group.OwnerID, &group.GroupName, &group.GroupDescrip)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if the user is in this group
+		inGroup, err := IsUserInGroup(userID, group.GroupID)
+    fmt.Println("hello?")
+		// Set the IsMember field based on the user's membership status
+		group.IsMember = inGroup
+
+		// Get the total number of members in this group
+		totalMembers, err := GetTotalMembers(group.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		group.TotalMembers = totalMembers + 1
+
+		group.Owner,_ = GetUserByID(group.OwnerID)
+		groupResponses = append(groupResponses, group)
+	}
+
+	return groupResponses, nil
 }
 
 func GetGroupMembers(groupID string) ([]UserModel, error) {

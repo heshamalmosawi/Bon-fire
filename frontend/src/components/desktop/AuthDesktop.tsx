@@ -112,14 +112,14 @@ const AuthDesktop: FC = () => {
               Login
             </Button>
           </form>
-          <Button
-            className="text-white"
-            variant={"link"}
-            onClick={handleNoAccountClick}
-          >
-            No Account?
-          </Button>
         </Form>
+        <Button
+          className="text-white"
+          variant={"link"}
+          onClick={handleNoAccountClick}
+        >
+          No Account?
+        </Button>
       </div>
     </main>
   );

@@ -1,25 +1,62 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 
 interface GroupCardProps {
+  id: string;
   name: string;
   description: string;
-  members: string;
-  isMine: boolean;
+  members: number;
+  isMine: boolean; // Indicates if the current user is the owner of the group
+  isMember: boolean; // Indicates if the current user is a member of the group
+  onJoinClick: () => void; // Function to handle "Join" button click
 }
 
-const GroupCard: React.FC<GroupCardProps> = ({ name, description, members, isMine }) => {
+const GroupCard: React.FC<GroupCardProps> = ({
+  id,
+  name,
+  description,
+  members,
+  isMine,
+  isMember,
+  onJoinClick,
+}) => {
+  const router = useRouter(); // Initialize useRouter for navigation
+
+  // Function to handle "Enter" button click
+  const handleEnterClick = () => {
+    router.push(`/groups/${id}`);
+  };
+
   return (
-    <div className="bg-black rounded-lg overflow-hidden shadow-md text-white">
-      <div className="p-4">
-        <h3 className="text-lg font-semibold">{name}</h3>
-        <p className="text-sm text-gray-400">{description}</p>
-        <div className="mt-2 text-sm">
-          <p>Members: {members}</p>
-        </div>
-        <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded">
-          {isMine ? "Enter" : "Join"}
-        </button>
-      </div>
+    <div className="bg-black p-4 rounded-md shadow-md">
+      {/* Group Name */}
+      <h2 className="text-white text-lg font-semibold">{name}</h2>
+
+      {/* Group Description */}
+      <p className="text-gray-400">{description}</p>
+
+      {/* Group Members Count */}
+      <p className="text-gray-400">Members: {members}</p>
+
+      {/* Conditionally Render Buttons */}
+      {isMine || isMember ? (
+        <Button
+          variant="secondary"
+          className="mt-4"
+          onClick={handleEnterClick}
+        >
+          Enter
+        </Button>
+      ) : (
+        <Button
+          variant="secondary"
+          className="mt-4"
+          onClick={onJoinClick}
+        >
+          Join
+        </Button>
+      )}
     </div>
   );
 };

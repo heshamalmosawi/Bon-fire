@@ -3,6 +3,7 @@ package models
 import (
 	"bonfire/pkgs/storage"
 	"bonfire/pkgs/utils"
+	"fmt"
 	"log"
 
 	"github.com/gofrs/uuid"
@@ -95,6 +96,9 @@ func TogglePostLike(postID, userID uuid.UUID) error {
 	}
 
 	if like != nil {
+		if err := ChangePostLike(postID, -1); err != nil {
+			return err
+		}
 		return like.Del()
 	}
 
@@ -103,13 +107,16 @@ func TogglePostLike(postID, userID uuid.UUID) error {
 		UserID: userID,
 	}
 
+	if err := ChangePostLike(postID, 1); err != nil {
+		return err
+	}
 	return newLike.Save()
 }
 
 // Function to get like by post ID and user ID
 func GetLikeByPostAndUser(postID, userID uuid.UUID) (*LikeModel, error) {
 	columns := []string{"like_id", "post_id", "user_id"}
-	condition := "post_id = ? AND user_id = ?"
+	condition := "post_id = ? AND user_id = ? AND comment_id = '00000000-0000-0000-0000-000000000000'"
 	rows, err := utils.Read("likes", columns, condition, postID, userID)
 	if err != nil {
 		return nil, err
@@ -220,6 +227,9 @@ func ToggleCommentLike(commentID, userID uuid.UUID) error {
 	}
 
 	if like != nil {
+		if err := ChangeCommentLike(commentID, -1); err != nil {
+			return err
+		}
 		return like.Del()
 	}
 
@@ -229,6 +239,9 @@ func ToggleCommentLike(commentID, userID uuid.UUID) error {
 		UserID:    userID,
 	}
 
+	if err := ChangeCommentLike(commentID, 1); err != nil {
+		return err
+	}
 	return newLike.Save()
 }
 
@@ -248,4 +261,46 @@ func GetCommentLikeCount(commentID uuid.UUID) (int, error) {
 	}
 
 	return count, nil
+}
+
+func ChangePostLike(postID uuid.UUID, inc int) error {
+	post, err := GetPostByPostID(postID)
+	if err != nil {
+		return err
+	}
+
+	post.PostLikeCount = post.PostLikeCount + inc
+
+	return post.Update()
+}
+
+func ChangeCommentLike(commentID uuid.UUID, inc int) error {
+	comment, err := GetCommentByCommentID(commentID)
+	if err != nil {
+		return err
+	}
+
+	comment.CommentLikeCount = comment.CommentLikeCount + inc
+
+	return comment.Update()
+}
+
+func GetIsPostLiked(postID, userID uuid.UUID) (bool, error) {
+	like_model, err := GetLikeByPostAndUser(postID, userID)
+	if err != nil {
+		return false, err
+	}
+	fmt.Println(like_model)
+
+
+	return like_model != nil, nil
+}
+
+func GetIsCommentLiked(commentID, userID uuid.UUID) (bool, error) {
+	like_model, err := GetLikeByCommentAndUser(commentID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	return like_model != nil, nil
 }

@@ -1,3 +1,5 @@
+import { Profile } from "./interfaces";
+
 export const Yori = "http://localhost:8080";
 
 // a function to fetch the session user
@@ -116,3 +118,134 @@ export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) 
         setLoading(false);
     }
 };
+
+// Function to fetch the group requests
+export const fetchRequest = async (groupID: string): Promise<RequestProps[] | null> => {
+    try {
+      const response = await fetch(`${Yori}/requests/${groupID}`, {
+        method: 'GET', // Use GET to fetch data
+        credentials: 'include',
+      });
+  
+      if (!response.ok) {
+        console.error(`Failed to fetch group requests: ${response.statusText}`);
+        return null;
+      }
+  
+      const data = await response.json();
+      console.log("Received request data:", data); // Debugging log
+  
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        return data.map((item) => ({
+          id: item.user_sent.user_id,
+          username: item.user_sent.user_nickname, // Ensure you map the correct fields
+          creationDate: new Date(item.InteractionTime).toLocaleString(),
+          avatarUrl: item.user_sent.userAvatarPath || "default-avatar-url.png" // Fallback for missing avatar
+        }));
+      } else {
+        console.error("Unexpected data format:", data);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+      return null;
+    }
+  };
+  
+// Function to join a group
+export const joinGroup = async (groupID: string, userId: string): Promise<boolean> => {
+    console.log(`Attempting to join group ${groupID} with user ${userId}.`); // Debugging log
+  
+    try {
+      const response = await fetch(`${Yori}/group/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ group_id: groupID, user_id: userId }),
+      });
+  
+      console.log("Request sent to /group/join:", {
+        method: 'POST',
+        url: `${Yori}/group/join`,
+        headers: { 'Content-Type': 'application/json' },
+        body: { group_id: groupID, user_id: userId }
+      });
+  
+      if (response.ok) {
+        console.log(`User ${userId} successfully joined group ${groupID}.`);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to join group:", response.statusText, "Response Body:", errorText); // Detailed error log
+        return false;
+      }
+    } catch (error) {
+      console.error("Error joining group:", error, "Group ID:", groupID, "User ID:", userId); // Detailed error log with parameters
+      return false;
+    }
+  };
+  
+  // Function to fetch the groups along with membership status
+export const fetchGroups = async (userId: string): Promise<any[]> => {
+    try {
+      const response = await fetch(`${Yori}/groups?user_id=${userId}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        console.error("Failed to fetch groups:", response.statusText);
+        return [];
+      }
+      const data = await response.json();
+      return data.map((group: any) => ({
+        id: group.group_id,
+        name: group.group_name,
+        description: group.group_desc,
+        members: group.total_members,
+        isMine: group.owner_id === userId,
+        isMember: group.is_member || false, // Ensure the backend provides `is_member` status
+      }));
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+      return [];
+    }
+  };
+  
+  // Function to leave a group
+  export const leaveGroup = async (groupID: string, userId: string): Promise<boolean> => {
+    console.log(`Attempting to leave group ${groupID} with user ${userId}.`); // Debugging log
+  
+    try {
+      const response = await fetch(`${Yori}/group/leave`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ group_id: groupID, user_id: userId }),
+      });
+  
+      console.log("Request sent to /group/leave:", {
+        method: 'POST',
+        url: `${Yori}/group/leave`,
+        headers: { 'Content-Type': 'application/json' },
+        body: { group_id: groupID, user_id: userId }
+      });
+  
+      if (response.ok) {
+        console.log(`User ${userId} successfully left group ${groupID}.`);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to leave group:", response.statusText, "Response Body:", errorText); // Detailed error log
+        return false;
+      }
+    } catch (error) {
+      console.error("Error leaving group:", error, "Group ID:", groupID, "User ID:", userId); // Detailed error log with parameters
+      return false;
+    }
+  };
+  

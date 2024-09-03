@@ -3,7 +3,9 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -35,9 +37,107 @@ type GroupCreateRequest struct {
 
 // HandleGroup handles the request for group related operations.
 func HandleGroup(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling error")
+	// Extract the group ID from the URL path
+	urlParts := strings.Split(r.URL.Path, "/")
+	groupIDStr := urlParts[len(urlParts)-1]
+
+	// Convert the group ID string to a UUID
+	groupID, err := uuid.FromString(groupIDStr)
+	if err != nil {
+		http.Error(w, "Invalid group ID", http.StatusBadRequest)
+		return
+	}
+
+	// Get the session cookie to check if the user is logged in
+	sessionID, err := r.Cookie("session_id")
+	var user *models.UserModel
+	if err == nil && sessionID != nil {
+		session, err := pkgs.MainSessionManager.GetSession(sessionID.Value)
+		if err == nil {
+			user = session.User
+		}
+	}
+
+	// Retrieve the group information
+	group, err := models.GetGroupByID(groupID)
+	if err != nil || group == nil {
+		http.Error(w, "Failed to retrieve group information", http.StatusInternalServerError)
+		log.Println("Error retrieving group information:", err)
+		return
+	}
+
+	// Check if the user is a member of the group (if logged in)
+	isMember := false
+	if user != nil {
+		isMember, err = models.IsUserInGroup(user.UserID, groupID)
+		if err != nil {
+			http.Error(w, "Failed to check membership", http.StatusInternalServerError)
+			log.Println("Error checking membership:", err)
+			return
+		}
+	}
+
+	isRequested := false
+
+	// Get the total number of members in the group
+	totalMembers, err := models.GetTotalMembers(groupID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve total members", http.StatusInternalServerError)
+		log.Println("Error retrieving total members:", err)
+		return
+	}
+
+	// Retrieve the posts for the group
+	posts, err := models.GetPostsByGroupID(groupID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve group posts", http.StatusInternalServerError)
+		log.Println("Error retrieving group posts:", err)
+		return
+	}
+
+	groupUser, err := models.GetGroupByID(groupID)
+	if err != nil {
+		log.Println("HandleProfile: Error getting profile user by ID", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	} else {
+		log.Println("HandleProfile: groupUser", groupUser)
+	}
+
+	// Retrieve the members of the group
+	members, err := models.GetMembersByGroupID(groupID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve group members", http.StatusInternalServerError)
+		log.Println("Error retrieving group members:", err)
+		return
+	}
+
+	// Prepare the response structure
+	response := struct {
+		GroupInfo   models.ExtendedGroupModel `json:"group_info"`
+		Posts       []models.PostModel        `json:"posts"`
+		Members     []models.UserModel        `json:"members"`
+	}{
+		GroupInfo: models.ExtendedGroupModel{
+			GroupID:      group.GroupID,
+			OwnerID:      group.OwnerID,
+			GroupName:    group.GroupName,
+			GroupDescrip: group.GroupDescrip,
+			IsMember:     isMember,
+			TotalMembers: totalMembers + 1,
+			IsRequested:  isRequested,
+			Owner: group.Owner,
+		},
+		Posts:   posts,
+		Members: members,
+	}
+
+	// Return the response as JSON
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response to JSON", http.StatusInternalServerError)
+		log.Println("Error encoding response to JSON:", err)
+	}
 }
 
 // HandleGroupCreate handles the request for creating a new group.
@@ -46,6 +146,11 @@ func HandleGroupCreate(w http.ResponseWriter, r *http.Request) {
 	var req GroupCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+	// Check for missing or empty fields
+	if req.GroupName == "" || req.GroupDescrip == "" {
+		http.Error(w, "Group name and description cannot be empty", http.StatusBadRequest)
 		return
 	}
 
@@ -79,9 +184,6 @@ func HandleGroupCreate(w http.ResponseWriter, r *http.Request) {
 	// Return a success response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"message": "Group created successfully"})
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
 }
 
 // HandleGroupInvite handles the request for inviting users to a group.
@@ -91,12 +193,12 @@ func HandleGroupInvite(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
 }
 
-// HandleGroupJoin handles the request for joining a group.
 func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body to get the group ID and user ID
 	var req GroupJoin
 	if err := utils.DecodeJSON(r, &req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		log.Println("Error decoding request body:", err) // Add debugging log
 		return
 	}
 
@@ -104,23 +206,43 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	groupID, err := uuid.FromString(req.GroupID)
 	if err != nil {
 		http.Error(w, "Invalid group ID", http.StatusBadRequest)
+		log.Println("Invalid group ID:", req.GroupID, err) // Add debugging log
 		return
 	}
 
 	userID, err := uuid.FromString(req.UserID)
 	if err != nil {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		log.Println("Invalid user ID:", req.UserID, err) // Add debugging log
 		return
 	}
+
+	log.Println("Group ID:", groupID) // Add debugging log
+	log.Println("User ID:", userID)   // Add debugging log
 
 	// Get the group details to ensure it exists
 	group, err := models.GetGroupByID(groupID)
 	if err != nil {
 		http.Error(w, "Failed to retrieve group details", http.StatusInternalServerError)
+		log.Println("Error retrieving group details:", err) // Add debugging log
 		return
 	}
 	if group == nil {
 		http.Error(w, "Group not found", http.StatusNotFound)
+		log.Println("Group not found for ID:", groupID) // Add debugging log
+		return
+	}
+
+	// Check if the user is already a member of the group
+	isMember, err := models.IsUserMemberOfGroup(userID, groupID)
+	if err != nil {
+		http.Error(w, "Failed to check group membership", http.StatusInternalServerError)
+		log.Println("Error checking group membership:", err) // Add debugging log
+		return
+	}
+	if isMember {
+		http.Error(w, "User is already a member of the group", http.StatusConflict)
+		log.Println("User is already a member of the group:", userID, "Group ID:", groupID) // Add debugging log
 		return
 	}
 
@@ -133,10 +255,11 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	// Save the user to the group_user table
 	if err := groupUser.Save(); err != nil {
 		http.Error(w, "Failed to join group", http.StatusInternalServerError)
+		log.Println("Error saving user to group:", err) // Add debugging log
 		return
 	}
 
-	//create a group notification that will be displayed in chat
+	// Create a group notification that will be displayed in chat
 	notification := models.GroupNotificationModel{
 		GroupID:     group.GroupID,
 		NotiType:    "group_join",
@@ -148,16 +271,21 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 	// Save the notification to the database
 	if err := notification.Save(); err != nil {
 		http.Error(w, "Failed to send notification to group admin", http.StatusInternalServerError)
+		log.Println("Error saving notification:", err) // Add debugging log
 		return
 	}
+
+	log.Println("User successfully joined the group:", req.UserID, "Group ID:", req.GroupID) // Success log
 
 	// Respond with a success message
 	response := map[string]string{"response": "Successfully joined the group"}
 	if err := utils.EncodeJSON(w, response); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		log.Println("Error encoding response to JSON:", err) // Add debugging log
 		return
 	}
 }
+
 
 func HandleGroupLeave(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body to get the group ID

@@ -31,6 +31,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	// we send the posts, and its author too
 	for _, post := range posts {
+		post.IsLiked, _ = models.GetIsPostLiked(post.PostID, session.User.UserID)
 		author, err := models.GetUserByID(post.AuthorID)
 		if err != nil {
 			utils.BonfireLogger.Error("error getting post for user: " + err.Error())

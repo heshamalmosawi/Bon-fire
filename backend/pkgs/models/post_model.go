@@ -8,14 +8,16 @@ import (
 
 // PostModel represents the structure of the post table
 type PostModel struct {
-	PostID        uuid.UUID `json:"post_id"`
-	PostContent   string    `json:"post_content"`
-	PostImagePath string    `json:"post_image_path"`
-	PostExposure  string    `json:"post_exposure"`
-	GroupID       uuid.UUID `json:"group_id"`
-	PostLikeCount int       `json:"post_likecount"`
-	CreatedAt     string    `json:"created_at"`
-	AuthorID      uuid.UUID `json:"author_id"`
+	PostID        uuid.UUID  `json:"post_id"`
+	PostContent   string     `json:"post_content"`
+	PostImagePath string     `json:"post_image_path"`
+	PostExposure  string     `json:"post_exposure"`
+	GroupID       uuid.UUID  `json:"group_id"`
+	PostLikeCount int        `json:"post_likecount"`
+	CreatedAt     string     `json:"created_at"`
+	AuthorID      uuid.UUID  `json:"author_id"`
+	IsLiked       bool       `json:"is_liked"`
+	Author        *UserModel `json:"author"`
 }
 
 // CRUD Operations
@@ -76,6 +78,11 @@ func GetPostsByAuthorID(authorID uuid.UUID) ([]PostModel, error) {
 		if err != nil {
 			return nil, err
 		}
+		post.Author, err = GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+
 		posts = append(posts, post)
 	}
 
@@ -102,5 +109,9 @@ func GetPostByPostID(postID uuid.UUID) (*PostModel, error) {
 		return nil, err
 	}
 
+	post.Author, err = GetUserByID(post.AuthorID)
+	if err != nil {
+		return nil, err
+	}
 	return &post, nil
 }
