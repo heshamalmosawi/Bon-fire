@@ -138,7 +138,8 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Received message: %v", msg)
 
 			// Save the message to the database
-			msg.Save()
+			// msg.Save()
+			// !! for now commented, using fetch to store the messages in the database
 
 			// Send message to a specific client if "to" is specified
 			if to := msg.RecipientID; to != uuid.Nil {

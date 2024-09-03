@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 
-interface Message {
-  message_id: string;
-  from: string;
-  to: string;
-  message: string;
-  message_timestamp: string;
+export interface Message {
+  message_id?: string; // uuid is a string in JSON
+  sender_id: string;
+  recipient_id: string;
+  message_content: string;
+  message_timestamp?: string; // ISO date string for time
 }
+
 
 interface History {
   type: string;
@@ -46,10 +47,14 @@ const useWebSocket = (url: string, user1: string | null, user2: string | null) =
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log("WebSocket message:", data);
       if (data.type === 'history') {
         setMessages(data.payload.msgs);
       } else {
-        setMessages((prevMessages) => [...prevMessages, data.payload as Message]);
+        // check if previous messages iterable
+        if (Symbol.iterator in Object(messages) && messages.length > 0) {
+          setMessages((prevMessages) => [...prevMessages, data.payload as Message]);
+        }
       }
     };
 
