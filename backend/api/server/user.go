@@ -99,7 +99,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		if !isFollower {
+		if !isFollower && user.UserID != profileUser.UserID {
 			w.WriteHeader(http.StatusForbidden)
 			utils.EncodeJSON(w, map[string]interface{}{
 				"user":     profileUser,
