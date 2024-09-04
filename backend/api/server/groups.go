@@ -22,6 +22,7 @@ type GroupRequest struct {
 type GroupJoin struct {
 	GroupID string `json:"group_id"`
 	UserID  string `json:"user_id"`
+	Accept  bool   `json:"accept"`
 }
 
 type GroupCreateRequest struct {
@@ -193,99 +194,99 @@ func HandleGroupInvite(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
 }
 
+// HandleGroupJoin processes requests for users to join or decline joining a group.
 func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
-	// Decode the request body to get the group ID and user ID
-	var req GroupJoin
-	if err := utils.DecodeJSON(r, &req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		log.Println("Error decoding request body:", err) // Add debugging log
-		return
-	}
+    // Decode the incoming JSON body to the GroupJoin struct.
+    var req GroupJoin
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        http.Error(w, "Invalid request body", http.StatusBadRequest)
+        log.Println("Error decoding request body:", err)
+        return
+    }
 
-	// Convert group ID and user ID from string to UUID
-	groupID, err := uuid.FromString(req.GroupID)
-	if err != nil {
-		http.Error(w, "Invalid group ID", http.StatusBadRequest)
-		log.Println("Invalid group ID:", req.GroupID, err) // Add debugging log
-		return
-	}
+    // Convert group ID from string to UUID.
+    groupID, err := uuid.FromString(req.GroupID)
+    if err != nil {
+        http.Error(w, "Invalid group ID", http.StatusBadRequest)
+        log.Println("Invalid group ID:", req.GroupID, err)
+        return
+    }
 
-	userID, err := uuid.FromString(req.UserID)
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		log.Println("Invalid user ID:", req.UserID, err) // Add debugging log
-		return
-	}
+    // Convert user ID from string to UUID.
+    userID, err := uuid.FromString(req.UserID)
+    if err != nil {
+        http.Error(w, "Invalid user ID", http.StatusBadRequest)
+        log.Println("Invalid user ID:", req.UserID, err)
+        return
+    }
 
-	log.Println("Group ID:", groupID) // Add debugging log
-	log.Println("User ID:", userID)   // Add debugging log
+    // Remove the join request from group interactions regardless of accept/decline.
+    if err := models.DeleteGroupInteraction(groupID, userID, true); err != nil {
+        http.Error(w, "Failed to clean up group interaction", http.StatusInternalServerError)
+        log.Println("Error cleaning up group interaction:", err)
+        return
+    }
 
-	// Get the group details to ensure it exists
-	group, err := models.GetGroupByID(groupID)
-	if err != nil {
-		http.Error(w, "Failed to retrieve group details", http.StatusInternalServerError)
-		log.Println("Error retrieving group details:", err) // Add debugging log
-		return
-	}
-	if group == nil {
-		http.Error(w, "Group not found", http.StatusNotFound)
-		log.Println("Group not found for ID:", groupID) // Add debugging log
-		return
-	}
+    // Proceed only if the request is accepted.
+    if req.Accept {
+        // Check group existence and membership before adding the user.
+        group, err := models.GetGroupByID(groupID)
+        if err != nil {
+            http.Error(w, "Failed to retrieve group details", http.StatusInternalServerError)
+            log.Println("Error retrieving group details:", err)
+            return
+        }
+        if group == nil {
+            http.Error(w, "Group not found", http.StatusNotFound)
+            log.Println("Group not found for ID:", groupID)
+            return
+        }
 
-	// Check if the user is already a member of the group
-	isMember, err := models.IsUserMemberOfGroup(userID, groupID)
-	if err != nil {
-		http.Error(w, "Failed to check group membership", http.StatusInternalServerError)
-		log.Println("Error checking group membership:", err) // Add debugging log
-		return
-	}
-	if isMember {
-		http.Error(w, "User is already a member of the group", http.StatusConflict)
-		log.Println("User is already a member of the group:", userID, "Group ID:", groupID) // Add debugging log
-		return
-	}
+        // Check if the user is already a member of the group.
+        isMember, err := models.IsUserMemberOfGroup(userID, groupID)
+        if err != nil {
+            http.Error(w, "Failed to check group membership", http.StatusInternalServerError)
+            log.Println("Error checking group membership:", err)
+            return
+        }
+        if isMember {
+            http.Error(w, "User is already a member of the group", http.StatusConflict)
+            log.Println("User is already a member of the group:", userID, "Group ID:", groupID)
+            return
+        }
 
-	// Create a new GroupUser model
-	groupUser := &models.GroupUser{
-		UserID:  userID,
-		GroupID: groupID,
-	}
+        // Add the user to the group.
+        groupUser := models.GroupUser{
+            UserID:  userID,
+            GroupID: groupID,
+        }
+        if err := groupUser.Save(); err != nil {
+            http.Error(w, "Failed to join group", http.StatusInternalServerError)
+            log.Println("Error saving user to group:", err)
+            return
+        }
 
-	// Save the user to the group_user table
-	if err := groupUser.Save(); err != nil {
-		http.Error(w, "Failed to join group", http.StatusInternalServerError)
-		log.Println("Error saving user to group:", err) // Add debugging log
-		return
-	}
+        // Optionally create and send a notification about the new group member.
+        notification := models.GroupNotificationModel{
+            GroupID:     groupID,
+            NotiType:    "group_join",
+            NotiContent: "User " + req.UserID + " has joined the group.",
+            NotiTime:    time.Now(),
+            NotiStatus:  "unread",
+        }
+        if err := notification.Save(); err != nil {
+            http.Error(w, "Failed to send notification to group admin", http.StatusInternalServerError)
+            log.Println("Error saving notification:", err)
+            return
+        }
 
-	// Create a group notification that will be displayed in chat
-	notification := models.GroupNotificationModel{
-		GroupID:     group.GroupID,
-		NotiType:    "group_join",
-		NotiContent: "User " + req.UserID + " has joined your group.",
-		NotiTime:    time.Now(),
-		NotiStatus:  "unread",
-	}
-
-	// Save the notification to the database
-	if err := notification.Save(); err != nil {
-		http.Error(w, "Failed to send notification to group admin", http.StatusInternalServerError)
-		log.Println("Error saving notification:", err) // Add debugging log
-		return
-	}
-
-	log.Println("User successfully joined the group:", req.UserID, "Group ID:", req.GroupID) // Success log
-
-	// Respond with a success message
-	response := map[string]string{"response": "Successfully joined the group"}
-	if err := utils.EncodeJSON(w, response); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-		log.Println("Error encoding response to JSON:", err) // Add debugging log
-		return
-	}
+        // Respond with a success message.
+        utils.EncodeJSON(w, map[string]string{"response": "Successfully joined the group"})
+    } else {
+        // Respond with a message for a declined request.
+        utils.EncodeJSON(w, map[string]string{"response": "Join request declined"})
+    }
 }
-
 
 func HandleGroupLeave(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body to get the group ID

@@ -97,3 +97,10 @@ func GetPendingRequestsByGroupID(groupID uuid.UUID) ([]GroupInteractions, error)
 
 	return requests, nil
 }
+
+
+func DeleteGroupInteraction(groupID, userID uuid.UUID, interactionType bool) error {
+    condition := "group_id = ? AND user_id = ? AND interaction_type = ?"
+    _, err := utils.Delete("group_interactions", condition, groupID, userID, interactionType)
+    return err
+}

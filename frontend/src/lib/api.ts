@@ -164,7 +164,7 @@ export const joinGroup = async (groupID: string, userId: string): Promise<boolea
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ group_id: groupID, user_id: userId }),
+        body: JSON.stringify({ group_id: groupID, user_id: userId, accept:true }),
       });
   
       console.log("Request sent to /group/join:", {
