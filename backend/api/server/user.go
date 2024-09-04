@@ -102,7 +102,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-
 	// Check if the profile is private
 	if profileUser.ProfileExposure == "Private" && user != nil {
 		// Check if the session user is one of the profile's followers
@@ -540,14 +539,14 @@ func HandlePeople(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a response structure
-	type UserResponse struct {
-		models.UserModel
-		IsFollowing bool `json:"is_follower"`
-	}
+	// type UserResponse struct {
+	// 	models.UserModel
+	// 	IsFollowing bool `json:"is_follower"`
+	// }
 
-	var userResponses []UserResponse
+	// var userResponses []UserResponse
 
-	for _, user := range users {
+	for i, user := range users {
 		isFollowing, err := models.IsFollowing(authUser.User.UserID, user.UserID)
 		if err != nil {
 			log.Println("HandlePeople: Error checking follower status", err)
@@ -555,12 +554,24 @@ func HandlePeople(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		userResponses = append(userResponses, UserResponse{
-			UserModel:   user,
-			IsFollowing: isFollowing,
-		})
+		Reuested, err := models.GetPendingRequest(user.UserID, authUser.User.UserID)
+		if err != nil {
+			log.Println("HandlePeople: Error checking follower status", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		users[i].IsFollowed = isFollowing
+		if Reuested.RequestID != uuid.Nil {
+			users[i].IsReuested = true
+		}
+
+		// userResponses = append(userResponses, UserResponse{
+		// 	UserModel:   user,
+		// 	IsFollowing: isFollowing,
+		// })
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(userResponses)
+	json.NewEncoder(w).Encode(users)
 }
