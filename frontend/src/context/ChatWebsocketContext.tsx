@@ -14,6 +14,8 @@ import React, {
   ReactNode,
 } from "react";
 
+import Cookies from "js-cookie";
+
 // Defines the shape of the WebSocket context, providing access to the WebSocket connection
 // and a function to set the callback for handling incoming messages.
 interface WebSocketContextType {
@@ -46,6 +48,9 @@ export const ChatWebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
   useEffect(() => {
     const connect = () => {
+      if (!Cookies.get("session_id")) {
+        return
+      }
       const ws = new WebSocket("ws://localhost:8080/ws");
 
       ws.onopen = () => {
@@ -54,7 +59,7 @@ export const ChatWebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
       ws.onclose = () => {
         console.log("Chat WebSocket connection closed. Reconnecting...");
-        setTimeout(connect, 5000); // Attempt to reconnect after 5 seconds
+        // setTimeout(connect, 5000); // Attempt to reconnect after 5 seconds
       };
 
       ws.onerror = (error) => {

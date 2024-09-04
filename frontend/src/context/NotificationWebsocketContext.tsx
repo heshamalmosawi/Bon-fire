@@ -14,6 +14,8 @@ import React, {
   ReactNode,
 } from "react";
 
+import Cookies from "js-cookie";
+
 interface WebSocketContextType {
   socket: WebSocket | null;
   setOnMessage: (callback: (event: MessageEvent) => void) => void;
@@ -44,6 +46,9 @@ export const NotificationWebSocketProvider: React.FC<
 
   useEffect(() => {
     const connect = () => {
+      if (!Cookies.get("session_id")) {
+        return
+      }
       const ws = new WebSocket("ws://localhost:8080/subscribe");
 
       ws.onopen = () => {

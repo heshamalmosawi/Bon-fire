@@ -16,6 +16,8 @@ const CookieCheckProvider: React.FC<CookieCheckProviderProps> = ({
 
   useEffect(() => {
     const checkCookie = () => {
+      console.log("running cookie check");
+      
       try {
         const cookie = Cookies.get("session_id");
         if (!cookie && pathName !== "/auth") {

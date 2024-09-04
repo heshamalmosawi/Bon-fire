@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import { ChatWebSocketProvider } from "@/context/ChatWebsocketContext";
-import { NotificationWebSocketProvider } from "@/context/NotificationWebsocketContext";
-import { NotificationProvider } from "@/context/NotificationContext";
-import { CookieCheckProvider } from "@/context/CookieCheckContext";
+import BonfireProvider from "@/context/BonfireProvider";
 
 export const metadata: Metadata = {
   title: "Bonfire",
@@ -19,14 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <CookieCheckProvider>
-          <ChatWebSocketProvider>
-            <NotificationWebSocketProvider>
-              <NotificationProvider>{children}</NotificationProvider>
-            </NotificationWebSocketProvider>
-          </ChatWebSocketProvider>
+        <BonfireProvider>
+          <main>{children}</main>
           <Toaster />
-        </CookieCheckProvider>
+        </BonfireProvider>
       </body>
     </html>
   );
