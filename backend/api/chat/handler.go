@@ -21,18 +21,18 @@ var upgrader = websocket.Upgrader{
 
 // Handles the WebSocket connections
 func HandleConnections(w http.ResponseWriter, r *http.Request) {
+	userSession, err := middleware.Auth(r)
+	if err != nil {
+		log.Printf("Failed to get session for sessionID %v", err)
+		return
+	}
+	
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Failed to upgrade to WebSocket: %v", err)
 		return
 	}
 	defer ws.Close()
-
-	userSession, err := middleware.Auth(r)
-	if err != nil {
-		log.Printf("Failed to get session for sessionID %s: %v", userSession.ID, err)
-		return
-	}
 
 	userID := userSession.User.UserID.String()
 

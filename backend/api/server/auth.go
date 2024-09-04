@@ -83,7 +83,6 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-
 // Signup handles user registration by decoding the JSON payload, saving the user information to the database.
 // It responds with the appropriate HTTP status code based on the success or failure of these operations.
 
@@ -186,8 +185,8 @@ func authenticate(w http.ResponseWriter, r *http.Request) {
 			Expires: time.Unix(0, 0),
 			MaxAge:  -1,
 		}
-	
-		http.SetCookie(w, &expiringCookie)	
+
+		http.SetCookie(w, &expiringCookie)
 		w.WriteHeader(http.StatusUnauthorized)
 		log.Print("authenticate: Error authenticating user: ", err)
 	}
