@@ -294,6 +294,23 @@ const GroupPage = () => {
                 >
                   Requests
                 </button>
+
+                
+              )}
+                 {groupProfile.ownerName === sessionUser && (
+                <button
+                  id="Find members"
+                  onClick={() => setActiveTab("find")}
+                  className={`p-2 rounded-lg ${
+                    activeTab === "find"
+                      ? "text-white bg-indigo-500"
+                      : "text-gray-400"
+                  }`}
+                >
+                  Find Members
+                </button>
+
+                
               )}
 
               {/* Show the "Leave" button only if the user is not the owner */}
@@ -419,6 +436,11 @@ const GroupPage = () => {
               {activeTab === "description" && (
                 <div>
                   <h1>{groupProfile.description}</h1>
+                </div>
+              )}
+               {activeTab === "find" && (
+                <div>
+                  <h1>fetch the users and ask them to join</h1>
                 </div>
               )}
               {activeTab === "events" && <EventsList />}
