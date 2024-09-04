@@ -12,6 +12,7 @@ import { fetchSessionUser} from '@/lib/api';
 
 const MessagesPage = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [sessionUser, setSessionUser] = useState("");
   const [u_id, setU_id] = useState<string | undefined>(undefined);
   const router = useRouter();
@@ -28,6 +29,7 @@ const MessagesPage = () => {
         // const data = await user.json();
         console.log("authentication data:", data.User.user_id);
         setSessionUser(data.User.user_id);
+        setUser(data.User);
         console.log("u_id:", u_id);
         if (u_id === undefined) {
           setU_id(data.User.user_id);
@@ -38,6 +40,7 @@ const MessagesPage = () => {
     getSessionUser();
   }, []);
 
+  
 
   return (
     <div className="w-screen h-screen flex bg-neutral-950">
@@ -46,7 +49,7 @@ const MessagesPage = () => {
         <div className="text-xl font-semibold h-[8%] flex items-center pl-10">Messages</div>
         <div className="flex w-full h-[92%] border border-customborder">
           <UserList onSelectUser={setSelectedUser} sessionUser={sessionUser} />
-          <Chat selectedUser={selectedUser} sessionUser={sessionUser} />
+          <Chat selectedUser={selectedUser} sessionUser={user} />
         </div>
       </div>
     </div>
