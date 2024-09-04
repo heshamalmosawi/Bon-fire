@@ -11,19 +11,16 @@ import React, {
   useContext,
   useEffect,
   useState,
+  useRef,
   ReactNode,
 } from "react";
-
 import Cookies from "js-cookie";
 
-// Defines the shape of the WebSocket context, providing access to the WebSocket connection
-// and a function to set the callback for handling incoming messages.
 interface WebSocketContextType {
   socket: WebSocket | null;
   setOnMessage: (callback: (event: MessageEvent) => void) => void;
 }
 
-// Creates the context with an initial undefined value.
 const ChatWebSocketContext = createContext<WebSocketContextType | undefined>(
   undefined
 );
@@ -42,14 +39,12 @@ export const ChatWebSocketProvider: React.FC<WebSocketProviderProps> = ({
   children,
 }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [onMessageCallback, setOnMessageCallback] = useState<
-    (event: MessageEvent) => void
-  >(() => () => {});
+  const onMessageCallbackRef = useRef<(event: MessageEvent) => void>(() => {});
 
   useEffect(() => {
     const connect = () => {
       if (!Cookies.get("session_id")) {
-        return
+        return;
       }
       const ws = new WebSocket("ws://localhost:8080/ws");
 
@@ -58,8 +53,8 @@ export const ChatWebSocketProvider: React.FC<WebSocketProviderProps> = ({
       };
 
       ws.onclose = () => {
-        console.log("Chat WebSocket connection closed. Reconnecting...");
-        // setTimeout(connect, 5000); // Attempt to reconnect after 5 seconds
+        console.log("Chat WebSocket connection closed.");
+        // Reconnection logic has been disabled
       };
 
       ws.onerror = (error) => {
@@ -67,8 +62,8 @@ export const ChatWebSocketProvider: React.FC<WebSocketProviderProps> = ({
       };
 
       ws.onmessage = (event) => {
-        if (onMessageCallback) {
-          onMessageCallback(event);
+        if (onMessageCallbackRef.current) {
+          onMessageCallbackRef.current(event);
         }
       };
 
@@ -77,13 +72,13 @@ export const ChatWebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
     connect(); // Initial connection attempt
 
-    // Clean up WebSocket connection on component unmount
     return () => {
       if (socket) {
+        socket.onclose = null; // Remove any onclose handlers to prevent reconnection
         socket.close();
       }
     };
-  }, [onMessageCallback]);
+  }, []); // Run only on initial mount
 
   /**
    * setOnMessage is a function that allows components to set a callback
@@ -92,7 +87,7 @@ export const ChatWebSocketProvider: React.FC<WebSocketProviderProps> = ({
    * @param {function} callback - The callback function to handle incoming messages.
    */
   const setOnMessage = (callback: (event: MessageEvent) => void) => {
-    setOnMessageCallback(() => callback);
+    onMessageCallbackRef.current = callback;
   };
 
   return (

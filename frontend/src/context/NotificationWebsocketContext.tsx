@@ -12,6 +12,7 @@ import React, {
   useEffect,
   useState,
   ReactNode,
+  useRef,
 } from "react";
 
 import Cookies from "js-cookie";
@@ -40,14 +41,12 @@ export const NotificationWebSocketProvider: React.FC<
   WebSocketProviderProps
 > = ({ children }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [onMessageCallback, setOnMessageCallback] = useState<
-    (event: MessageEvent) => void
-  >(() => () => {});
+  const onMessageCallbackRef = useRef<(event: MessageEvent) => void>(() => {});
 
   useEffect(() => {
     const connect = () => {
       if (!Cookies.get("session_id")) {
-        return
+        return;
       }
       const ws = new WebSocket("ws://localhost:8080/subscribe");
 
@@ -56,10 +55,8 @@ export const NotificationWebSocketProvider: React.FC<
       };
 
       ws.onclose = () => {
-        console.log(
-          "Notification WebSocket connection closed. Reconnecting..."
-        );
-        setTimeout(connect, 5000); // Attempt to reconnect after 5 seconds
+        console.log("Notification WebSocket connection closed.");
+        // Reconnection logic has been disabled
       };
 
       ws.onerror = (error) => {
@@ -67,8 +64,8 @@ export const NotificationWebSocketProvider: React.FC<
       };
 
       ws.onmessage = (event) => {
-        if (onMessageCallback) {
-          onMessageCallback(event);
+        if (onMessageCallbackRef.current) {
+          onMessageCallbackRef.current(event);
         }
       };
 
@@ -77,16 +74,15 @@ export const NotificationWebSocketProvider: React.FC<
 
     connect(); // Initial connection attempt
 
-    // Clean up WebSocket connection on component unmount
     return () => {
       if (socket) {
         socket.close();
       }
     };
-  }, [onMessageCallback]);
+  }, []); // Run only on initial mount
 
   const setOnMessage = (callback: (event: MessageEvent) => void) => {
-    setOnMessageCallback(() => callback);
+    onMessageCallbackRef.current = callback;
   };
 
   return (
