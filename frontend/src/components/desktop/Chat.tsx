@@ -5,7 +5,8 @@ import { User } from "@/components/desktop/UserList";
 import { Message } from "@/hooks/useWebSockets";
 import { Button } from "../ui/button";
 
-import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage, ChatBubbleTimestamp } from '@/components/chat/chat-bubble'
+import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage, ChatBubbleTimestamp } from '@/components/chat/chat-bubble';
+import { format } from 'date-fns'; // Import the 'format' function from 'date-fns'
 import { ChatInput } from '@/components/chat/chat-input'
 import { ExpandableChat, ExpandableChatHeader, ExpandableChatBody, ExpandableChatFooter } from '@/components/chat/expandable-chat'
 import { ChatMessageList } from '@/components/chat/chat-message-list'
@@ -25,7 +26,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
 
     // Define a function to handle incoming messages
   const handleMessage = (message: Message) => {
-    setChatHistory((prevHistory) => [...prevHistory, message]);
+    setChatHistory((prevHistory) => [ ...(prevHistory || []), message]);
   };
 
   useWebSocket("ws://localhost:8080/ws", sessionUser?.user_id ?? null, selectedUser?.user_id ?? null, handleMessage);
@@ -67,7 +68,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
       const response = await fetch(`http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}&lastMessageId=${lastMessageId}`);
       const data = await response.json();
       if (Array.isArray(data)) {
-        setChatHistory((prevHistory) => [...data, ...prevHistory]);  // Prepend the older messages
+        setChatHistory((prevHistory) => [...data, ...(prevHistory || [])]);  // Prepend the older messages
         console.log("Loaded more messages:", data);
       }
       setLoadingHistory(false);
@@ -117,7 +118,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
       };
 
       // Update chat history only here
-      setChatHistory((prevHistory) => [...prevHistory, newChatMessage]);
+      setChatHistory((prevHistory) => [ ...(prevHistory || []), newChatMessage]);
       setNewMessage("");
 
       console.log("Chat history:", chatHistory);
@@ -134,16 +135,19 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
 
         if (!response.ok) {
           console.error("Failed to store message:", response.statusText);
+        } else {
+          console.log("clear");
+          setNewMessage("");
         }
       } catch (error) {
         console.error("Error storing message:", error);
-      }
-        
+      } 
     }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       handleSendMessage();
     }
   };
@@ -190,7 +194,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
                   <ChatBubbleMessage variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
                     {msg.message_content}
                   </ChatBubbleMessage>
-                  <ChatBubbleTimestamp timestamp={new Date().toLocaleTimeString()} />
+                  <ChatBubbleTimestamp timestamp={msg.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
                 </ChatBubble>
                 // <div
                 //   key={index}
@@ -211,7 +215,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
                   <ChatBubbleMessage variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
                     {msg.message_content}
                   </ChatBubbleMessage>
-                  <ChatBubbleTimestamp timestamp={new Date().toLocaleTimeString()} />
+                  <ChatBubbleTimestamp timestamp={msg.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
                 </ChatBubble>
               ))}
             </>
