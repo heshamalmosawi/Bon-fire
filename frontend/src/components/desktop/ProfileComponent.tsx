@@ -4,6 +4,7 @@ import EditProfile from "../EditProfile";
 import { handleFollow } from '@/lib/api';
 import { Profile } from "@/lib/interfaces";
 import { log } from "console";
+import Link from "next/link";
 
 interface ProfileProps extends Profile {
     session_user: string;
@@ -113,15 +114,23 @@ export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson, session_
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {Array.isArray(onSelectPerson) && onSelectPerson.map((person) => (
                         <div key={person.user_id} className="bg-neutral-950 rounded-lg overflow-hidden shadow-md text-white">
-                            <Avatar className="w-32 h-32 rounded-full mx-auto object-cover mt-5">
-                                <AvatarImage src={person.user_avatar_path} />
-                                <AvatarFallback>{person.user_fname.charAt(0) + person.user_lname.charAt(0)}</AvatarFallback>
-                            </Avatar>
+                            <Link href={`/profile/${person.user_id}`} legacyBehavior>
+                                <a>
+                                    <Avatar className="w-32 h-32 rounded-full mx-auto object-cover mt-5">
+                                        <AvatarImage src={person.user_avatar_path} />
+                                        <AvatarFallback>{person.user_fname.charAt(0) + person.user_lname.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                </a>
+                            </Link>
                             <div className="p-4">
-                                <h3 className="text-lg font-semibold">{person.user_fname} {person.user_lname}</h3>
-                                <div className="mt-2 text-sm">
-                                    <p>{person.profile_exposure}</p>
-                                </div>
+                                <Link href={`/profile/${person.user_id}`} legacyBehavior>
+                                    <a>
+                                        <h3 className="text-lg font-semibold">{person.user_fname} {person.user_lname}</h3>
+                                        <div className="mt-2 text-sm">
+                                            <p>{person.profile_exposure}</p>
+                                        </div>
+                                    </a>
+                                </Link>
                                 {person.is_followed ? (
                                     <button onClick={() => handleFollow(person.user_id)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
                                         Unfollow
@@ -130,7 +139,7 @@ export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson, session_
                                     <button onClick={() => handleFollow(person.user_id)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
                                         Follow Request Pending
                                     </button>
-                                ) : person.user_id !== session_user? (
+                                ) : person.user_id !== session_user ? (
                                     <button onClick={() => handleFollow(person.user_id)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
                                         You
                                     </button>
