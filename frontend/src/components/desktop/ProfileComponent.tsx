@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import EditProfile from "../EditProfile";
 import { handleFollow } from '@/lib/api';
 import { Profile } from "@/lib/interfaces";
+import { log } from "console";
 
 interface ProfileProps extends Profile {
     session_user: string;
@@ -10,21 +11,29 @@ interface ProfileProps extends Profile {
     save_changes: Function;
 }
 
-export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, dob, avatarUrl, bio, nickname, session_user, u_id, privacy, is_followed, save_changes }) => {
+export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, dob, avatarUrl, bio, nickname, session_user, u_id, privacy, is_followed, is_requested, save_changes }) => {
     const [followbtn_message, setFollowbtn_message] = useState("");
     console.log("is followed:", is_followed, privacy);
+    console.log("is requested:", is_requested);
     useEffect(() => {
         if (session_user && session_user !== u_id) {
             if (is_followed === true) {
                 setFollowbtn_message("Unfollow");
             } else {
                 if (privacy === "Private") {
-                    setFollowbtn_message("Request to Follow");
+                    // console.log("is_requested:", is_requested);
+                    if (is_requested === true) {
+                        setFollowbtn_message("Follow Request Sent");
+                    } else {
+                        console.log("not req:", is_requested);
+                        setFollowbtn_message("Request to Follow");
+                    }
                 } else {
                     setFollowbtn_message("Follow");
-                } 
+                }
             }
-    }}, [is_followed, privacy]);
+        }
+    }, [is_followed, privacy, is_requested]);
 
     return (
         <div id="profile" className="relative -top-24 w-1/3 space-y-6">
@@ -49,7 +58,7 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, 
                     <br /> <br />
                     <h3 className="text-lg font-semibold mb-2">Birthday</h3>
                     <span className="mb-4">
-                    {new Date(dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        {new Date(dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </span>
                     <br /> <br />
                     <h3 className="text-lg font-semibold mb-2">About</h3>

@@ -57,4 +57,5 @@ export interface Profile {
   nickname: string;
   privacy: string;
   is_followed: boolean;
+  is_requested: boolean;
 }

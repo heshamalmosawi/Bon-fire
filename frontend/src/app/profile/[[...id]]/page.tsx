@@ -10,7 +10,7 @@ import { Profile } from "@/lib/interfaces";
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
-  const [profile, setProfile] = useState<Profile>({ fname: "", lname: "", email: "", dob: "", avatarUrl: "", bio: "", nickname: "", privacy: "", is_followed: false });
+  const [profile, setProfile] = useState<Profile>({ fname: "", lname: "", email: "", dob: "", avatarUrl: "", bio: "", nickname: "", privacy: "", is_followed: false, is_requested: false });
 
   // just used as a flag.
   let [fetched, setFetched] = useState(false);
@@ -66,13 +66,15 @@ const ProfilePage = () => {
     notFound();
   }
 
-  useEffect(() => {
+  useEffect(() => {setProfile
     if (!data) {
       return;
     }
+    console.log("first set", data.user.is_requested);
     setProfile({
       ...profile,
-      is_followed: data.user.is_followed
+      is_followed: data.user.is_followed,
+      is_requested: data.user.is_requested
     });
   }, [data]);
 
@@ -83,7 +85,8 @@ const ProfilePage = () => {
 
     // data response only returns private, if the public is private and the user is not the user in session
     if (data && data.response === "Private") {
-      setProfile({ ...profile, privacy: "Private", is_followed: data.user.is_followed }); // unnecessary but just in case 
+      console.log("request:", data.user.is_requested);
+      setProfile({ ...profile, privacy: "Private", is_followed: data.user.is_followed, is_requested: data.user.is_requested }); // unnecessary but just in case 
       return <p>This user's profile is private</p>;
     }
 
@@ -163,7 +166,7 @@ const ProfilePage = () => {
 
           <div className="flex items-start space-x-6">
             {/* <!-- Profile Info --> */}
-            <ProfileComponent {...profile} session_user={sessionUser} u_id={u_id} save_changes={updateProf} />
+            <ProfileComponent {...profile} is_requested={profile.is_requested} session_user={sessionUser} u_id={u_id} save_changes={updateProf} />
 
             {/* <!-- Timeline --> */}
             {(profile.privacy == "Public" || u_id === sessionUser || profile.is_followed) ? (

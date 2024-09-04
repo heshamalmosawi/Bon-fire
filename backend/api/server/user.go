@@ -42,16 +42,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	var user *models.UserModel
-	// Retrieve the user based on the session information
-	if err == nil || session_id != nil {
-		session, err1 := pkgs.MainSessionManager.GetSession(session_id.Value)
-		if err1 == nil {
-			user = session.User
-		}
-
-	}
-
 	theUrl := r.URL.Path
 
 	urlParts := strings.Split(theUrl, "/")
@@ -66,14 +56,15 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// if no profile user id is provided, use the session user id
 	var profileUserIDUUID uuid.UUID
+	var err1 error
 	if profileUserID == "" {
 		log.Println("HandleProfile: No profile user ID provided")
 		http.Error(w, "HandleProfile: Cannot get user profile", http.StatusBadRequest)
 		return
 	} else {
 		// get the profile user uuid
-		profileUserIDUUID, err = uuid.FromString(profileUserID)
-		if err != nil {
+		profileUserIDUUID, err1 = uuid.FromString(profileUserID)
+		if err1 != nil {
 			log.Println("the user id:", profileUserID)
 			log.Println("HandleProfile: Error converting profileUserID to UUID", err, profileUserID)
 			http.Error(w, "Bad Request", http.StatusBadRequest)
@@ -81,14 +72,36 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	profileUser, err := models.GetUserByID(profileUserIDUUID)
-	if err != nil {
+	profileUser, err3 := models.GetUserByID(profileUserIDUUID)
+	if err3 != nil {
 		log.Println("HandleProfile: Error getting profile user by ID", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	} else {
 		log.Println("HandleProfile: profileUser", profileUser)
 	}
+
+	var user *models.UserModel
+	// Retrieve the user based on the session information
+	if err == nil || session_id != nil {
+		session, err1 := pkgs.MainSessionManager.GetSession(session_id.Value)
+		if err1 == nil {
+			user = session.User
+			followrequestcheck, err := models.GetPendingRequest(profileUserIDUUID, user.UserID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting follow request:", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			if followrequestcheck.RequestID != uuid.Nil {
+				profileUser.IsReuested = true
+				log.Println("HandleProfile: profileUser, update", profileUser)
+			} else {
+				log.Println("HandleProfile: profileUser, no update", profileUser)
+			}
+		}
+	}
+
 
 	// Check if the profile is private
 	if profileUser.ProfileExposure == "Private" && user != nil {
