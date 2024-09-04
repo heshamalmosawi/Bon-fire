@@ -13,8 +13,16 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
   const [newMessage, setNewMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
-  const { messages, sendMessage } = useWebSocket("ws://localhost:8080/ws", selectedUser?.user_id ?? null, sessionUser);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
+
+
+    // Define a function to handle incoming messages
+    const handleMessage = (message: Message) => {
+      setChatHistory((prevHistory) => [...prevHistory, message]);
+    };
+  
+    useWebSocket("ws://localhost:8080/ws", sessionUser, selectedUser?.user_id ?? null, handleMessage);
+  
 
 
   useEffect(() => {
@@ -28,7 +36,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [chatHistory, messages]);
+  }, [chatHistory]);
 
   const loadInitialChatHistory = async () => {
     try {
@@ -86,17 +94,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
-      const messageObject = {
-        from: sessionUser,
-        to: selectedUser?.user_id,
-        message: newMessage,
-        // !! New Field names for thew new message interface
-        sender_id: sessionUser,
-        recipient_id: selectedUser?.user_id,
-        message_content: newMessage,
-      };
-      
-      sendMessage(JSON.stringify(messageObject));
 
       const newChatMessage : Message = {
         sender_id: sessionUser,
@@ -104,12 +101,27 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
         message_content: newMessage,
       };
 
+      // sendMessage(JSON.stringify(newChatMessage));
 
-      if (chatHistory == null) {
-        setChatHistory([newChatMessage]);
-      } else {
-        setChatHistory([...chatHistory, newChatMessage]);
-      }
+      const messageString = JSON.stringify(newChatMessage);
+      const ws = new WebSocket("ws://localhost:8080/ws");
+      ws.onopen = () => {
+        ws.send(messageString);
+      };
+
+      // Update chat history only here
+      setChatHistory((prevHistory) => [...prevHistory, newChatMessage]);
+
+      setNewMessage("");
+
+
+
+
+      // if (chatHistory == null) {
+      //   setChatHistory([newChatMessage]);
+      // } else {
+      //   setChatHistory([...chatHistory, newChatMessage]);
+      // }
       console.log("Chat history:", chatHistory);
   
       // Store the message in the database
@@ -129,7 +141,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
         console.error("Error storing message:", error);
       }
         
-      setNewMessage(""); 
+      // setNewMessage(""); 
     }
   };
   
@@ -142,11 +154,11 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
   // Handle filtering of messages to show only those exchanged between sessionUser and selectedUser
   const handleMessages = (): Message[] => {
     return (
-      Array.isArray(messages)
-        ? messages.filter(
+      Array.isArray(chatHistory)
+        ? chatHistory.filter(
             (msg) =>
-              (msg.sender_id === selectedUser?.user_id  && msg.recipient_id  === sessionUser) ||
-              (msg.sender_id === sessionUser && msg.recipient_id  === selectedUser?.user_id)
+              (msg.sender_id === selectedUser?.user_id && msg.recipient_id === sessionUser) ||
+              (msg.sender_id === sessionUser && msg.recipient_id === selectedUser?.user_id)
           )
         : []
     );

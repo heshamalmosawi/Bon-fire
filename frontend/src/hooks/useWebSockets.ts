@@ -9,52 +9,21 @@ export interface Message {
 }
 
 
-interface History {
-  type: string;
-  payload: {
-    user1: string;
-    user2: string;
-    msgs: Message[];
-  };
-}
-
-
-const useWebSocket = (url: string, user1: string | null, user2: string | null) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+const useWebSocket = (url: string, senderId: string | null, recipientId: string | null, handleMessage: (message: Message) => void) => {
   const [ws, setWs] = useState<WebSocket | null>(null);
 
   useEffect(() => {
     const socket = new WebSocket(url);
-    setWs(socket);
+    // setWs(socket);
 
     socket.onopen = () => {
       console.log("WebSocket connected");
-      // send a history request
-      if (user1 && user2) {
-        const historyRequest = {
-          type: 'history',
-          payload: {
-            user1: user1,
-            user2: user2,
-            msgs: [],
-          }
-        }
-
-        socket.send(JSON.stringify(historyRequest));
-      }
-
     };
 
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("WebSocket message:", data);
-      if (data.type === 'history') {
-        setMessages(data.payload.msgs);
-      } else {
-        // check if previous messages iterable
-        if (Symbol.iterator in Object(messages) && messages.length > 0) {
-          setMessages((prevMessages) => [...prevMessages, data.payload as Message]);
-        }
+      const message: Message = JSON.parse(event.data);
+      if (message.sender_id === senderId || message.sender_id === recipientId) {
+        handleMessage(message);
       }
     };
 
@@ -69,28 +38,18 @@ const useWebSocket = (url: string, user1: string | null, user2: string | null) =
     return () => {
       socket.close();
     };
-  }, [url, user1, user2]);
-
-console.log("messages:", messages);
+  }, [url, senderId, recipientId, handleMessage]);
 
   const sendMessage = (message: string) => {
-    console.log("ws:", ws);
     if (ws && ws.readyState === WebSocket.OPEN) {
-      const chatMessage = {
-        type: 'chat',
-        payload: JSON.parse(message),
-      };
-      ws.send(JSON.stringify(chatMessage));
-      setMessages((prevMessages = []) => [
-        ...prevMessages,
-        chatMessage.payload,
-      ]);
+      ws.send(message);
     } else {
       console.error("WebSocket is not connected or still connecting");
     }
   };
 
-  return { messages, sendMessage };
+  return { sendMessage };
 };
+
 
 export default useWebSocket;
