@@ -107,6 +107,7 @@ export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) 
                     nickname: data.user.user_nickname,
                     privacy: data.user.profile_exposure,
                     is_followed: data.user.is_followed,
+                    is_requested: data.user.is_requested,
                 });
             } else {
                 console.error("User data is null or undefined", data);
