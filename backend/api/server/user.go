@@ -144,20 +144,33 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		}
 		var followers []models.UserModel
 		for _, follower := range user_followers {
-			user, err := models.GetUserByID(follower.FollowerID)
+			userf, err := models.GetUserByID(follower.FollowerID)
 			if err != nil {
 				log.Println("HandleProfile: Error getting user by ID", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
-			isFollowing, err := models.IsFollowing(user.UserID, profileUserIDUUID)
-			if err != nil {
-				log.Println("HandleProfile: Error checking if user is a follower", err)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				return
+
+			if user != nil {
+				isFollowing, err := models.IsFollowing(user.UserID, userf.UserID)
+				if err != nil {
+					log.Println("HandleProfile: Error checking if user is a follower", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+
+				isReusted, err := models.GetPendingRequest(userf.UserID, user.UserID)
+				if err != nil {
+					log.Println("HandleProfile: Error getting follow request:", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				if isReusted.RequestID != uuid.Nil {
+					userf.IsReuested = true
+				}
+				userf.IsFollowed = isFollowing
 			}
-			profileUser.IsFollowed = isFollowing
-			followers = append(followers, *user)
+			followers = append(followers, *userf)
 		}
 		response = followers
 
@@ -171,20 +184,33 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		}
 		var followings []models.UserModel
 		for _, following := range user_followings {
-			user, err := models.GetUserByID(following.FollowerID)
+			userf, err := models.GetUserByID(following.FollowerID)
 			if err != nil {
 				log.Println("HandleProfile: Error getting user by ID", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
-			isFollowing, err := models.IsFollowing(profileUserIDUUID, user.UserID)
-			if err != nil {
-				log.Println("HandleProfile: Error checking if user is a follower", err)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				return
+
+			if user != nil {
+				isFollowing, err := models.IsFollowing(user.UserID, userf.UserID)
+				if err != nil {
+					log.Println("HandleProfile: Error checking if user is a follower", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+
+				isReusted, err := models.GetPendingRequest(userf.UserID, user.UserID)
+				if err != nil {
+					log.Println("HandleProfile: Error getting follow request:", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				if isReusted.RequestID != uuid.Nil {
+					userf.IsReuested = true
+				}
+				userf.IsFollowed = isFollowing
 			}
-			profileUser.IsFollowed = isFollowing
-			followings = append(followings, *user)
+			followings = append(followings, *userf)
 		}
 		response = followings
 

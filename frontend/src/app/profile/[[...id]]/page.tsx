@@ -111,11 +111,11 @@ const ProfilePage = () => {
         )) : <p>No likes available.</p>;
       case 'followers':
         return data.response ? (
-          <PeopleList onSelectPerson={data.response} />
+          <PeopleList onSelectPerson={data.response} session_user={data.user.user_id} />
         ) : <p>No followers available.</p>;
       case 'followings':
         return data.response ? (
-          <PeopleList onSelectPerson={data.response} />
+          <PeopleList onSelectPerson={data.response} session_user={data.user.user_id} />
         ) : <p>No followings available.</p>;
       default:
         return null;

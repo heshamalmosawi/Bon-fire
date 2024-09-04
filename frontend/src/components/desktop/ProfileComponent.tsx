@@ -78,14 +78,16 @@ interface Person {
     profile_exposure: string;
     user_avatar_path: string;
     is_followed: boolean;
+    is_requested: boolean;
     response: Array<Person>;
 }
 
 interface PeopleListProps {
     onSelectPerson: (person: Person) => void;
+    session_user: string;
 }
 
-export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson }) => {
+export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson, session_user }) => {
     const [people, setPeople] = useState<Person[]>([]);
     const [followers, setFollowers] = useState<Person[]>([]);
     const [followings, setFollowings] = useState<Person[]>([]);
@@ -123,6 +125,14 @@ export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson }) => {
                                 {person.is_followed ? (
                                     <button onClick={() => handleFollow(person.user_id)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
                                         Unfollow
+                                    </button>
+                                ) : person.is_requested ? (
+                                    <button onClick={() => handleFollow(person.user_id)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
+                                        Follow Request Pending
+                                    </button>
+                                ) : person.user_id !== session_user? (
+                                    <button onClick={() => handleFollow(person.user_id)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
+                                        You
                                     </button>
                                 ) : (
                                     <button onClick={() => handleFollow(person.user_id)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
