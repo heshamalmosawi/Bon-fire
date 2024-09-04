@@ -26,7 +26,7 @@ func HandleSubscription(w http.ResponseWriter, r *http.Request) {
 
 	userSession, err := middleware.Auth(r)
 	if err != nil {
-		log.Printf("Failed to get session for sessionID %s: %v", userSession.ID, err)
+		log.Printf("Failed to get session for sessionID %v", err)
 		return
 	}
 
