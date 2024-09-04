@@ -1,15 +1,8 @@
-/**
- * This file defines a context for managing the cookie state for authentication
- *
- * The context allows for the application to detect when the cookie has expired by
- * polling for it every 2 seconds, and routing to `/auth` if it doesn't exist 
- */
-
 import React, { createContext, useEffect, ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Cookies from "js-cookie";
 
-const CookieCheckContext = createContext<any | undefined>(undefined);
+const CookieCheckContext = createContext<void | undefined>(undefined);
 
 interface CookieCheckProviderProps {
   children: ReactNode;
@@ -19,12 +12,17 @@ const CookieCheckProvider: React.FC<CookieCheckProviderProps> = ({
   children,
 }) => {
   const router = useRouter();
+  const pathName = usePathname();
 
   useEffect(() => {
     const checkCookie = () => {
-      const cookie = Cookies.get("session_id");
-      if (!cookie) {
-        router.push("/auth");
+      try {
+        const cookie = Cookies.get("session_id");
+        if (!cookie && pathName !== "/auth") {
+          router.push("/auth");
+        }
+      } catch (error) {
+        console.error("Error checking cookie:", error);
       }
     };
 
@@ -32,10 +30,10 @@ const CookieCheckProvider: React.FC<CookieCheckProviderProps> = ({
 
     // Clear interval on component unmount
     return () => clearInterval(intervalId);
-  }, [router]);
+  }, [router, pathName]);
 
   return (
-    <CookieCheckContext.Provider value={{}}>
+    <CookieCheckContext.Provider value={undefined}>
       {children}
     </CookieCheckContext.Provider>
   );
