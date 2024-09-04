@@ -1,11 +1,12 @@
 package server
 
 import (
-	"bonfire/pkgs/models"
-	"bonfire/pkgs/utils"
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"bonfire/pkgs/models"
+	"bonfire/pkgs/utils"
 )
 
 // HandleMessages handles the messages route.
@@ -93,7 +94,12 @@ func HandleStoreMessages(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	message.MessageTime = time.Now()
+	messageTime, err := time.Parse("2006-01-02 15:04:05", time.Now().Format("2006-01-02 15:04:05"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	message.MessageTime = messageTime
 	// Save the message to the database
 	if err := message.Save(); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -101,6 +101,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
         chatContainer.removeEventListener("scroll", handleScroll);  // Cleanup event listener
       };
     }
+    setNewMessage("");
   }, [chatHistory]);  // Re-attach scroll listener if chat history changes
 
   const handleSendMessage = async () => {
@@ -206,7 +207,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
                 //   </strong> {msg.message_content}
                 // </div>
               ))}
-              {handleMessages().map((msg, index) => (
+              {/* {handleMessages().map((msg, index) => (
                 <ChatBubble key={index} variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
                   <ChatBubbleAvatar
                     src={msg.sender_id === sessionUser?.user_id ? sessionUser?.user_id : selectedUser.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"}
@@ -217,7 +218,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
                   </ChatBubbleMessage>
                   <ChatBubbleTimestamp timestamp={msg.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
                 </ChatBubble>
-              ))}
+              ))} */}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full bg-black">
