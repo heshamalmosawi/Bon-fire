@@ -5,7 +5,8 @@ import { User } from "@/components/desktop/UserList";
 import { Message } from "@/hooks/useWebSockets";
 import { Button } from "../ui/button";
 
-import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage, ChatBubbleTimestamp } from '@/components/chat/chat-bubble'
+import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage, ChatBubbleTimestamp } from '@/components/chat/chat-bubble';
+import { format } from 'date-fns'; // Import the 'format' function from 'date-fns'
 import { ChatInput } from '@/components/chat/chat-input'
 import { ExpandableChat, ExpandableChatHeader, ExpandableChatBody, ExpandableChatFooter } from '@/components/chat/expandable-chat'
 import { ChatMessageList } from '@/components/chat/chat-message-list'
@@ -154,6 +155,9 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
 
         if (!response.ok) {
           console.error("Failed to store message:", response.statusText);
+        } else {
+          console.log("clear");
+          setNewMessage("");
         }
       } catch (error) {
         console.error("Error storing message:", error);
@@ -166,7 +170,8 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       handleSendMessage();
     }
   };
@@ -219,7 +224,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
                   <ChatBubbleMessage variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
                     {msg.message_content}
                   </ChatBubbleMessage>
-                  <ChatBubbleTimestamp timestamp={new Date().toLocaleTimeString()} />
+                  <ChatBubbleTimestamp timestamp={msg.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
                 </ChatBubble>
                 // <div
                 //   key={index}
@@ -240,7 +245,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
                   <ChatBubbleMessage variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
                     {msg.message_content}
                   </ChatBubbleMessage>
-                  <ChatBubbleTimestamp timestamp={new Date().toLocaleTimeString()} />
+                  <ChatBubbleTimestamp timestamp={msg.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
                 </ChatBubble>
               ))}
             </>
