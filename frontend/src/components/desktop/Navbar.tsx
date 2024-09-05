@@ -29,7 +29,7 @@ const Navbar = () => {
   };
 
   return (
-    <aside className="w-1/4 h-screen bg-black p-4 sticky top-0 left-0">
+    <aside className="w-1/4 h-screen bg-black p-4 sticky top-0 left-0 navbar">
       <DisplayLogo />
       <h3 className="text-lg font-semibold mb-4 text-white">Main Menu</h3>
       <nav className="space-y-4 gap-4">

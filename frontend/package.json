@@ -40,6 +40,7 @@
     "react-day-picker": "8.10.1",
     "react-dom": "^18",
     "react-hook-form": "^7.52.2",
+    "react-joyride": "^2.8.2",
     "shadcn": "^1.0.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
