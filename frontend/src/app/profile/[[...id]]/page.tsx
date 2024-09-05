@@ -66,11 +66,12 @@ const ProfilePage = () => {
     notFound();
   }
 
-  useEffect(() => {setProfile
-    if (!data) {
+  useEffect(() => {
+    if (!data || !data.user) {
       return;
+    } else if (data.user) {
+      console.log("first set", data.user.is_requested);
     }
-    console.log("first set", data.user.is_requested);
     setProfile({
       ...profile,
       is_followed: data.user.is_followed,
@@ -111,11 +112,12 @@ const ProfilePage = () => {
         )) : <p>No likes available.</p>;
       case 'followers':
         return data.response ? (
-          <PeopleList onSelectPerson={data.response} session_user={data.user.user_id} />
+          <PeopleList onSelectPerson={data.response} session_user={data.user.user_id} save_changes={setData}/>
         ) : <p>No followers available.</p>;
       case 'followings':
+        console.log("data:", data);
         return data.response ? (
-          <PeopleList onSelectPerson={data.response} session_user={data.user.user_id} />
+          <PeopleList onSelectPerson={data.response} session_user={data.user.user_id} save_changes={setData}/>
         ) : <p>No followings available.</p>;
       default:
         return null;
@@ -151,7 +153,7 @@ const ProfilePage = () => {
   }, []);
 
   const updateProf = (newprof: Profile) => {
-    const x = profile.avatarUrl
+    const x = profile.avatarUrl;
     setProfile({ ...newprof, avatarUrl: x });
   }
 
