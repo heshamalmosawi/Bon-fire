@@ -68,14 +68,24 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
           variant: "default",
           title: "Group Invite",
           description: message.noti_content,
-          action: <ToastAction altText="accept invite">Accept</ToastAction>,
+          action: (
+            <div className="flex flex-col gap-2">
+              <ToastAction altText="accept invite">Accept</ToastAction>
+              <ToastAction altText="Reject invite">Reject</ToastAction>
+            </div>
+          ),
         });
       } else if (message.noti_type === "join_request") {
         toast({
           variant: "default",
           title: "Group Join Request",
           description: message.noti_content,
-          action: <ToastAction altText="accept member">Accept</ToastAction>,
+          action: (
+            <div className="flex flex-col gap-2">
+              <ToastAction altText="accept invite">Accept</ToastAction>
+              <ToastAction altText="Reject invite">Reject</ToastAction>
+            </div>
+          ),
         });
       }
 
