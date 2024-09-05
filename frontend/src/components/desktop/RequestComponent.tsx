@@ -18,7 +18,7 @@ const RequestComponent: React.FC<RequestProps> = ({
     console.log(`Attempting to join group ${groupID} for user ${id}`);
     setIsLoading(true); // Set loading state to true
 
-    const success = await joinGroup(groupID, id); // Use userId and groupID for the joinGroup function
+    const success = await joinGroup(groupID, id,true); // Use userId and groupID for the joinGroup function
 
     if (success) {
       console.log(`User ${id} successfully joined group ${groupID}.`);
@@ -30,9 +30,13 @@ const RequestComponent: React.FC<RequestProps> = ({
     setIsLoading(false); // Reset loading state
   };
 
-  const handleIgnore = () => {
+  const handleIgnore = async () => {
     console.log(`Ignored request for user ${username} (ID: ${id})`);
-    onRequestHandled(id); // Remove the request from the list
+    const success = await joinGroup(groupID, id,false); 
+    if (success) {
+      console.log(`User ${id} successfully joined group ${groupID}.`);
+      onRequestHandled(id); // Remove the request from the list
+    }
   };
 
   return (
@@ -45,7 +49,7 @@ const RequestComponent: React.FC<RequestProps> = ({
           </Avatar>
           <div className="flex flex-col">
             <h2 className="text-white font-semibold">{username}</h2>
-            <h6 className="text-sm text-gray-400">{getAgo(creationDate)}</h6>
+            <h6 className="text-sm text-gray-400">{creationDate}</h6>
           </div>
         </div>
       </div>

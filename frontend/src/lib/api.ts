@@ -140,7 +140,7 @@ export const fetchRequest = async (groupID: string): Promise<RequestProps[] | nu
         return data.map((item) => ({
           id: item.user_sent.user_id,
           username: item.user_sent.user_nickname, // Ensure you map the correct fields
-          creationDate: new Date(item.InteractionTime).toLocaleString(),
+          creationDate: new Date(item.interaction_Time).toLocaleString(),
           avatarUrl: item.user_sent.userAvatarPath || "default-avatar-url.png" // Fallback for missing avatar
         }));
       } else {
@@ -154,7 +154,7 @@ export const fetchRequest = async (groupID: string): Promise<RequestProps[] | nu
   };
   
 // Function to join a group
-export const joinGroup = async (groupID: string, userId: string): Promise<boolean> => {
+export const joinGroup = async (groupID: string, userId: string, accept: boolean): Promise<boolean> => {
     console.log(`Attempting to join group ${groupID} with user ${userId}.`); // Debugging log
   
     try {
@@ -164,7 +164,7 @@ export const joinGroup = async (groupID: string, userId: string): Promise<boolea
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ group_id: groupID, user_id: userId, accept:true }),
+        body: JSON.stringify({ group_id: groupID, user_id: userId, accept:accept }),
       });
   
       console.log("Request sent to /group/join:", {
