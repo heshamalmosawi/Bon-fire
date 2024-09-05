@@ -354,6 +354,24 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 
 	session.User.Update()
 
+	// if the profile is public, then accept all the requests
+	if session.User.ProfileExposure == "Public" {
+		// Get all the follow requests
+		followRequests, err := models.GetRequestsByUserID(session.User.UserID)
+		if err != nil {
+			log.Println("HandleProfileUpdate: Error getting follow requests by user ID", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		for _, followRequest := range followRequests {
+			follow := models.UserFollowModel{
+				UserID:     session.User.UserID,
+				FollowerID: followRequest.RequesterID,
+			}
+			follow.Save()
+			followRequest.Del()
+		}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Profile updated successfully"})
 }

@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
-// import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { Forward, Heart, MessageSquare } from "lucide-react";
-import { usePathname, useRouter } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useRouter } from 'next/navigation';
 import { handleFollow, fetchSessionUser, fetchPeople } from '../lib/api';
-// import ToolTipWrapper from "../ToolTipWrapper";
 import Link from "next/link";
 
 
@@ -22,7 +18,6 @@ interface Person {
 const AllPeopleList = () => {
   const [people, setPeople] = useState<Person[]>([]);
   const [sessionUser, setSessionUser] = useState<string>("");
-  const [following, setFollowing] = useState<Set<string>>(new Set());
   const [buttonText, setButtonText] = useState<{ [key: string]: string }>({});
 
   const router = useRouter();
@@ -53,13 +48,13 @@ const AllPeopleList = () => {
     const handleClick = () => {
       getPeople();
     };
-  
+
     window.addEventListener('click', handleClick);
-  
+
     return () => {
       window.removeEventListener('click', handleClick);
     };
-  }, [sessionUser]);
+  }, [sessionUser, router]);
 
   useEffect(() => {
     const updateButtonText = () => {
@@ -83,54 +78,66 @@ const AllPeopleList = () => {
     updateButtonText();
   }, [people, sessionUser]);
 
+  const updateFollow = async (person: Person) => {
+    let resp = await handleFollow(person.user_id);
+    if (resp.success) {
+      let follow = person.is_followed;
+      if (person.profile_exposure === "Public") {
+        person.is_followed = !follow;
+        person.is_requested = false;
+        const updatedPeople = people.map((p) => {
+          if (p.user_id === person.user_id) {
+            return person;
+          }
+          return p;
+        });
+        setPeople(updatedPeople);
+      } else {
+        person.is_requested = !person.is_requested;
+        const updatedPeople = people.map((p) => {
+          if (p.user_id === person.user_id) {
+            return person;
+          }
+          return p;
+        });
+        setPeople(updatedPeople);
+      }
+    }
+  }
+
   return (
     <div className="ml-1/4 p-2">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl text-white">People ({people.length})</h2>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {people.map((person) => (
           <div key={person.user_id} className="bg-black rounded-lg overflow-hidden shadow-md text-white">
+
             <Link href={`/profile/${person.user_id}`} legacyBehavior>
               <a>
-                <Image
-                  src={person.user_avatar_path || "https://github.com/shadcn.png"}
-                  alt={person.user_fname}
-                  width={300}
-                  height={200}
-                  className="w-full h-48 object-cover"
-                />
+                <Avatar className="w-32 h-32 rounded-full mx-auto object-cover mt-5">
+                  <AvatarImage src={person.user_avatar_path} />
+                  <AvatarFallback>{person.user_fname.charAt(0) + person.user_lname.charAt(0)}</AvatarFallback>
+                </Avatar>
               </a>
             </Link>
+
             <div className="p-4">
               <Link href={`/profile/${person.user_id}`} legacyBehavior>
                 <a>
-                  <h3 className="text-lg font-semibold">{person.user_fname} {person.user_lname}</h3>
-                  <div className="mt-2 text-sm">
-                    <p className="text-sm text-gray-400">{person.profile_exposure}</p>
+                  <div className="mt-2 text-sm text-center">
+                    <h3 className="text-lg font-semibold">{person.user_fname} {person.user_lname}</h3>
+                    <p className="text-sm text-gray-400 font-medium">{person.profile_exposure}</p>
                   </div>
                 </a>
               </Link>
-              {/* {person.is_followed ? (
-                <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded"
-                  onClick={() => handleFollow(person.user_id)}>
-                  Unfollow
-                </button>
-              ) : person.is_requested ? (
-                <button className="mt-4 bg-gray-600 text-white w-full py-2 rounded" disabled>
-                  Follow Request Sent
-                </button>
-              ) : (
-                <button
-                  className="mt-4 bg-blue-600 text-white w-full py-2 rounded"
-                  onClick={() => handleFollow(person.user_id)}
-                >
-                  Follow
-                </button>
-              )} */}
               <button
-                className="mt-4 bg-blue-600 text-white w-full py-2 rounded"
-                onClick={() => handleFollow(person.user_id)}
+                // className="mt-4 bg-indigo-500 text-white w-full py-2 rounded-full"
+                className={`mt-4 w-full py-2 rounded-full ${person.user_id === sessionUser ? 'text-indigo-400 font-semibold text-lg border-solid border-2 border-indigo-400' : 'bg-indigo-500 text-white'}`}
+
+                onClick={() => updateFollow(person)}
+                disabled={person.user_id === sessionUser}
               >
                 {buttonText[person.user_id]}
               </button>
@@ -138,7 +145,7 @@ const AllPeopleList = () => {
           </div>
         ))}
       </div>
-    </div>
+    </div >
   );
 }
 

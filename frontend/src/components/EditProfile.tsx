@@ -19,17 +19,21 @@ interface ProfileFormData {
     fname: string;
     lname: string;
     username: string;
+    email: string;
+    dob: string;
     bio: string;
     privacy: boolean;
     onEdit: Function;
 }
 
 
-const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, privacy, onEdit}) => {
+const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, email, dob, bio, privacy, onEdit}) => {
     const [profileData, setProfileData] = useState<ProfileFormData>({
         fname,
         lname,
         username,
+        email,
+        dob,
         bio,
         privacy,
         onEdit: ()=>{} // empty function just so we can ignore it.
@@ -41,6 +45,8 @@ const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, p
             ...prevData,
             fname,
             lname,
+            email,
+            dob,
             username,
             bio,
             privacy,
@@ -93,6 +99,8 @@ const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, p
                 fname: profileData.fname,
                 lname: profileData.lname,
                 nickname: profileData.username,
+                email: email,
+                dob: dob,
                 bio: profileData.bio,
                 privacy: profileData.privacy ? 'Private' : 'Public'
             });

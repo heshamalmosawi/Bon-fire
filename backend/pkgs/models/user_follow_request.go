@@ -42,8 +42,8 @@ func (f *FollowRequestModel) Update() error {
 	return err
 }
 
-// GetRequestByUserID retrieves follow requests by the user's ID.
-func GetRequestByUserID(userID uuid.UUID) ([]FollowRequestModel, error) {
+// GetRequestsByUserID retrieves follow requests by the user's ID.
+func GetRequestsByUserID(userID uuid.UUID) ([]FollowRequestModel, error) {
 	columns := []string{"request_id", "user_id", "requester_id", "request_status"}
 	condition := "user_id = ?"
 	rows, err := utils.Read("follow_request", columns, condition, userID)

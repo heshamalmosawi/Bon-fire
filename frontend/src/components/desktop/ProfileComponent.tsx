@@ -3,7 +3,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import EditProfile from "../EditProfile";
 import { handleFollow } from '@/lib/api';
 import { Profile } from "@/lib/interfaces";
-import { log } from "console";
 import Link from "next/link";
 
 interface ProfileProps extends Profile {
@@ -22,7 +21,6 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, 
                 setFollowbtn_message("Unfollow");
             } else {
                 if (privacy === "Private") {
-                    // console.log("is_requested:", is_requested);
                     if (is_requested === true) {
                         setFollowbtn_message("Follow Request Sent");
                     } else {
@@ -45,7 +43,6 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, 
             follow = !follow;
             // setFollowbtn_message(follow ? "Unfollow" : "Follow");
             if (privacy === "Public") {
-                setFollowbtn_message("Unfollow");
                 save_changes({
                     fname: fname,
                     lname: lname,
@@ -60,10 +57,14 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, 
                 });
             }
             else if (privacy === "Private") {
+                let x = is_requested;
                 if (follow){
                     follow = !follow;
+                    x = false;
                 }
-                setFollowbtn_message("Follow Request Sent");
+                if (!x) {
+                    x = true;
+                }
                 save_changes({
                     fname: fname,
                     lname: lname,
@@ -74,7 +75,7 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, 
                     nickname: nickname,
                     privacy: privacy,
                     is_followed: follow,
-                    is_requested: !is_requested,
+                    is_requested: x,
                 });
             }
         }
@@ -90,8 +91,8 @@ export const ProfileComponent: React.FC<ProfileProps> = ({ fname, lname, email, 
                 </Avatar>
                 <div className="text-center mt-4">
                     <h2 className="text-2xl font-semibold">{fname} {lname}</h2>
-                    <p className="text-gray-400">{nickname !== "" ? `@${nickname}` : 'Nickname? Who needs one!'}</p>
-                    {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} privacy={privacy === "Private"} onEdit={save_changes} />}
+                    <p className="text-gray-400 font-medium">{nickname !== "" ? `@${nickname}` : 'Nickname? Who needs one!'}</p>
+                    {session_user && session_user === u_id && <EditProfile fname={fname} lname={lname} username={nickname} bio={bio} email={email} dob={dob} privacy={privacy === "Private"} onEdit={save_changes} />}
                     {session_user && session_user !== u_id && <button onClick={() => updateFollow()} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded-full ">{followbtn_message}</button>}
                 </div>
             </div>
@@ -162,8 +163,24 @@ export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson, session_
                         }
                         return p;
                     });
-                    console.log("Updated people:", updatedPeople);
-                    save_changes({response: updatedPeople, user: {user_id: session_user}});
+                    save_changes({ response: updatedPeople, user: { user_id: session_user } });
+                }
+            } else {
+                if (person.is_followed) {
+                    person.is_requested = false;
+                    person.is_followed = false;
+                } else {
+                    person.is_requested = true;
+                    person.is_followed = false;
+                }
+                if (Array.isArray(onSelectPerson)) {
+                    const updatedPeople = onSelectPerson.map((p) => {
+                        if (p.user_id === person.user_id) {
+                            return person;
+                        }
+                        return p;
+                    });
+                    save_changes({ response: updatedPeople, user: { user_id: session_user } });
                 }
             }
         }
@@ -189,26 +206,26 @@ export const PeopleList: React.FC<PeopleListProps> = ({ onSelectPerson, session_
                             <div className="p-4">
                                 <Link href={`/profile/${person.user_id}`} legacyBehavior>
                                     <a>
-                                        <h3 className="text-lg font-semibold">{person.user_fname} {person.user_lname}</h3>
-                                        <div className="mt-2 text-sm">
-                                            <p>{person.profile_exposure}</p>
+                                        <div className="mt-2 text-sm text-center">
+                                            <h3 className="text-lg font-semibold">{person.user_fname} {person.user_lname}</h3>
+                                            <p className="text-gray-400 font-medium">{person.profile_exposure}</p>
                                         </div>
                                     </a>
                                 </Link>
                                 {person.is_followed ? (
-                                    <button onClick={() => updateFollow(person)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
+                                    <button onClick={() => updateFollow(person)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded-full">
                                         Unfollow
                                     </button>
                                 ) : person.is_requested ? (
-                                    <button onClick={() => updateFollow(person)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
+                                    <button onClick={() => updateFollow(person)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded-full">
                                         Follow Request Pending
                                     </button>
                                 ) : person.user_id === session_user ? (
-                                    <button onClick={() => updateFollow(person)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
+                                    <button onClick={() => updateFollow(person)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded-full">
                                         You
                                     </button>
                                 ) : (
-                                    <button onClick={() => updateFollow(person)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded">
+                                    <button onClick={() => updateFollow(person)} className="mt-4 bg-indigo-500 text-white w-full py-2 rounded-full">
                                         Follow
                                     </button>
                                 )}
