@@ -11,12 +11,10 @@ import (
 type UserNotificationModel struct {
 	NotiID      uuid.UUID `json:"noti_id,omitempty"`
 	ReceiverID  uuid.UUID `json:"receiver_id,omitempty"`
-	NotiType    string    `json:"noti_type"` 
+	NotiType    string    `json:"noti_type"`
 	NotiContent string    `json:"noti_content"`
-	NotiTime    time.Time    `json:"noti_time"`
+	NotiTime    time.Time `json:"noti_time"`
 	NotiStatus  string    `json:"noti_status,omitempty"`
-
-	
 }
 
 // CRUD Operations

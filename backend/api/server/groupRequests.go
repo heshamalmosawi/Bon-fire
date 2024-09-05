@@ -2,16 +2,18 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/gofrs/uuid"
 
+	"bonfire/api/notify"
 	"bonfire/pkgs"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
 )
-
 
 type GroupRequest struct {
 	GroupID string `json:"group_id"`
@@ -72,7 +74,7 @@ func HandleGroupInvite(w http.ResponseWriter, r *http.Request) {
 	notification := models.UserNotificationModel{
 		ReceiverID:  userID,
 		NotiType:    "group_invite",
-		NotiContent: "You have been invited to join the group.",
+		NotiContent: fmt.Sprintf("You have been invited to join %s!", group.GroupName),
 		NotiTime:    time.Now(),
 		NotiStatus:  "unread",
 	}
@@ -80,6 +82,10 @@ func HandleGroupInvite(w http.ResponseWriter, r *http.Request) {
 	if err := notification.Save(); err != nil {
 		http.Error(w, "Failed to send invitation notification", http.StatusInternalServerError)
 		return
+	}
+
+	if err := notify.NotifyUser(userID, notification); err != nil {
+		log.Println("the invited user is not online")
 	}
 
 	utils.EncodeJSON(w, map[string]string{"message": "User invited successfully"})
@@ -262,7 +268,7 @@ func HandleGroupRequests(w http.ResponseWriter, r *http.Request) {
 	notification := models.UserNotificationModel{
 		ReceiverID:  group.OwnerID,
 		NotiType:    "join_request",
-		NotiContent: session.User.UserNickname + " has requested to join your group.", //discuss later
+		NotiContent: fmt.Sprintf("%s %s has requested to join %s", session.User.UserFirstName, session.User.UserLastName, group.GroupName), //discuss later
 		NotiTime:    time.Now(),
 		NotiStatus:  "unread",
 	}
@@ -273,6 +279,10 @@ func HandleGroupRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := notify.NotifyUser(group.OwnerID, notification); err != nil {
+		log.Println("the group owner is not online")
+	}
+
 	// Respond with a success message
 	response := map[string]string{"response": "Group join request sent"}
 	if err := utils.EncodeJSON(w, response); err != nil {
@@ -280,6 +290,3 @@ func HandleGroupRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-
-

@@ -22,11 +22,6 @@ func RegisterSubscriber(session pkgs.Session, conn *websocket.Conn) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	// If a connection already exists for this session, close it before replacing.
-	if existingConn, ok := Subscribers[session]; ok {
-		existingConn.Close()
-	}
-
 	Subscribers[session] = conn
 }
 

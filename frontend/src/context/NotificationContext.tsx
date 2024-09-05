@@ -14,6 +14,8 @@ import React, {
   ReactNode,
 } from "react";
 import { useNotificationWebSocket } from "./NotificationWebsocketContext";
+import { useToast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 /**
  * NotificationContextType defines the shape of the notification context.
@@ -48,6 +50,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 }) => {
   const [notifications, setNotifications] = useState<string[]>([]);
   const { socket, setOnMessage } = useNotificationWebSocket();
+  const { toast } = useToast();
 
   useEffect(() => {
     /**
@@ -57,9 +60,25 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
      * @param {MessageEvent} event - The WebSocket message event containing the notification data.
      */
     const handleNotification = (event: MessageEvent) => {
-      const message = event.data;
+      const message = JSON.parse(event.data);
       console.log("Notification received:", message);
-      // TODO: invoke toast component here
+
+      if (message.noti_type === "group_invite") {
+        toast({
+          variant: "default",
+          title: "Group Invite",
+          description: message.noti_content,
+          action: <ToastAction altText="accept invite">Accept</ToastAction>,
+        });
+      } else if (message.noti_type === "join_request") {
+        toast({
+          variant: "default",
+          title: "Group Join Request",
+          description: message.noti_content,
+          action: <ToastAction altText="accept member">Accept</ToastAction>,
+        });
+      }
+
       addNotification(message);
     };
 

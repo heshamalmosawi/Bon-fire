@@ -3,15 +3,17 @@
 import FeedDesktop from "@/components/desktop/FeedDesktop";
 import Navbar from "@/components/desktop/Navbar";
 import RightSidebar from "@/components/rightNav";
+import { useNotifications } from "@/context/NotificationContext";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Home() {
-  const router = useRouter()
+  const router = useRouter();
+  const { notifications, addNotification } = useNotifications();
   useEffect(() => {
     if (!Cookies.get("session_id")) {
-      router.replace("/auth")
+      router.replace("/auth");
     }
   });
 

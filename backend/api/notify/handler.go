@@ -30,5 +30,4 @@ func HandleSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RegisterSubscriber(*userSession, ws)
-	defer UnregisterSubscriber(*userSession)
 }
