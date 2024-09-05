@@ -54,7 +54,7 @@ func Routers() {
 	mux.HandleFunc("GET /subscribe", notify.HandleSubscription)
 
 	mux.HandleFunc("GET /requests/{group_id}", HandleFetchGroupRequests)
-
+	mux.HandleFunc("GET /fetchpeople/{group_id}", HandleFetchUsersNotInGroup)
 
 	// handle cors
 	cors_mux := middleware.CORS(mux)

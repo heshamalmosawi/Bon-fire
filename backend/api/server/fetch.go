@@ -107,3 +107,42 @@ func HandleFetchGroupRequests(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error encoding response to JSON:", err)
 	}
 }
+
+func HandleFetchUsersNotInGroup(w http.ResponseWriter, r *http.Request) {
+    urlParts := strings.Split(r.URL.Path, "/")
+    groupIDStr := urlParts[len(urlParts)-1]
+
+    groupID, err := uuid.FromString(groupIDStr)
+    if err != nil {
+        http.Error(w, "Invalid group ID", http.StatusBadRequest)
+        return
+    }
+
+    // Fetch the group to get the owner's ID
+    group, err := models.GetGroupByID(groupID)
+    if err != nil {
+        http.Error(w, "Failed to fetch group", http.StatusBadRequest)
+        return
+    }
+
+    // Fetch users not in the group
+    users, err := models.GetUsersNotInGroup(groupID)
+    if err != nil {
+        http.Error(w, fmt.Sprintf("Failed to fetch users not in group: %v", err), http.StatusInternalServerError)
+        return
+    }
+
+    // Filter out the group owner from the list
+    filteredUsers := []models.UserModel{}
+    for _, user := range users {
+        if user.UserID != group.OwnerID {
+            filteredUsers = append(filteredUsers, user)
+        }
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    if err := json.NewEncoder(w).Encode(filteredUsers); err != nil {
+        http.Error(w, "Failed to encode users to JSON", http.StatusInternalServerError)
+        log.Println("Error encoding users to JSON:", err)
+    }
+}

@@ -5,7 +5,7 @@ import { Group } from "@/components/desktop/groupProfile";
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
 import { usePathname, useRouter } from "next/navigation";
-import { GroupProps, RequestProps } from "@/lib/interfaces";
+import { GroupProps, RequestProps,UserModel } from "@/lib/interfaces";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sheet,
@@ -24,8 +24,11 @@ import {
   joinGroup,
   fetchSessionUser,
   leaveGroup,
+  fetchPeopleNotInGroup
 } from "@/lib/api";
 import { Images } from "lucide-react";
+
+
 
 const GroupPage = () => {
   const [sessionUser, setSessionUser] = useState<string>("");
@@ -52,6 +55,13 @@ const GroupPage = () => {
   const pathname = usePathname();
   const [groupID, setGroupID] = useState<string>(pathname.split("/")[2]);
   const router = useRouter();
+  const [nonMembers, setNonMembers] = useState<UserModel[]>([]);
+
+useEffect(() => {
+  if (activeTab === "find") {
+    fetchPeopleNotInGroup(groupID).then(setNonMembers);
+  }
+}, [groupID, activeTab]); 
 
   // Function to handle the removal of requests
   const handleRequestHandled = (id: string) => {
@@ -136,22 +146,7 @@ const GroupPage = () => {
   }, [sessionUser]);
 
   // Function to handle join group logic
-  const handleJoinClick = async (groupId: string) => {
-    try {
-      const success = await joinGroup(groupId, sessionUser);
-      if (success) {
-        setGroups((prevGroups) =>
-          prevGroups.map((group) =>
-            group.id === groupId ? { ...group, isMember: true } : group
-          )
-        );
-      } else {
-        console.error("Failed to join group");
-      }
-    } catch (error) {
-      console.error("Error joining group:", error);
-    }
-  };
+ 
 
   // Function to fetch group data
   const fetchGroupData = async () => {
@@ -438,11 +433,35 @@ const GroupPage = () => {
                   <h1>{groupProfile.description}</h1>
                 </div>
               )}
-               {activeTab === "find" && (
-                <div>
-                  <h1>fetch the users and ask them to join</h1>
-                </div>
-              )}
+              {activeTab === "find" && (
+  <div className="flex flex-col items-center">
+    <h2 className="text-xl font-semibold">Invite Members</h2>
+    <div className="w-full">
+      {nonMembers.length > 0 ? (
+        nonMembers.map((user) => (
+          <div key={user.user_id} className="flex justify-between items-center p-2 m-2 bg-black text-white rounded-lg">
+            <div className="flex items-center">
+              <Avatar>
+                <AvatarImage src={user.user_avatar_path || "default-avatar.png"} alt="Avatar" />
+                <AvatarFallback>{user.user_fname.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="ml-4">
+                <h3>{user.user_fname} {user.user_lname}</h3>
+                <p className="text-gray-500">{user.user_email}</p>
+              </div>
+            </div>
+            <button className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700 transition duration-150 ease-in-out">
+              Invite
+            </button>
+          </div>
+        ))
+      ) : (
+        <p className="text-center text-white">No users available to invite.</p>
+      )}
+    </div>
+  </div>
+)}
+
               {activeTab === "events" && <EventsList />}
               {activeTab === "requests" && (
                 <div className="flex flex-wrap gap-4 justify-center">

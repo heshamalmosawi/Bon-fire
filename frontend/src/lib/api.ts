@@ -249,3 +249,25 @@ export const fetchGroups = async (userId: string): Promise<any[]> => {
     }
   };
   
+
+  // Function to fetch users not in a group
+export const fetchPeopleNotInGroup = async (groupID: string) => {
+  try {
+      const response = await fetch(`${Yori}/fetchpeople/${groupID}`, {
+          method: 'GET',
+          credentials: 'include',
+      });
+      if (response.ok) {
+          const users = await response.json();
+          console.log("user not in group",users)
+          return users;
+      } else {
+          console.error("Failed to fetch people not in group");
+          return [];
+      }
+  } catch (error) {
+      console.error("Error fetching people not in group:", error);
+      return [];
+  }
+};
+
