@@ -12,23 +12,23 @@ import (
 )
 
 type GroupModel struct {
-	GroupID      uuid.UUID `json:"group_id"`
-	OwnerID      uuid.UUID `json:"owner_id"`
-	GroupName    string    `json:"group_name"`
-	GroupDescrip string    `json:"group_desc"`
-	Owner		*UserModel `json:"owner"`
+	GroupID      uuid.UUID  `json:"group_id"`
+	OwnerID      uuid.UUID  `json:"owner_id"`
+	GroupName    string     `json:"group_name"`
+	GroupDescrip string     `json:"group_desc"`
+	Owner        *UserModel `json:"owner"`
 }
 
-//makes it easier to fetch
+// makes it easier to fetch
 type ExtendedGroupModel struct {
-	GroupID      uuid.UUID `json:"group_id"`
-	OwnerID      uuid.UUID `json:"owner_id"`
-	GroupName    string    `json:"group_name"`
-	GroupDescrip string    `json:"group_desc"`
-	IsMember     bool      `json:"is_member"`      
-	TotalMembers int       `json:"total_members"`  
-	IsRequested  bool      `json:"is_requested"`
-	Owner		*UserModel `json:"owner"`
+	GroupID      uuid.UUID  `json:"group_id"`
+	OwnerID      uuid.UUID  `json:"owner_id"`
+	GroupName    string     `json:"group_name"`
+	GroupDescrip string     `json:"group_desc"`
+	IsMember     bool       `json:"is_member"`
+	TotalMembers int        `json:"total_members"`
+	IsRequested  bool       `json:"is_requested"`
+	Owner        *UserModel `json:"owner"`
 }
 
 func (g *GroupModel) Save() error {
@@ -67,7 +67,7 @@ func (g *GroupModel) Update() error {
 	return err
 }
 
-//fix this later
+// fix this later
 func GetOwwnerByGroup(ownerID string) (*GroupModel, error) {
 	columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
 	condition := " owner_id = ?"
@@ -107,7 +107,7 @@ func GetAllGroups() ([]GroupModel, error) {
 			log.Println("Error scanning row:", err)
 			return nil, err
 		}
-		group.Owner,_ = GetUserByID(group.OwnerID)
+		group.Owner, _ = GetUserByID(group.OwnerID)
 		groups = append(groups, group)
 	}
 
@@ -135,7 +135,7 @@ func GetGroupByID(groupID uuid.UUID) (*GroupModel, error) {
 		if err != nil {
 			return nil, err
 		}
-		group.Owner,_ = GetUserByID(group.OwnerID)
+		group.Owner, _ = GetUserByID(group.OwnerID)
 		return &group, nil
 	}
 
@@ -158,7 +158,7 @@ func GetGroupNameByGroup(groupName string) (*GroupModel, error) {
 			return nil, err
 		}
 	}
-	group.Owner,_ = GetUserByID(group.OwnerID)
+	group.Owner, _ = GetUserByID(group.OwnerID)
 
 	return &group, nil
 }
@@ -180,7 +180,7 @@ func GetGroupDescripByGroup(groupDescrip string) (*GroupModel, error) {
 		}
 	}
 
-	group.Owner,_ = GetUserByID(group.OwnerID)
+	group.Owner, _ = GetUserByID(group.OwnerID)
 	return &group, nil
 }
 
@@ -200,7 +200,7 @@ func GetGroupEverything(groupID, ownerID, groupName, groupDesc string) (*GroupMo
 			return nil, err
 		}
 	}
-	group.Owner,_ = GetUserByID(group.OwnerID)
+	group.Owner, _ = GetUserByID(group.OwnerID)
 	return &group, nil
 }
 
@@ -233,7 +233,6 @@ func DeleteGroup(group *GroupModel) error {
 	}
 	return nil
 }
-
 
 // Function to add a user to a group
 func AddUserToGroup(group *GroupModel, user *UserModel) error {
@@ -293,7 +292,11 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 
 		// Check if the user is in this group
 		inGroup, err := IsUserInGroup(userID, group.GroupID)
-    fmt.Println("hello?")
+		if err != nil {
+			return nil, err
+		}
+		
+		fmt.Println("hello?")
 		// Set the IsMember field based on the user's membership status
 		group.IsMember = inGroup
 
@@ -304,7 +307,7 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 		}
 		group.TotalMembers = totalMembers + 1
 
-		group.Owner,_ = GetUserByID(group.OwnerID)
+		group.Owner, _ = GetUserByID(group.OwnerID)
 		groupResponses = append(groupResponses, group)
 	}
 
