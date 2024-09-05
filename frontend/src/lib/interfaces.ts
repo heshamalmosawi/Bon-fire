@@ -78,5 +78,8 @@ export interface RequestProps {
   onRequestHandled: (id: string) => void; // Function to handle the request
 }
 
-
-
+export interface chatMessage {
+  from: string;
+  to: string;
+  message: string;
+}

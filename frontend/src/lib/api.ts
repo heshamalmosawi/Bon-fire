@@ -1,4 +1,4 @@
-import { Profile } from "./interfaces";
+import { Profile,RequestProps } from "./interfaces";
 
 export const Yori = "http://localhost:8080";
 
@@ -271,3 +271,28 @@ export const fetchPeopleNotInGroup = async (groupID: string) => {
   }
 };
 
+
+export const sendGroupInvite = async (groupID: string, userID: string): Promise<boolean> => {
+  try {
+      const response = await fetch(`${Yori}/group/invite`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ group_id: groupID, user_id:userID }),
+      });
+
+      if (response.ok) {
+          console.log(`Invitation sent successfully to user ${userID} for group ${groupID}`);
+          return true;
+      } else {
+          const errorText = await response.text();
+          console.error(`Failed to send invite: ${response.statusText}, Response Body: ${errorText}`);
+          return false;
+      }
+  } catch (error) {
+      console.error(`Error sending group invite: ${error}`);
+      return false;
+  }
+};

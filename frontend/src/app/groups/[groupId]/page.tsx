@@ -24,9 +24,12 @@ import {
   joinGroup,
   fetchSessionUser,
   leaveGroup,
-  fetchPeopleNotInGroup
+  fetchPeopleNotInGroup,
+  sendGroupInvite
 } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
 import { Images } from "lucide-react";
+
 
 
 
@@ -56,6 +59,8 @@ const GroupPage = () => {
   const [groupID, setGroupID] = useState<string>(pathname.split("/")[2]);
   const router = useRouter();
   const [nonMembers, setNonMembers] = useState<UserModel[]>([]);
+  const { toast } = useToast();
+
 
 useEffect(() => {
   if (activeTab === "find") {
@@ -70,6 +75,23 @@ useEffect(() => {
       prevRequests.filter((request) => request.id !== id)
     );
   };
+
+  const handleInviteClick = async (userId: string) => {
+    const success = await sendGroupInvite(groupProfile.groupID, userId);
+    if (success) {
+      console.log("Invitation successfully sent to user:", userId);
+      // Optionally update UI or show a success message
+    } else {
+      console.error("Failed to send invitation to user:", userId);
+      toast({
+        variant: "destructive",
+        title: "Error sending invite",
+        description: "Our servers did not create the invite properly",
+      });
+      // Optionally handle errors, e.g., show an error message
+    }
+  };
+  
 
   const handleLeaveClick = async () => {
     const success = await leaveGroup(groupID, sessionUser);
@@ -292,7 +314,7 @@ useEffect(() => {
 
                 
               )}
-                 {groupProfile.ownerName === sessionUser && (
+              
                 <button
                   id="Find members"
                   onClick={() => setActiveTab("find")}
@@ -306,7 +328,7 @@ useEffect(() => {
                 </button>
 
                 
-              )}
+       
 
               {/* Show the "Leave" button only if the user is not the owner */}
               {groupProfile.ownerName !== sessionUser && (
@@ -433,7 +455,7 @@ useEffect(() => {
                   <h1>{groupProfile.description}</h1>
                 </div>
               )}
-              {activeTab === "find" && (
+          {activeTab === "find" && (
   <div className="flex flex-col items-center">
     <h2 className="text-xl font-semibold">Invite Members</h2>
     <div className="w-full">
@@ -450,7 +472,10 @@ useEffect(() => {
                 <p className="text-gray-500">{user.user_email}</p>
               </div>
             </div>
-            <button className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700 transition duration-150 ease-in-out">
+            <button 
+              onClick={() => handleInviteClick(user.user_id)}
+              className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700 transition duration-150 ease-in-out"
+            >
               Invite
             </button>
           </div>

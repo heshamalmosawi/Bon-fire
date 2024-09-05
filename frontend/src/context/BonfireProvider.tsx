@@ -1,6 +1,5 @@
 "use client";
 
-import { Toaster } from "@/components/ui/toaster";
 import React, { ReactNode } from "react";
 import { ChatWebSocketProvider } from "./ChatWebsocketContext";
 import { CookieCheckProvider } from "./CookieCheckContext";
