@@ -295,10 +295,20 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 		if err != nil {
 			return nil, err
 		}
-		
-		fmt.Println("hello?")
-		// Set the IsMember field based on the user's membership status
 		group.IsMember = inGroup
+
+		// Check if there are any pending requests by this user for this group
+		pendingRequests, err := GetPendingRequestsByGroupID(group.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		group.IsRequested = false
+		for _, request := range pendingRequests {
+			if request.UserID == userID && request.InteractionType == true && request.Status == "pending" {
+				group.IsRequested = true
+				break
+			}
+		}
 
 		// Get the total number of members in this group
 		totalMembers, err := GetTotalMembers(group.GroupID)

@@ -55,7 +55,8 @@ export interface Group {
   group_name: string;
   group_desc: string;
   is_member: boolean;
-  total_members: number; // Extended
+  total_members: number; 
+  is_requested: boolean;// Extended
 }
 
 export interface GroupProps {

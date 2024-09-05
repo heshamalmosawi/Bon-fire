@@ -206,7 +206,8 @@ export const fetchGroups = async (userId: string): Promise<any[]> => {
         description: group.group_desc,
         members: group.total_members,
         isMine: group.owner_id === userId,
-        isMember: group.is_member || false, // Ensure the backend provides `is_member` status
+        isMember: group.is_member || false,
+        isRequested: group.is_requested,
       }));
     } catch (error) {
       console.error("Error fetching groups:", error);
