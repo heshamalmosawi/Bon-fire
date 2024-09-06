@@ -37,16 +37,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { fetchProfile, fetchSessionUser, handleClick } from '@/lib/api';
+import { fetchProfile, fetchSessionUser, handleClick } from "@/lib/api";
 
 interface Follower {
   id: string;
   name: string;
 }
 
-const CreatePost = () => {
+const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
   const [sessionUser, setSessionUser] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [postVisibility, setPostVisibility] = useState("public");
@@ -56,23 +56,38 @@ const CreatePost = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('posts');
+  const [activeTab, setActiveTab] = useState("posts");
   const router = useRouter();
 
   const pathname = usePathname();
   const [u_id, setU_id] = useState<string | undefined>(undefined);
-  const [User, setProfile] = useState<{ fname: string; lname: string; avatarUrl: string; bio: string; nickname: string; privacy: string }>({ fname: "", lname: "", avatarUrl: "", bio: "", nickname: "", privacy: "" });
+  const [User, setProfile] = useState<{
+    fname: string;
+    lname: string;
+    avatarUrl: string;
+    bio: string;
+    nickname: string;
+    privacy: string;
+  }>({
+    fname: "",
+    lname: "",
+    avatarUrl: "",
+    bio: "",
+    nickname: "",
+    privacy: "",
+  });
   const { toast } = useToast();
 
   useEffect(() => {
     const getSessionUser = async () => {
       const data = await fetchSessionUser();
-      console.log("user:", data, "status:", data.status);
-      if (data.status !== 200 && u_id === undefined) {
-        console.log(`Failed to authenticate user: ${data.status}`);
-        router.push('/auth');
+      // console.log("user:", data, "status:", data.status);
+      if (!data) {
+        console.log(`Failed to authenticate user`);
+        router.push("/auth");
         return;
-      } else if (data.status === 200) { // if user is authenticated and u_id is defined in URL
+      } else if (data.status === 200) {
+        // if user is authenticated and u_id is defined in URL
         // const data = await user.json();
         console.log("authentication data:", data.User.user_id);
         setSessionUser(data.User.user_id);
@@ -92,7 +107,14 @@ const CreatePost = () => {
       setLoading(true);
       if (u_id !== undefined) {
         await fetchProfile(u_id, setProfile, setLoading, setError);
-        handleClick('followers', u_id, setLoading, setError, setActiveTab, setData);
+        handleClick(
+          "followers",
+          u_id,
+          setLoading,
+          setError,
+          setActiveTab,
+          setData
+        );
       }
     };
     fetchData();
@@ -100,6 +122,10 @@ const CreatePost = () => {
 
   const form = useForm<z.infer<typeof createPostSchema>>({
     resolver: zodResolver(createPostSchema),
+    defaultValues: {
+      textContent: "",
+      imageContent: undefined,
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof createPostSchema>) => {
@@ -112,6 +138,8 @@ const CreatePost = () => {
       await HandleCreatePost(payload);
 
       setIsDialogOpen(false);
+      form.reset();
+      onPostCreated();
     } catch (error) {
       toast({
         variant: "destructive",
@@ -134,7 +162,7 @@ const CreatePost = () => {
         ? prevSelected.filter((id) => id !== followerId)
         : [...prevSelected, followerId]
     );
-  }
+  };
 
   return (
     <>
@@ -146,7 +174,10 @@ const CreatePost = () => {
           <div className="cursor-pointer bg-black h-fit flex items-center justify-start gap-4 py-2 px-4 rounded-lg">
             <Avatar>
               <AvatarImage src={User.avatarUrl} />
-              <AvatarFallback>{User.fname.charAt(0)}{User.lname.charAt(0)}</AvatarFallback>
+              <AvatarFallback>
+                {User.fname.charAt(0)}
+                {User.lname.charAt(0)}
+              </AvatarFallback>
             </Avatar>
             <h1 className="text-[#ffffff66]">What's new?</h1>
           </div>
@@ -155,10 +186,15 @@ const CreatePost = () => {
           <div className="flex items-center gap-2">
             <Avatar>
               <AvatarImage src={User.avatarUrl} />
-              <AvatarFallback>{User.fname.charAt(0)}{User.lname.charAt(0)}</AvatarFallback>
+              <AvatarFallback>
+                {User.fname.charAt(0)}
+                {User.lname.charAt(0)}
+              </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <h4 className="text-white font-bold">{User.fname} {User.lname}</h4>
+              <h4 className="text-white font-bold">
+                {User.fname} {User.lname}
+              </h4>
               <h6 className="text-[#ffffff66]">@{User.nickname}</h6>
             </div>
           </div>
@@ -297,6 +333,5 @@ const CreatePost = () => {
     </>
   );
 };
-
 
 export default CreatePost;

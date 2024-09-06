@@ -1,24 +1,7 @@
 /**
  * these are properties each post will have
  */
-// ​​
-// author_id: "1aee23c6-52a6-4de1-b771-b26389b8ed43"
-// ​​​
-// created_at: "2024-08-29T18:43:07+03:00"
-// ​​​
-// group_id: "00000000-0000-0000-0000-000000000000"
-// ​​​
-// post_content: "cszdc"
-// ​​​
-// post_exposure: "public"
-// ​​​
-// post_id: "71c78886-2ca5-4524-a5c8-9297a73b5c9b"
-// ​​​
-// post_image_path: ""
-// ​​​
-// post_likecount: 0
-
-interface PostProps {
+export interface PostProps {
   id: string;
   firstName: string;
   lastName: string;
@@ -28,24 +11,34 @@ interface PostProps {
   post_content: string;
   post_image_path: string;
   post_likecount: number;
+  postIsLiked: boolean;
   postCommentNum: number;
 }
 
-/**
- * interface representing a user
- */
-// interface UserModel {
-//   userId: string;
-//   userEmail: string;
-//   userPassword: string;
-//   userFirstName: string;
-//   userLastName: string;
-//   userDOB: string;
-//   userAvatarPath: string;
-//   userNickname: string;
-//   userBio: string;
-//   profileExposure: string;
-// }
+export interface CommentModel {
+  comment_id: string;
+  author_id: string;
+  comment_content: string;
+  comment_likecount: number;
+  created_at: string;
+  comment_is_liked: boolean;
+  comment_image_path: string;
+
+  full_user: UserModel;
+}
+
+export interface UserModel {
+  user_id: string;
+  user_email: string;
+  user_password: string;
+  user_fname: string;
+  user_lname: string;
+  user_dob: string;
+  user_avatar_path: string;
+  user_nickname: string;
+  user_about: string;
+  profile_exposure: string;
+}
 
 export interface Profile {
   fname: string;
@@ -56,6 +49,22 @@ export interface Profile {
   bio: string;
   nickname: string;
   privacy: string;
-  is_followed: boolean;
-  is_requested: boolean;
+}
+
+export interface Group {
+  group_id: string;
+  owner_id: string;
+  group_name: string;
+  group_desc: string;
+  is_member: boolean;
+  total_members: number; // Extended
+}
+
+export interface GroupProps {
+  groupName: string;
+  ownerName: string;
+  description: string;
+  session_user: string;
+  groupID: string;
+  total_members: number;
 }

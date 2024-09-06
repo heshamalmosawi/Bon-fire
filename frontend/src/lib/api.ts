@@ -1,4 +1,5 @@
-import { Profile } from "@/lib/interfaces";
+import { Profile } from "./interfaces";
+
 export const Yori = "http://localhost:8080";
 
 // a function to fetch the session user
