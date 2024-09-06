@@ -40,6 +40,21 @@ export interface UserModel {
   profile_exposure: string;
 }
 
+export interface GroupUserModel {
+  user_id: string;
+  user_email: string;
+  user_password: string;
+  user_fname: string;
+  user_lname: string;
+  user_dob: string;
+  user_avatar_path: string;
+  user_nickname: string;
+  user_about: string;
+  profile_exposure: string
+  is_invited: boolean;
+}
+
+
 export interface Profile {
   fname: string;
   lname: string;

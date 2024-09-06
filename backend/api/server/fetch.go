@@ -134,6 +134,15 @@ func HandleFetchUsersNotInGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for i, user := range users {
+        invited, err := models.IsUserInvited(groupID, user.UserID)
+        if err != nil {
+            log.Printf("Error checking invitation status for user %s: %v", user.UserID, err)
+            continue // Optionally handle this more gracefully
+        }
+        users[i].IsInvited = invited
+    }
+	
 	// Filter out the group owner from the list
 	filteredUsers := []models.UserModel{}
 	for _, user := range users {

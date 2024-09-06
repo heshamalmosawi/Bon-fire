@@ -5,7 +5,7 @@ import { Group } from "@/components/desktop/groupProfile";
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
 import { usePathname, useRouter } from "next/navigation";
-import { GroupProps, RequestProps,UserModel } from "@/lib/interfaces";
+import { GroupProps, GroupUserModel, RequestProps,UserModel } from "@/lib/interfaces";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sheet,
@@ -58,7 +58,7 @@ const GroupPage = () => {
   const pathname = usePathname();
   const [groupID, setGroupID] = useState<string>(pathname.split("/")[2]);
   const router = useRouter();
-  const [nonMembers, setNonMembers] = useState<UserModel[]>([]);
+  const [nonMembers, setNonMembers] = useState<GroupUserModel[]>([]);
   const { toast } = useToast();
 
 
@@ -473,11 +473,14 @@ useEffect(() => {
               </div>
             </div>
             <button 
-              onClick={() => handleInviteClick(user.user_id)}
-              className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700 transition duration-150 ease-in-out"
-            >
-              Invite
-            </button>
+        onClick={() => !user.is_invited && handleInviteClick(user.user_id)}
+        disabled={user.is_invited}
+        className={`px-4 py-2 rounded hover:opacity-75 transition duration-150 ease-in-out ${
+          user.is_invited ? "bg-gray-500" : "bg-indigo-500 hover:bg-indigo-700"
+        }`}
+      >
+        {user.is_invited ? "Requested" : "Invite"}
+      </button>
           </div>
         ))
       ) : (

@@ -104,3 +104,22 @@ func DeleteGroupInteraction(groupID, userID uuid.UUID, interactionType bool) err
     _, err := utils.Delete("group_interactions", condition, groupID, userID, interactionType)
     return err
 }
+
+// IsUserInvited checks if there is a pending invitation for the user in the specified group.
+func IsUserInvited(groupID, userID uuid.UUID) (bool, error) {
+    // Define the columns to retrieve from the database
+    columns := []string{"interaction_ID"}
+
+    // Define the condition to find the specific interaction
+    condition := "group_id = ? AND user_id = ? AND interaction_Type = false AND status = 'pending'"
+
+    // Execute the read operation
+    rows, err := utils.Read("group_interactions", columns, condition, groupID, userID)
+    if err != nil {
+        return false, err
+    }
+    defer rows.Close()
+
+    // Check if any rows are returned
+    return rows.Next(), nil
+}
