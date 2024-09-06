@@ -222,6 +222,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+
 		var posts []models.PostModel
 		for _, comment := range user_comments {
 			post, err := models.GetPostByPostID(comment.PostID)
@@ -230,9 +231,19 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
+			
+			// Check if the post already exists, remove the old one so it is a unique and ordered list.
+			for i, existingPost := range posts {
+				if existingPost.PostID == post.PostID {
+					posts = append(posts[:i], posts[i+1:]...)
+					break
+				}
+			}
 			posts = append(posts, *post)
 		}
+
 		response = posts
+		
 	// Placeholder for posts liked
 	case "post_likes":
 		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
@@ -255,28 +266,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response = posts
-
-	// Placeholder for posts liked
-	case "comments_liked":
-		user_posts_comments, err := models.GetCommentLikeByUserID(profileUserIDUUID)
-		if err != nil {
-			log.Println("HandleProfile: Error getting comments by user ID", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		var comments []models.Comment
-
-		for _, like := range user_posts_comments {
-			comment, err := models.GetCommentByCommentID(like.CommentID)
-			if err != nil {
-				log.Println("HandleProfile: Error getting post by ID", err)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-			comments = append(comments, *comment)
-		}
-		response = comments
 
 	// Placeholder for posts
 	default:
