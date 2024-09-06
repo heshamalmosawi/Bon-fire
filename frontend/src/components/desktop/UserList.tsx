@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { ChatSidebar } from '@/components/chat/chat-message-list';
 import { ExpandableChat, ExpandableChatHeader, ExpandableChatBody } from '@/components/chat/expandable-chat';
 import { ChatBubbleAvatar } from '@/components/chat/chat-bubble';
+import { notFound, usePathname, useRouter } from 'next/navigation';
+import { handleClick, fetchSessionUser } from '@/lib/api';
+import { set } from "animejs";
 // import { Button } from '@/components/ui/button';
 // import { ChatList, ChatListItem } from "@/components/chat/chat-list";
 // import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/chat/chat-bubble'
@@ -17,39 +20,82 @@ export interface User {
   user_lname: string;
   user_nickname?: string;
   user_profile_pic?: string;
+  is_followed: boolean;
   // user_email: string;
 }
 
 const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
-  const [users, setUsers] = useState<User[]>([]);  
+  const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('posts');
+  const [clickCount, setClickCount] = useState(0);
+  const [sessionUser1, setSessionUser] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    const getSessionUser = async () => {
+      const data = await fetchSessionUser();
+      if (!data && sessionUser === undefined) {
+        router.push('/auth');
+        return;
+      } else if (data && data.status === 200) { // if user is authenticated and u_id is defined in URL
+        console.log("authentication data:", data.User.user_id);
+        setSessionUser(data.User.user_id);
+        console.log("u_id:", sessionUser1);
+
+      }
+    };
+    getSessionUser();
+  }, [sessionUser]);
 
   useEffect(() => {
     const fetchUsers = async () => {
-      try {
-        const response = await fetch("http://localhost:8080/people", {
-          method: 'POST',
-          credentials: 'include',
-        });
-        if (response.ok) {
-          console.log(response);
-          const data = await response.json();
-          setUsers(data);
+      if (sessionUser != "") {
+        handleClick('followers', sessionUser1, setLoading, setError, setActiveTab, setData);
+        if (data.response === "Handling default message" || data === null) {
+          setUsers([]);
         } else {
-          console.error("Failed to fetch users");
+          setUsers(data.response);
         }
-      } catch (error) {
-        console.error("Error fetching users:", error);
       }
+      // setUsers(data.response);
     };
-
-    fetchUsers();
-  }, []);
+    // if (sessionUser === "") {
+    //   getSessionUser().then(user => {
+    //     setSessionUser(user);
+    //     fetchUsers();
+    //   });
+    // } else {
+      // getSessionUser()
+      fetchUsers();
+    // }
+  }, [sessionUser1, clickCount]);
+  // if (sessionUser != "" && clickCount == 0) {
+  //   // return <div>Loading...</div>;4
+  //   setSessionUser(sessionUser);
+  // }
   // delete my user from the list
-  const myUser = users.findIndex((user) => user.user_id === sessionUser);
-  if (myUser > -1) {
-    users.splice(myUser, 1);
-  }
+  // const myUser = users.findIndex((user) => user.user_id === sessionUser);
+  // if (myUser > -1) {
+  //   users.splice(myUser, 1);
+  // }
+
+  const handleClickCount = () => {
+    setClickCount(prevCount => prevCount + 1);
+  };
+
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
+  // if (data && data.response === "Handling default message" && users.length === 0) {
+  //   setClickCount(prevCount => prevCount + 1);
+  //   console.log("clickCount:", clickCount);
+  // }
+  // setClickCount(prevCount => prevCount + 1);
+  // }
 
   const handleUserSelect = (user: User) => {
     setSelectedUser(user);
@@ -57,19 +103,19 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
   };
 
   return (
-      <div className="flex flex-col h-full bg-black">
-        <ExpandableChatHeader>
-          <h2 className="text-xl font-semibold">Users</h2>
-        </ExpandableChatHeader>
-        <ExpandableChatBody>
-          <ChatSidebar chats={users.map(user => ({
-            name: `${user.user_fname} ${user.user_lname}`,
-            status: user.user_nickname,
-            avatar: user.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg",
-            isActive: user.user_id === selectedUser?.user_id,
-            onClick: () => handleUserSelect(user),
-          }))} />
-        </ExpandableChatBody>
+    <div className="flex flex-col h-full bg-black" onClick={handleClickCount}>
+      <ExpandableChatHeader>
+        <h2 className="text-xl font-semibold">Users</h2>
+      </ExpandableChatHeader>
+      <ExpandableChatBody>
+        <ChatSidebar chats={users.map(user => ({
+          name: `${user.user_fname} ${user.user_lname}`,
+          status: user.user_nickname,
+          avatar: user.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg",
+          isActive: user.user_id === selectedUser?.user_id,
+          onClick: () => handleUserSelect(user),
+        }))} />
+      </ExpandableChatBody>
     </div>
     // <div className="w-1/4 h-full p-4 overflow-y-auto">
     //   <h3 className="text-lg font-semibold mb-4 text-white">Users</h3>

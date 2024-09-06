@@ -75,6 +75,7 @@ func Routers() {
 
 func HandleDefault(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling default message")
+	fmt.Println(r.URL.Path)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Default message Handled"})
 

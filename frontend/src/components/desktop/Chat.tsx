@@ -150,6 +150,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       handleSendMessage();
+      setNewMessage(""); // Clear the input
     }
   };
 
