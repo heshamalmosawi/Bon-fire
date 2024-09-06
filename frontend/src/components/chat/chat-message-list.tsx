@@ -55,16 +55,20 @@ interface ChatSidebarProps {
 const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats }) => (
   <div className="w-64 bg-black p-4 flex flex-col gap-2">
     <h2 className="text-white text-lg font-bold">Chats ({chats.length})</h2>
-    {chats.map((chat, index) => (
-      <ChatListItem
-        key={index}
-        name={chat.name}
-        status={chat.status}
-        avatar={chat.avatar ||"https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"}
-        isActive={chat.isActive}
-        onClick={chat.onClick}
-      />
-    ))}
+    {chats.length === 0 ? (
+      <div className="text-white text-center mt-4">Click to load your chat</div>
+    ) : (
+      chats.map((chat, index) => (
+        <ChatListItem
+          key={index}
+          name={chat.name}
+          status={chat.status}
+          avatar={chat.avatar || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"}
+          isActive={chat.isActive}
+          onClick={chat.onClick}
+        />
+      ))
+    )}
   </div>
 );
 
