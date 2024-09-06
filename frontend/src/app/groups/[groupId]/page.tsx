@@ -29,6 +29,8 @@ import {
 } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { Images } from "lucide-react";
+import EventDialog from "@/components/AddEvent"
+import Events from "@/components/groupEvents";
 
 
 
@@ -376,7 +378,7 @@ useEffect(() => {
               {loading && <p>Loading...</p>}
               {activeTab === "posts" &&
                 posts.map((post: any) => (
-                  <div className="w-6/12">
+                  <div className="w-10/12">
                     {" "}
                     {/* Wrapper to ensure full width */}
                     <PostComponent
@@ -456,7 +458,7 @@ useEffect(() => {
                 </div>
               )}
           {activeTab === "find" && (
-  <div className="flex flex-col items-center">
+  <div className="flex flex-col items-center w-10/12">
     <h2 className="text-xl font-semibold">Invite Members</h2>
     <div className="w-full">
       {nonMembers.length > 0 ? (
@@ -490,9 +492,18 @@ useEffect(() => {
   </div>
 )}
 
-              {activeTab === "events" && <EventsList />}
+{activeTab === "events" && (
+  <div className="w-10/12">
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-xl font-semibold text-white">Events</h2>
+      <EventDialog />
+    </div>
+    <Events />
+  </div>
+)}
+
               {activeTab === "requests" && (
-                <div className="flex flex-wrap gap-4 justify-center">
+                <div className="flex flex-wrap gap-4 justify-center w-10/12">
                   {requests
                     .filter((request) => !handledRequests.has(request.id))
                     .map((request) => (
