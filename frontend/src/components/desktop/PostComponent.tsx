@@ -10,7 +10,7 @@ import { useToast } from "../ui/use-toast";
 
 const PostComponent = (props: PostProps) => {
   console.log(props.postIsLiked);
-  const [likes, setlikes] = useState(props.postLikeNum);
+  const [likes, setlikes] = useState(props.post_likecount);
   const [liked, setliked] = useState(props.postIsLiked);
   const { toast } = useToast();
 
@@ -50,6 +50,8 @@ const PostComponent = (props: PostProps) => {
    }
  };
 
+ const firstNameInitial = props.firstName.charAt(0);
+ const lastNameInitial = props.lastName.charAt(0);
 
   return (
     <div
@@ -79,11 +81,11 @@ const PostComponent = (props: PostProps) => {
           className="w-full flex flex-col items-center justify-center gap-4 min-h-[50px]"
         >
           <div id="post-text-content" className="text-white text-sm w-full">
-            {props.postTextContent}
+            {props.post_content}
           </div>
-          {props.postImageContentUrl ? (
+          {props.post_image_path ? (
             <Image
-              src={props.postImageContentUrl}
+              src={props.post_image_path}
               className="w-full h-[200px] rounded-lg object-cover"
               alt="post image"
               width={400}

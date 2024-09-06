@@ -49,6 +49,8 @@ export interface Profile {
   bio: string;
   nickname: string;
   privacy: string;
+  is_followed: boolean;
+  is_requested: boolean;
 }
 
 export interface Group {
