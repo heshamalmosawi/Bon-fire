@@ -50,10 +50,9 @@ export interface GroupUserModel {
   user_avatar_path: string;
   user_nickname: string;
   user_about: string;
-  profile_exposure: string
+  profile_exposure: string;
   is_invited: boolean;
 }
-
 
 export interface Profile {
   fname: string;
@@ -70,15 +69,15 @@ export interface Group {
   group_name: string;
   group_desc: string;
   is_member: boolean;
-  total_members: number; 
-  is_requested: boolean;// Extended
+  total_members: number;
+  is_requested: boolean; // Extended
 }
 
 export interface GroupProps {
   groupName: string;
   ownerName: string;
-  owner:string;
-  ownerEmail:string;
+  owner: string;
+  ownerEmail: string;
   description: string;
   session_user: string;
   groupID: string;
@@ -98,4 +97,9 @@ export interface chatMessage {
   from: string;
   to: string;
   message: string;
+}
+
+export interface Notification {
+  notiType: string;
+  notiContent: string;
 }
