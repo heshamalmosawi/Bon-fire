@@ -30,6 +30,7 @@ func BrodcastNotiToGroup(groupID uuid.UUID, notification models.GroupNotificatio
 
 	for _, user := range users {
 		if err := NotifyUser(user.UserID, models.UserNotificationModel{
+			NotiID:      notification.NotiID,
 			NotiType:    notification.NotiType,
 			NotiContent: notification.NotiContent,
 			NotiTime:    notification.NotiTime,

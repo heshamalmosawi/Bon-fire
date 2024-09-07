@@ -16,14 +16,15 @@ import React, {
 import { useNotificationWebSocket } from "./NotificationWebsocketContext";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { Notification } from "@/lib/interfaces";
 
 /**
  * NotificationContextType defines the shape of the notification context.
  * It includes the list of notifications and a function to add a new notification.
  */
 interface NotificationContextType {
-  notifications: string[];
-  addNotification: (message: string) => void;
+  notifications: Notification[];
+  addNotification: (message: Notification) => void;
 }
 
 /**
@@ -32,7 +33,7 @@ interface NotificationContextType {
  */
 const NotificationContext = createContext<NotificationContextType>({
   notifications: [],
-  addNotification: () => {},
+  addNotification: (notifications: Notification) => {},
 });
 
 interface NotificationProviderProps {
@@ -48,7 +49,7 @@ interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
 }) => {
-  const [notifications, setNotifications] = useState<string[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const { socket, setOnMessage } = useNotificationWebSocket();
   const { toast } = useToast();
 
@@ -89,7 +90,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         });
       }
 
-      addNotification(message);
+      addNotification({
+        notiType: message.noti_type,
+        notiContent: message.noti_content,
+      });
     };
 
     if (socket) {
@@ -103,7 +107,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     };
   }, [socket, setOnMessage]);
 
-  const addNotification = (message: string) => {
+  const addNotification = (message: Notification) => {
     setNotifications((prevNotifications) => [...prevNotifications, message]);
   };
 
