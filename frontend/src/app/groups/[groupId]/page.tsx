@@ -29,6 +29,8 @@ import {
 } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { Images } from "lucide-react";
+import EventDialog from "@/components/AddEvent"
+import Events from "@/components/groupEvents";
 
 
 
@@ -61,6 +63,13 @@ const GroupPage = () => {
   const [nonMembers, setNonMembers] = useState<GroupUserModel[]>([]);
   const { toast } = useToast();
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredNonMembers = nonMembers.filter((user) =>
+    user.user_fname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.user_lname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.user_email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
 useEffect(() => {
   if (activeTab === "find") {
@@ -376,7 +385,7 @@ useEffect(() => {
               {loading && <p>Loading...</p>}
               {activeTab === "posts" &&
                 posts.map((post: any) => (
-                  <div className="w-6/12">
+                  <div className="w-10/12">
                     {" "}
                     {/* Wrapper to ensure full width */}
                     <PostComponent
@@ -455,12 +464,20 @@ useEffect(() => {
                   <h1>{groupProfile.description}</h1>
                 </div>
               )}
-          {activeTab === "find" && (
-  <div className="flex flex-col items-center">
+  {activeTab === "find" && (
+  <div className="flex flex-col items-start w-10/12">
     <h2 className="text-xl font-semibold">Invite Members</h2>
+    <input
+      type="text"
+      placeholder="Search members..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="p-2 m-2 rounded-lg text-white bg-black"
+      style={{ width: '200px' }}
+    />
     <div className="w-full">
-      {nonMembers.length > 0 ? (
-        nonMembers.map((user) => (
+      {filteredNonMembers.length > 0 ? (
+        filteredNonMembers.map((user) => (
           <div key={user.user_id} className="flex justify-between items-center p-2 m-2 bg-black text-white rounded-lg">
             <div className="flex items-center">
               <Avatar>
@@ -473,14 +490,14 @@ useEffect(() => {
               </div>
             </div>
             <button 
-        onClick={() => !user.is_invited && handleInviteClick(user.user_id)}
-        disabled={user.is_invited}
-        className={`px-4 py-2 rounded hover:opacity-75 transition duration-150 ease-in-out ${
-          user.is_invited ? "bg-gray-500" : "bg-indigo-500 hover:bg-indigo-700"
-        }`}
-      >
-        {user.is_invited ? "Requested" : "Invite"}
-      </button>
+              onClick={() => !user.is_invited && handleInviteClick(user.user_id)}
+              disabled={user.is_invited}
+              className={`px-4 py-2 rounded hover:opacity-75 transition duration-150 ease-in-out ${
+                user.is_invited ? "bg-gray-500" : "bg-indigo-500 hover:bg-indigo-700"
+              }`}
+            >
+              {user.is_invited ? "Requested" : "Invite"}
+            </button>
           </div>
         ))
       ) : (
@@ -490,9 +507,18 @@ useEffect(() => {
   </div>
 )}
 
-              {activeTab === "events" && <EventsList />}
+{activeTab === "events" && (
+  <div className="w-10/12">
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-xl font-semibold text-white">Events</h2>
+      <EventDialog />
+    </div>
+    <Events groupId={groupID}/>
+  </div>
+)}
+
               {activeTab === "requests" && (
-                <div className="flex flex-wrap gap-4 justify-center">
+                <div className="flex flex-wrap gap-4 justify-center w-10/12">
                   {requests
                     .filter((request) => !handledRequests.has(request.id))
                     .map((request) => (
