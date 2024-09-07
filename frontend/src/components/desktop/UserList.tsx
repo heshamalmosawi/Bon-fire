@@ -55,7 +55,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
     const fetchUsers = async () => {
       if (sessionUser != "") {
         handleClick('followers', sessionUser1, setLoading, setError, setActiveTab, setData);
-        if (data.response === "Handling default message" || data === null) {
+        if ((data && data.response === "Handling default message") || data === null) {
           setUsers([]);
         } else {
           setUsers(data.response);
