@@ -99,6 +99,7 @@ export interface chatMessage {
   to: string;
   message: string;
 }
+
 export interface GroupEvent {
   event_id: string;
   group_id: string;
@@ -106,4 +107,9 @@ export interface GroupEvent {
   event_title: string;
   event_description: string;
   event_timestamp: string; // or Date if you prefer Date objects
+  is_going: boolean;
+  did_respond: boolean;
+  attendees: number;
 }
+
+

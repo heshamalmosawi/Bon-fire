@@ -1,13 +1,15 @@
 package server
 
 import (
-    "encoding/json"
-    "net/http"
-    "bonfire/pkgs/models"
-    "bonfire/pkgs/utils"
-    "github.com/gofrs/uuid"
-    "log"
-    "strings"
+	"bonfire/pkgs"
+	"bonfire/pkgs/models"
+	"bonfire/pkgs/utils"
+	"encoding/json"
+	"log"
+	"net/http"
+	"strings"
+
+	"github.com/gofrs/uuid"
 )
 
 // HandleAddEvent handles the creation of new group events.
@@ -53,6 +55,22 @@ func HandleAddEvent(w http.ResponseWriter, r *http.Request) {
 // HandleFetchEventsByGroup handles fetching all events for a specific group.
 func HandleFetchEventsByGroup(w http.ResponseWriter, r *http.Request) {
     // Extract the group ID from the URL path
+    var user *models.UserModel
+	sessionIDCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Session ID cookie not found", http.StatusUnauthorized)
+		return
+	}
+
+	// Get the session from the session manager
+	session, err := pkgs.MainSessionManager.GetSession(sessionIDCookie.Value)
+	if err != nil {
+		http.Error(w, "Invalid session detected", http.StatusUnauthorized)
+		return
+	}
+	// Extract the user ID from the session
+	user = session.User
+
     pathParts := strings.Split(r.URL.Path, "/")
     if len(pathParts) < 3 {
         http.Error(w, "Invalid URL path", http.StatusBadRequest)
@@ -61,7 +79,7 @@ func HandleFetchEventsByGroup(w http.ResponseWriter, r *http.Request) {
     groupID := pathParts[2]
 
     // Fetch events using the provided group ID.
-    events, err := models.GetEventsByGroup(groupID)
+    events, err := models.GetEventsByGroup(groupID,user.UserID)
     if err != nil {
         http.Error(w, "Failed to fetch events: "+err.Error(), http.StatusInternalServerError)
         return

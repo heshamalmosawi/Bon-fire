@@ -14,6 +14,11 @@ type GroupEvent struct {
 	EventTitle   string    `json:"event_title"`
 	EventDescrip string    `json:"event_description"`
 	EventTime    time.Time `json:"event_timestamp"`
+
+	IsGoing		bool `json:"is_going"` // if the user is going or not 
+	DidRespond  bool `json:"did_respond"` // to see if we show the buttons or not 
+	Attendees	int `json:"attendees"`//display total number of attendees 
+	
 }
 
 func (u *GroupEvent) Save() error {
@@ -69,7 +74,7 @@ func GetEventByGroup(groupID string) (*GroupEvent, error) {
 	return &event, nil
 }
 
-func GetEventsByGroup(groupID string) ([]GroupEvent, error) {
+func GetEventsByGroup(groupID string, userID uuid.UUID) ([]GroupEvent, error) {
     var events []GroupEvent
     columns := []string{"event_id", "group_id", "creator_id", "event_title", "event_description", "event_timestamp"}
     condition := "group_id = ?"
@@ -84,6 +89,19 @@ func GetEventsByGroup(groupID string) ([]GroupEvent, error) {
         if err := rows.Scan(&event.EventID, &event.GroupID, &event.CreatorID, &event.EventTitle, &event.EventDescrip, &event.EventTime); err != nil {
             return nil, err
         }
+		event.Attendees,err = GetAttendeeCountByEvent(event.EventID)
+		if err != nil {
+			return nil, err
+		}
+
+		response, didRespond, err := GetUserResponseToEvent(event.EventID, userID)
+		if err != nil {
+			return nil, err
+		}
+
+
+		event.DidRespond = didRespond
+		event.IsGoing = (response == "going")
         events = append(events, event)
     }
 

@@ -11,6 +11,8 @@ interface Event {
   event_description: string;
   event_timestamp: Date;
   attendees: number;
+  is_going: boolean;
+  did_respond: boolean;
 }
 
 export default function Events({ groupId }: { groupId: string }) {
@@ -22,7 +24,7 @@ export default function Events({ groupId }: { groupId: string }) {
         setEvents(fetchedEvents.map(event => ({
           ...event,
           event_timestamp: new Date(event.event_timestamp), // Assuming the key should be `date` based on your Event interface
-          attendees: 10 // Hardcode the number of attendees
+  
         })));
       } else {
         // Handle the case where no events are fetched or an error occurred
@@ -85,17 +87,21 @@ export default function Events({ groupId }: { groupId: string }) {
             </Badge>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button
-              variant="ghost"
+          <Button
+              disabled={event.did_respond}
+              variant={event.did_respond && event.is_going ? "secondary" : "ghost"}
               size="sm"
               onClick={() => handleRSVP(event.event_id, true)}
+              className={event.did_respond && event.is_going ? "bg-green-500" : ""}
             >
               <CheckIcon className="mr-2 h-4 w-4" /> Going
             </Button>
             <Button
-              variant="ghost"
+              disabled={event.did_respond}
+              variant={event.did_respond && !event.is_going ? "secondary" : "ghost"}
               size="sm"
               onClick={() => handleRSVP(event.event_id, false)}
+              className={event.did_respond && !event.is_going ? "bg-red-500" : ""}
             >
               <XIcon className="mr-2 h-4 w-4" /> Not Going
             </Button>
