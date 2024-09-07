@@ -1,4 +1,4 @@
-import { Profile,RequestProps } from "./interfaces";
+import { Profile,RequestProps,GroupEvent } from "./interfaces";
 
 export const Yori = "http://localhost:8080";
 
@@ -295,5 +295,25 @@ export const sendGroupInvite = async (groupID: string, userID: string): Promise<
   } catch (error) {
       console.error(`Error sending group invite: ${error}`);
       return false;
+  }
+};
+
+export const fetchEventsByGroup = async (groupId: string): Promise<GroupEvent[] | null> => {
+  try {
+    const response = await fetch(`${Yori}/events/${groupId}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (response.ok) {
+      const events: GroupEvent[] = await response.json();
+      console.log("Fetched events:", events); // Debugging log
+      return events;
+    } else {
+      console.error("Failed to fetch events:", response.statusText);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    return null;
   }
 };

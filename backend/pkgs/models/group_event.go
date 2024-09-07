@@ -3,6 +3,7 @@ package models
 import (
 	"bonfire/pkgs/utils"
 	"time"
+
 	"github.com/gofrs/uuid"
 )
 
@@ -66,4 +67,25 @@ func GetEventByGroup(groupID string) (*GroupEvent, error) {
 	}
 
 	return &event, nil
+}
+
+func GetEventsByGroup(groupID string) ([]GroupEvent, error) {
+    var events []GroupEvent
+    columns := []string{"event_id", "group_id", "creator_id", "event_title", "event_description", "event_timestamp"}
+    condition := "group_id = ?"
+    rows, err := utils.Read("group_event", columns, condition, groupID)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    for rows.Next() {
+        var event GroupEvent
+        if err := rows.Scan(&event.EventID, &event.GroupID, &event.CreatorID, &event.EventTitle, &event.EventDescrip, &event.EventTime); err != nil {
+            return nil, err
+        }
+        events = append(events, event)
+    }
+
+    return events, nil
 }

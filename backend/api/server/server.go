@@ -48,7 +48,6 @@ func Routers() {
 	mux.HandleFunc("POST /group/event_response", HandleGroupEventResponse)
 	mux.HandleFunc("POST /group/request", HandleGroupRequests)
 	mux.HandleFunc("GET /fetchGroups", FetchGroups)
-	
 	mux.HandleFunc("POST /authenticate", authenticate)
 	mux.HandleFunc("GET /ws", chat.HandleConnections)
 	mux.HandleFunc("GET /subscribe", notify.HandleSubscription)
@@ -56,6 +55,7 @@ func Routers() {
 	mux.HandleFunc("GET /requests/{group_id}", HandleFetchGroupRequests)
 	mux.HandleFunc("GET /fetchpeople/{group_id}", HandleFetchUsersNotInGroup)
 	mux.HandleFunc("POST /addevent", HandleAddEvent)
+	mux.HandleFunc("GET /events/{group_id}",HandleFetchEventsByGroup)
 
 	// handle cors
 	cors_mux := middleware.CORS(mux)

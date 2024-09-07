@@ -472,7 +472,7 @@ useEffect(() => {
       placeholder="Search members..."
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
-      className="p-2 m-2 rounded-lg text-white bg-black border border-white"
+      className="p-2 m-2 rounded-lg text-white bg-black"
       style={{ width: '200px' }}
     />
     <div className="w-full">
@@ -513,7 +513,7 @@ useEffect(() => {
       <h2 className="text-xl font-semibold text-white">Events</h2>
       <EventDialog />
     </div>
-    <Events />
+    <Events groupId={groupID}/>
   </div>
 )}
 

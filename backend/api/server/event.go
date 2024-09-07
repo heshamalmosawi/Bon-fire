@@ -7,6 +7,7 @@ import (
     "bonfire/pkgs/utils"
     "github.com/gofrs/uuid"
     "log"
+    "strings"
 )
 
 // HandleAddEvent handles the creation of new group events.
@@ -47,4 +48,26 @@ func HandleAddEvent(w http.ResponseWriter, r *http.Request) {
     // Respond with success message
     w.WriteHeader(http.StatusCreated)
     utils.EncodeJSON(w, map[string]string{"response": "Event successfully added"})
+}
+
+// HandleFetchEventsByGroup handles fetching all events for a specific group.
+func HandleFetchEventsByGroup(w http.ResponseWriter, r *http.Request) {
+    // Extract the group ID from the URL path
+    pathParts := strings.Split(r.URL.Path, "/")
+    if len(pathParts) < 3 {
+        http.Error(w, "Invalid URL path", http.StatusBadRequest)
+        return
+    }
+    groupID := pathParts[2]
+
+    // Fetch events using the provided group ID.
+    events, err := models.GetEventsByGroup(groupID)
+    if err != nil {
+        http.Error(w, "Failed to fetch events: "+err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Set content type and encode the response as JSON.
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(events)
 }
