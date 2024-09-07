@@ -34,6 +34,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
   const [clickCount, setClickCount] = useState(0);
   const [sessionUser1, setSessionUser] = useState("");
   const router = useRouter();
+  const [NoF, SetFollowera] = useState(false);
 
   useEffect(() => {
     const getSessionUser = async () => {
@@ -55,7 +56,10 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
     const fetchUsers = async () => {
       if (sessionUser != "") {
         handleClick('followers', sessionUser1, setLoading, setError, setActiveTab, setData);
-        if ((data && data.response === "Handling default message") || data === null) {
+        if ((data && data.response === "Handling default message") || (data === null)) {
+          setUsers([]);
+        } else if (data && data.response === null) {
+          SetFollowera(true);
           setUsers([]);
         } else {
           setUsers(data.response);
@@ -108,13 +112,25 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
         <h2 className="text-xl font-semibold">Users</h2>
       </ExpandableChatHeader>
       <ExpandableChatBody>
-        <ChatSidebar chats={users.map(user => ({
-          name: `${user.user_fname} ${user.user_lname}`,
-          status: user.user_nickname,
-          avatar: user.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg",
-          isActive: user.user_id === selectedUser?.user_id,
-          onClick: () => handleUserSelect(user),
-        }))} />
+        {NoF ? (
+          <div className="w-64 bg-black p-4 flex flex-col gap-2 items-center justify-center h-full">
+            <div className="text-white text-center">
+              <h2 className="text-xl font-semibold mb-4">No Followers</h2>
+              <p className="text-gray-400">
+                You have no followers yet.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <ChatSidebar chats={users.map(user => ({
+            name: `${user.user_fname} ${user.user_lname}`,
+            status: user.user_nickname,
+            avatar: user.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg",
+            isActive: user.user_id === selectedUser?.user_id,
+            onClick: () => handleUserSelect(user),
+          }))} />
+        )}
+
       </ExpandableChatBody>
     </div>
     // <div className="w-1/4 h-full p-4 overflow-y-auto">
