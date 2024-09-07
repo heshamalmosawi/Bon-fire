@@ -4,7 +4,7 @@ import React, { useEffect, useState, ChangeEvent } from "react";
 import { Group } from "@/components/desktop/groupProfile";
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
-import { usePathname, useRouter } from "next/navigation";
+import { notFound, usePathname, useRouter } from "next/navigation";
 import { GroupProps, GroupUserModel, RequestProps,UserModel } from "@/lib/interfaces";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -31,6 +31,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Images } from "lucide-react";
 import EventDialog from "@/components/AddEvent"
 import Events from "@/components/groupEvents";
+
 
 
 
@@ -186,10 +187,21 @@ useEffect(() => {
       const response = await fetch(`http://localhost:8080/group/${groupID}`, {
         credentials: "include",
       });
+      if (response.status === 401) {
+        // Handle unauthorized access
+        router.push('/unauthorized'); // Redirect to an unauthorized page
+        return;
+      }
+      if (response.status === 400) {
+        // No data found for the group
+        router.push('/404'); // Redirect to an unauthorized page
+        return;
+      }
       if (!response.ok) {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
+     
 
       console.log("Fetched group data:", data.members);
       console.log("Fetched owner data:", data.group_info.owner);

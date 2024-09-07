@@ -55,6 +55,12 @@ func HandleGroup(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if !isMember && user.UserID != group.OwnerID {
+        // If the user is neither a member nor the owner, respond with unauthorized
+        http.Error(w, "Unauthorized access", http.StatusUnauthorized)
+        return
+    } 
+	
 	isRequested := false
 
 	// Get the total number of members in the group
