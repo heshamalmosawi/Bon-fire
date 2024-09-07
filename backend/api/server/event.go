@@ -12,6 +12,12 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+type GroupEventResponse struct {
+    EventID string `json:"event_id"`
+    UserID  string `json:"user_id"`
+    Going   string `json:"going"` 
+}
+
 // HandleAddEvent handles the creation of new group events.
 func HandleAddEvent(w http.ResponseWriter, r *http.Request) {
     if r.Method != http.MethodPost {
@@ -89,3 +95,52 @@ func HandleFetchEventsByGroup(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(events)
 }
+
+// HandleGroupEventResponse handles the request for responding to a group event.
+func HandleGroupEventResponse(w http.ResponseWriter, r *http.Request) {
+    var resp GroupEventResponse
+    err := json.NewDecoder(r.Body).Decode(&resp)
+    if err != nil {
+        http.Error(w, "Invalid request body", http.StatusBadRequest)
+        return
+    }
+
+     // Validate event ID
+     eventID, err := models.ValidateUUID(resp.EventID, "group_event", "event_id")
+     if err != nil {
+         http.Error(w, err.Error(), http.StatusBadRequest)
+         return
+     }
+ 
+     // Validate user ID
+     userID, err := models.ValidateUUID(resp.UserID, "user", "user_id")
+     if err != nil {
+         http.Error(w, err.Error(), http.StatusBadRequest)
+         return
+     }
+ 
+     // Set ResponseType based on the 'Going' field
+     responseType := "not_going"
+     if resp.Going == "yes" {
+         responseType = "going"
+     }
+ 
+     // Create a new GroupEventAttend object
+     eventResponse := models.GroupEventAttend{
+         EventID:     eventID,
+         AttendeeID:  userID,
+         ResponseType: responseType,
+     }
+ 
+     // Save the response
+     if err := eventResponse.Save(); err != nil {
+         log.Println("Error saving event response:", err)
+         http.Error(w, "Failed to save event response", http.StatusInternalServerError)
+         return
+     }
+ 
+     // Respond with success message
+     w.Header().Set("Content-Type", "application/json")
+     json.NewEncoder(w).Encode(map[string]string{"response": "Response recorded successfully"})
+ }
+

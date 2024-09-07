@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, UsersIcon, CheckIcon, XIcon } from "lucide-react";
-import { fetchEventsByGroup } from "@/lib/api"; // Ensure this function is implemented correctly in your API module
+import { fetchEventsByGroup,sendEventResponse, fetchSessionUser} from "@/lib/api"; // Ensure this function is implemented correctly in your API module
 
 interface Event {
   event_id: string;
@@ -17,22 +17,28 @@ interface Event {
 
 export default function Events({ groupId }: { groupId: string }) {
   const [events, setEvents] = useState<Event[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
-    const loadEvents = async () => {
+    const init = async () => {
+      const user = await fetchSessionUser();
+      if (user && user.User && user.User.user_id) {
+        setUserId(user.User.user_id);
+      } else {
+        console.error("Failed to authenticate user or no session available.");
+      }
+
       const fetchedEvents = await fetchEventsByGroup(groupId);
       if (fetchedEvents) {
         setEvents(fetchedEvents.map(event => ({
           ...event,
-          event_timestamp: new Date(event.event_timestamp), // Assuming the key should be `date` based on your Event interface
-  
+          event_timestamp: new Date(event.event_timestamp),
         })));
       } else {
-        // Handle the case where no events are fetched or an error occurred
-        setEvents([]); // Set to empty array or handle differently
         console.error('Failed to fetch events, or no events exist for this group.');
+        setEvents([]);
       }
     };
-    loadEvents();
+    init();
   }, [groupId]);
   
 
@@ -50,13 +56,25 @@ export default function Events({ groupId }: { groupId: string }) {
     }
   };
 
-  const handleRSVP = (eventId: string, going: boolean) => {
-    setEvents(events.map(event =>
-      event.event_id === eventId
-        ? { ...event, attendees: going ? event.attendees + 1 : Math.max(0, event.attendees - 1) }
-        : event
-    ));
+  const handleRSVP = async (eventId: string, going: boolean) => {
+    if (!userId) {
+      console.error('User ID is not set');
+      return;
+    }
+    try {
+      const result = await sendEventResponse(eventId, userId, going);
+      console.log(result);  // Log the server's response or handle it as needed
+
+      setEvents(events.map(event =>
+        event.event_id === eventId
+          ? { ...event, is_going: going, did_respond: true, attendees: going ? event.attendees + 1 : event.attendees }
+          : event
+      ));
+    } catch (error) {
+      console.error('Failed to send RSVP:', error);
+    }
   };
+
 
   return (
     <div className="container mx-auto p-4 space-y-4">

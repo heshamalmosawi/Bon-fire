@@ -317,3 +317,27 @@ export const fetchEventsByGroup = async (groupId: string): Promise<GroupEvent[] 
     return null;
   }
 };
+
+export const sendEventResponse = async ( eventId:string, userId:string, going:boolean ) => {
+  try {
+    const response = await fetch('http://localhost:8080/group/event_response', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        event_id: eventId,
+        user_id: userId,
+        going: going ? "yes" : "no",
+      }),
+    });
+    if (response.ok) {
+      return await response.json();  // Expecting some confirmation response from the server
+    } else {
+      throw new Error('Failed to submit response');
+    }
+  } catch (error) {
+    console.error('Error submitting event response:', error);
+    throw error;
+  }
+};

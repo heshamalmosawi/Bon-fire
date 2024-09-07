@@ -1,8 +1,11 @@
 package models
 
 import (
+	"bonfire/pkgs/storage"
+	"errors"
+	"fmt"
+
 	"github.com/gofrs/uuid"
-	 "errors"
 )
 
 var ErrNotFound = errors.New("resource not found")
@@ -30,4 +33,25 @@ func ValidateUserID(userIDStr string) (uuid.UUID, error) {
 		return uuid.Nil, err
 	}
 	return userID, nil
+}
+
+func ValidateUUID(uuidStr, tableName, columnName string) (uuid.UUID, error) {
+	// Convert the string to a UUID.
+	uid, err := uuid.FromString(uuidStr)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid UUID format: %v", err)
+	}
+
+	// Check if the UUID exists in the database.
+	query := fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE %s = ?)", tableName, columnName)
+	var exists bool
+	err = storage.DB.QueryRow(query, uid).Scan(&exists)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("error checking UUID existence: %v", err)
+	}
+	if !exists {
+		return uuid.Nil, fmt.Errorf("UUID does not exist in %s", tableName)
+	}
+
+	return uid, nil
 }

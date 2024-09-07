@@ -171,9 +171,3 @@ func HandleGroupDelete(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
 }
 
-// HandleGroupEventResponse handles the request for responding to a group event.
-func HandleGroupEventResponse(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handling error")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"response": "Error"})
-}
