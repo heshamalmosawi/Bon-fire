@@ -50,8 +50,13 @@ export const NotificationWebSocketProvider: React.FC<
       }
       const ws = new WebSocket("ws://localhost:8080/subscribe");
 
-      ws.onopen = () => {
-        console.log("Notification WebSocket connection established");
+      ws.onopen = async () => {
+        console.log("Notification WebSocket connection established")
+        ws.send(
+          JSON.stringify({
+            type: "noti_history",
+          })
+        );
       };
 
       ws.onclose = () => {

@@ -4,6 +4,7 @@ import { getAgo } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RequestProps } from "@/lib/interfaces";
 import { joinGroup } from "@/lib/api"; // Adjust the import path to where joinGroup is defined
+
 const RequestComponent: React.FC<RequestProps> = ({
   id, // User ID
   username,
@@ -18,7 +19,7 @@ const RequestComponent: React.FC<RequestProps> = ({
     console.log(`Attempting to join group ${groupID} for user ${id}`);
     setIsLoading(true); // Set loading state to true
 
-    const success = await joinGroup(groupID, id,true); // Use userId and groupID for the joinGroup function
+    const success = await joinGroup(groupID, id, true); // Use userId and groupID for the joinGroup function
 
     if (success) {
       console.log(`User ${id} successfully joined group ${groupID}.`);
@@ -32,7 +33,7 @@ const RequestComponent: React.FC<RequestProps> = ({
 
   const handleIgnore = async () => {
     console.log(`Ignored request for user ${username} (ID: ${id})`);
-    const success = await joinGroup(groupID, id,false); 
+    const success = await joinGroup(groupID, id, false);
     if (success) {
       console.log(`User ${id} successfully joined group ${groupID}.`);
       onRequestHandled(id); // Remove the request from the list
@@ -61,7 +62,10 @@ const RequestComponent: React.FC<RequestProps> = ({
         >
           {isLoading ? "Joining..." : "Accept"}
         </Button>
-        <Button onClick={handleIgnore} className="bg-red-600 text-white hover:bg-red-700">
+        <Button
+          onClick={handleIgnore}
+          className="bg-red-600 text-white hover:bg-red-700"
+        >
           Ignore
         </Button>
       </div>

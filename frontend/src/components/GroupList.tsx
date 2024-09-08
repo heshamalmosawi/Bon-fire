@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 
 const AllGroupList: React.FC = () => {
   const [filter, setFilter] = useState("all"); 
+  const [newGroup, setNewGroup] = useState(false)
+  const [newjoinrequest, setnewjoinrequest] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]); 
   const [isDialogOpen, setIsDialogOpen] = useState(false); 
   const [sessionUser, setSessionUser] = useState<string | null>(null); 
@@ -50,7 +52,9 @@ const AllGroupList: React.FC = () => {
       setGroups(data || []);
     };
     loadGroups();
-  }, []);
+    setNewGroup(false)
+    setnewjoinrequest(false)
+  }, [newGroup, newjoinrequest]);
 
   // Filter the groups based on the selected filter
   const filteredGroups = groups.filter((group) => {
@@ -64,7 +68,10 @@ const AllGroupList: React.FC = () => {
   });
 
   const openDialog = () => setIsDialogOpen(true);
-  const closeDialog = () => setIsDialogOpen(false);
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    setNewGroup(true)
+  }
 
   const openConfirmJoinDialog = (group: Group) => {
     setSelectedGroup(group);
@@ -74,6 +81,7 @@ const AllGroupList: React.FC = () => {
   const closeConfirmJoinDialog = () => {
     setSelectedGroup(null);
     setIsConfirmJoinDialogOpen(false);
+    setnewjoinrequest(true);
   };
 
 const handleConfirmJoin = async () => {
@@ -97,7 +105,6 @@ const handleConfirmJoin = async () => {
           group.group_id === selectedGroup.group_id ? { ...group, isRequested: true } : group
         );
         setGroups(updatedGroups);
-        window.location.reload(); //find better solution later 
       } else {
         console.error("Failed to send join request:", response.statusText);
       }

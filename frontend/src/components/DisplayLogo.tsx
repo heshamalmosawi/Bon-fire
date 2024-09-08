@@ -3,8 +3,8 @@
 import Image from "next/image";
 import logo from "/public/logo.png";
 import React from "react";
-import { Bell } from "lucide-react";
 import { useNotifications } from "@/context/NotificationContext";
+import DarkNotificationPopover from "./dark-notification-popover";
 
 const DisplayLogo = () => {
   const { notifications } = useNotifications();
@@ -15,7 +15,7 @@ const DisplayLogo = () => {
       </div>
       <div className="w-full flex items-center  justify-between">
         <h1 className="text-white font-bold text-[1.5rem]">Bonfire</h1>
-        <Bell color="white" className="" />
+        <DarkNotificationPopover />
       </div>
     </div>
   );

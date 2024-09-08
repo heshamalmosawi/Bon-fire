@@ -5,7 +5,12 @@ import { Group } from "@/components/desktop/groupProfile";
 import PostComponent from "@/components/desktop/PostComponent";
 import Navbar from "@/components/desktop/Navbar";
 import { notFound, usePathname, useRouter } from "next/navigation";
-import { GroupProps, GroupUserModel, RequestProps,UserModel } from "@/lib/interfaces";
+import {
+  GroupProps,
+  GroupUserModel,
+  RequestProps,
+  UserModel,
+} from "@/lib/interfaces";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sheet,
@@ -25,16 +30,11 @@ import {
   fetchSessionUser,
   leaveGroup,
   fetchPeopleNotInGroup,
-  sendGroupInvite
+  sendGroupInvite,
 } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
-import { Images } from "lucide-react";
-import EventDialog from "@/components/AddEvent"
+import EventDialog from "@/components/AddEvent";
 import Events from "@/components/groupEvents";
-
-
-
-
 
 const GroupPage = () => {
   const [sessionUser, setSessionUser] = useState<string>("");
@@ -42,7 +42,7 @@ const GroupPage = () => {
     groupName: "",
     ownerName: "",
     owner: "",
-    ownerEmail:"",
+    ownerEmail: "",
     description: "",
     session_user: "",
     groupID: "",
@@ -66,17 +66,18 @@ const GroupPage = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredNonMembers = nonMembers.filter((user) =>
-    user.user_fname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.user_lname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.user_email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredNonMembers = nonMembers.filter(
+    (user) =>
+      user.user_fname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.user_lname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.user_email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-useEffect(() => {
-  if (activeTab === "find") {
-    fetchPeopleNotInGroup(groupID).then(setNonMembers);
-  }
-}, [groupID, activeTab]); 
+  useEffect(() => {
+    if (activeTab === "find") {
+      fetchPeopleNotInGroup(groupID).then(setNonMembers);
+    }
+  }, [groupID, activeTab]);
 
   // Function to handle the removal of requests
   const handleRequestHandled = (id: string) => {
@@ -101,7 +102,6 @@ useEffect(() => {
       // Optionally handle errors, e.g., show an error message
     }
   };
-  
 
   const handleLeaveClick = async () => {
     const success = await leaveGroup(groupID, sessionUser);
@@ -178,7 +178,6 @@ useEffect(() => {
   }, [sessionUser]);
 
   // Function to handle join group logic
- 
 
   // Function to fetch group data
   const fetchGroupData = async () => {
@@ -189,19 +188,18 @@ useEffect(() => {
       });
       if (response.status === 401) {
         // Handle unauthorized access
-        router.push('/unauthorized'); // Redirect to an unauthorized page
+        router.push("/unauthorized"); // Redirect to an unauthorized page
         return;
       }
       if (response.status === 400) {
         // No data found for the group
-        router.push('/404'); // Redirect to an unauthorized page
+        router.push("/404"); // Redirect to an unauthorized page
         return;
       }
       if (!response.ok) {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
-     
 
       console.log("Fetched group data:", data.members);
       console.log("Fetched owner data:", data.group_info.owner);
@@ -211,7 +209,7 @@ useEffect(() => {
           groupName: data.group_info.group_name,
           ownerName: data.group_info.owner_name || data.group_info.owner_id,
           owner: data.group_info.owner.user_nickname,
-          ownerEmail:data.group_info.owner.user_email,
+          ownerEmail: data.group_info.owner.user_email,
           description: data.group_info.group_desc,
           session_user: sessionUser,
           groupID: data.group_info.group_id,
@@ -332,24 +330,19 @@ useEffect(() => {
                 >
                   Requests
                 </button>
-
-                
               )}
-              
-                <button
-                  id="Find members"
-                  onClick={() => setActiveTab("find")}
-                  className={`p-2 rounded-lg ${
-                    activeTab === "find"
-                      ? "text-white bg-indigo-500"
-                      : "text-gray-400"
-                  }`}
-                >
-                  Find Members
-                </button>
 
-                
-       
+              <button
+                id="Find members"
+                onClick={() => setActiveTab("find")}
+                className={`p-2 rounded-lg ${
+                  activeTab === "find"
+                    ? "text-white bg-indigo-500"
+                    : "text-gray-400"
+                }`}
+              >
+                Find Members
+              </button>
 
               {/* Show the "Leave" button only if the user is not the owner */}
               {groupProfile.ownerName !== sessionUser && (
@@ -412,7 +405,7 @@ useEffect(() => {
                       postImageContentUrl={post.post_image_path}
                       postLikeNum={post.post_likecount}
                       postCommentNum={post.comment_count}
-                      postIsLiked = {post.is_liked}
+                      postIsLiked={post.is_liked}
                     />
                   </div>
                 ))}
@@ -432,7 +425,9 @@ useEffect(() => {
                           <h3 className="text-lg font-semibold pl-6">
                             {groupProfile.owner}
                           </h3>
-                          <p className="text-gray-600 pl-6">{groupProfile.ownerEmail}</p>
+                          <p className="text-gray-600 pl-6">
+                            {groupProfile.ownerEmail}
+                          </p>
                         </div>
                       </div>
                       <p className="font-bold text-gray-600 pr-6">Owner</p>
@@ -476,58 +471,77 @@ useEffect(() => {
                   <h1>{groupProfile.description}</h1>
                 </div>
               )}
-  {activeTab === "find" && (
-  <div className="flex flex-col items-start w-10/12">
-    <h2 className="text-xl font-semibold">Invite Members</h2>
-    <input
-      type="text"
-      placeholder="Search members..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className="p-2 m-2 rounded-lg text-white bg-black"
-      style={{ width: '200px' }}
-    />
-    <div className="w-full">
-      {filteredNonMembers.length > 0 ? (
-        filteredNonMembers.map((user) => (
-          <div key={user.user_id} className="flex justify-between items-center p-2 m-2 bg-black text-white rounded-lg">
-            <div className="flex items-center">
-              <Avatar>
-                <AvatarImage src={user.user_avatar_path || "default-avatar.png"} alt="Avatar" />
-                <AvatarFallback>{user.user_fname.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="ml-4">
-                <h3>{user.user_fname} {user.user_lname}</h3>
-                <p className="text-gray-500">{user.user_email}</p>
-              </div>
-            </div>
-            <button 
-              onClick={() => !user.is_invited && handleInviteClick(user.user_id)}
-              disabled={user.is_invited}
-              className={`px-4 py-2 rounded hover:opacity-75 transition duration-150 ease-in-out ${
-                user.is_invited ? "bg-gray-500" : "bg-indigo-500 hover:bg-indigo-700"
-              }`}
-            >
-              {user.is_invited ? "Requested" : "Invite"}
-            </button>
-          </div>
-        ))
-      ) : (
-        <p className="text-center text-white">No users available to invite.</p>
-      )}
-    </div>
-  </div>
-)}
+              {activeTab === "find" && (
+                <div className="flex flex-col items-start w-10/12">
+                  <h2 className="text-xl font-semibold">Invite Members</h2>
+                  <input
+                    type="text"
+                    placeholder="Search members..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="p-2 m-2 rounded-lg text-white bg-black"
+                    style={{ width: "200px" }}
+                  />
+                  <div className="w-full">
+                    {filteredNonMembers.length > 0 ? (
+                      filteredNonMembers.map((user) => (
+                        <div
+                          key={user.user_id}
+                          className="flex justify-between items-center p-2 m-2 bg-black text-white rounded-lg"
+                        >
+                          <div className="flex items-center">
+                            <Avatar>
+                              <AvatarImage
+                                src={
+                                  user.user_avatar_path || "default-avatar.png"
+                                }
+                                alt="Avatar"
+                              />
+                              <AvatarFallback>
+                                {user.user_fname.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="ml-4">
+                              <h3>
+                                {user.user_fname} {user.user_lname}
+                              </h3>
+                              <p className="text-gray-500">{user.user_email}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() =>
+                              !user.is_invited &&
+                              handleInviteClick(user.user_id)
+                            }
+                            disabled={user.is_invited}
+                            className={`px-4 py-2 rounded hover:opacity-75 transition duration-150 ease-in-out ${
+                              user.is_invited
+                                ? "bg-gray-500"
+                                : "bg-indigo-500 hover:bg-indigo-700"
+                            }`}
+                          >
+                            {user.is_invited ? "Requested" : "Invite"}
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-white">
+                        No users available to invite.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
-{activeTab === "events" && (
-  <div className="w-10/12">
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="text-xl font-semibold text-white">Events</h2>
-      <EventDialog />
-    </div>
-    <Events groupId={groupID}/>
-  </div>
-)}
+              {activeTab === "events" && (
+                <div className="w-10/12">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-white">Events</h2>
+                    <EventDialog />
+                  </div>
+                  <Events groupId={groupID} />
+                </div>
+              )}
 
               {activeTab === "requests" && (
                 <div className="flex flex-wrap gap-4 justify-center w-10/12">

@@ -100,8 +100,14 @@ export interface chatMessage {
 }
 
 export interface Notification {
+  notiID: string; // uuid
   notiType: string;
   notiContent: string;
+  recieverID: string;
+  userID: string;
+  groupID: string;
+  eventID: string;
+  notiRead: boolean;
 }
 
 export interface GroupEvent {
@@ -115,5 +121,3 @@ export interface GroupEvent {
   did_respond: boolean;
   attendees: number;
 }
-
-

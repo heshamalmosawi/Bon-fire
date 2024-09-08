@@ -17,6 +17,7 @@ import { useNotificationWebSocket } from "./NotificationWebsocketContext";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Notification } from "@/lib/interfaces";
+import { handleFollow, joinGroup, sendEventResponse } from "@/lib/api";
 
 /**
  * NotificationContextType defines the shape of the notification context.
@@ -64,15 +65,49 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       const message = JSON.parse(event.data);
       console.log("Notification received:", message);
 
+      if (!message) {
+        return;
+      } else if (Array.isArray(message)) {
+        // deal with initial updates
+        setNotifications(
+          message.map((m) => ({
+            notiID: m.noti_id,
+            recieverID: m.receiver_id,
+            userID: m.user_id ? m.user_id : "",
+            groupID: m.group_id ? m.group_id : "",
+            eventID: m.event_id ? m.event_id : "",
+            notiType: m.noti_type,
+            notiContent: m.noti_content,
+            notiRead: m.noti_status !== "unread",
+          }))
+        );
+
+        return;
+      }
+
       if (message.noti_type === "group_invite") {
         toast({
           variant: "default",
           title: "Group Invite",
-          description: message.noti_content,
+          description: message.noti_content, // group_id -> need user_id
           action: (
             <div className="flex flex-col gap-2">
-              <ToastAction altText="accept invite">Accept</ToastAction>
-              <ToastAction altText="Reject invite">Reject</ToastAction>
+              <ToastAction
+                altText="accept invite"
+                onClick={async () =>
+                  await joinGroup(message.group_id, message.receiver_id, true)
+                }
+              >
+                Accept
+              </ToastAction>
+              <ToastAction
+                altText="Reject invite"
+                onClick={async () =>
+                  await joinGroup(message.group_id, message.receiver_id, false)
+                }
+              >
+                Reject
+              </ToastAction>
             </div>
           ),
         });
@@ -80,19 +115,105 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         toast({
           variant: "default",
           title: "Group Join Request",
+          description: message.noti_content, // user_id of the requester -> need group_id
+          action: (
+            <div className="flex flex-col gap-2">
+              <ToastAction
+                altText="accept request"
+                onClick={async () =>
+                  await joinGroup(message.group_id, message.user_id, true)
+                }
+              >
+                Accept
+              </ToastAction>
+              <ToastAction
+                altText="Reject request"
+                onClick={async () =>
+                  await joinGroup(message.group_id, message.user_id, false)
+                }
+              >
+                Reject
+              </ToastAction>
+            </div>
+          ),
+        });
+      } else if (message.noti_type === "follow") {
+        toast({
+          variant: "default",
+          title: "New Follower!",
+          description: message.noti_content,
+        });
+      } else if (message.noti_type === "follow_request") {
+        toast({
+          variant: "default",
+          title: "Follow Request",
           description: message.noti_content,
           action: (
             <div className="flex flex-col gap-2">
-              <ToastAction altText="accept invite">Accept</ToastAction>
-              <ToastAction altText="Reject invite">Reject</ToastAction>
+              <ToastAction
+                altText="accept request"
+                onClick={async () => handleFollow(message.user_id, true)}
+              >
+                Accept
+              </ToastAction>
+              <ToastAction
+                altText="Reject request"
+                onClick={async () => handleFollow(message.user_id, false)}
+              >
+                Reject
+              </ToastAction>
+            </div>
+          ),
+        });
+      } else if (message.noti_type === "follow_response_accept") {
+        toast({
+          variant: "default",
+          title: "Follow Request accepted!",
+          description: message.noti_content,
+        });
+      } else if (message.noti_type === "follow_response_accept") {
+        toast({
+          variant: "destructive",
+          title: "Follow Request rejected...",
+          description: message.noti_content,
+        });
+      } else if (message.noti_type === "new_event") {
+        toast({
+          variant: "default",
+          title: "New Event!",
+          description: message.noti_content,
+          action: (
+            <div className="flex flex-col gap-2">
+              <ToastAction
+                altText="going"
+                onClick={async () =>
+                  await sendEventResponse(message.event_id, true)
+                }
+              >
+                Going
+              </ToastAction>
+              <ToastAction
+                altText="not going"
+                onClick={async () =>
+                  await sendEventResponse(message.event_id, false)
+                }
+              >
+                Not Going
+              </ToastAction>
             </div>
           ),
         });
       }
 
       addNotification({
+        notiID: message.noti_id,
+        recieverID: message.receiver_id,
+        userID: message.user_id ? message.user_id : "",
+        groupID: message.group_id ? message.group_id : "",
+        eventID: message.event_id ? message.event_id : "",
         notiType: message.noti_type,
         notiContent: message.noti_content,
+        notiRead: message.noti_status !== "unread",
       });
     };
 
