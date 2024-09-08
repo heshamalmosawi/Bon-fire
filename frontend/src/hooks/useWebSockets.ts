@@ -22,6 +22,7 @@ const useWebSocket = (url: string, senderId: string | null, recipientId: string 
     socket.onmessage = (event) => {
       const message: Message = JSON.parse(event.data);
       SetNewMessageFlag(!newMessageFlag);
+      console.log("Received message:", newMessageFlag);
       if (message.sender_id === senderId || message.sender_id === recipientId) {
         handleMessage(message);
       }

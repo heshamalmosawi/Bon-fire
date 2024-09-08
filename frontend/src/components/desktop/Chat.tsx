@@ -141,6 +141,8 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
         } else {
           console.log("clear");
           setNewMessage("");
+          SetNewMessageFlag(!newMessageFlag);
+          console.log("newMessageFlag", newMessageFlag);
         }
       } catch (error) {
         console.error("Error storing message:", error);
