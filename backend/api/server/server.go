@@ -58,6 +58,7 @@ func Routers() {
 	mux.HandleFunc("GET /fetchpeople/{group_id}", HandleFetchUsersNotInGroup)
 	mux.HandleFunc("POST /addevent", HandleAddEvent)
 	mux.HandleFunc("GET /events/{group_id}", HandleFetchEventsByGroup)
+	mux.HandleFunc("GET /user-events", HandleEventsByUser)
 
 	// handle cors
 	cors_mux := middleware.CORS(mux)

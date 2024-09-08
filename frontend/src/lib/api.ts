@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Profile, RequestProps, GroupEvent } from "./interfaces";
+import { Profile, RequestProps, GroupEvent, BonfireEvent } from "./interfaces";
 
 export const Yori = "http://localhost:8080";
 
@@ -138,9 +138,7 @@ export const fetchProfile = async (
 };
 
 // Function to fetch the group requests
-export const fetchRequest = async (
-  groupID: string
-): Promise<RequestProps[] | null> => {
+export const fetchRequest = async (groupID: string): Promise<any[] | null> => {
   try {
     const response = await fetch(`${Yori}/requests/${groupID}`, {
       method: "GET", // Use GET to fetch data
@@ -420,4 +418,27 @@ export const readAllNotis = async () => {
       withCredentials: true,
     }
   );
+};
+
+export const getEventsIndex = async (): Promise<BonfireEvent[] | undefined> => {
+  const res = await axios.get(`${Yori}/user-events`, {
+    withCredentials: true,
+  });
+
+  if (res.status !== 200) {
+    return;
+  }
+
+  return res.data
+    ? res.data.map(
+        (ev: any): BonfireEvent => ({
+          eventID: ev.event_id,
+          groupID: ev.group_id,
+          eventTitle: ev.event_title,
+          eventDesc: ev.event_description,
+          eventDate: new Date(ev.event_timestamp),
+          eventDuration: 86400000,
+        })
+      )
+    : [];
 };

@@ -188,3 +188,39 @@ func HandleGroupEventResponse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Response recorded successfully"})
 }
+
+func HandleEventsByUser(w http.ResponseWriter, r *http.Request) {
+	session, err := middleware.Auth(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	userID := session.User.UserID
+
+	var events []models.GroupEvent
+
+	groupUsers, err := models.GetGroupsByUser(userID)
+	if err != nil {
+		log.Printf("HandleEventsByUser: error getting groupUsers: %v\n", err)
+		http.Error(w, "internal server error", http.StatusUnauthorized)
+		return
+	}
+
+	for _, gu := range groupUsers {
+		group_events, err := models.GetEventsByGroup(gu.GroupID.String(), userID)
+		if err != nil {
+			log.Printf("HandleEventsByUser: error getting events: %v\n", err)
+			http.Error(w, "internal server error", http.StatusUnauthorized)
+			return
+		}
+		
+		events = append(events, group_events...)
+	}
+
+	if err := utils.EncodeJSON(w, events); err != nil {
+		log.Printf("HandleEventsByUser: error sending events: %v\n", err)
+		http.Error(w, "internal server error", http.StatusUnauthorized)
+		return
+	}
+}

@@ -9,7 +9,6 @@ import { PostProps } from "@/lib/interfaces";
 import { useToast } from "../ui/use-toast";
 
 const PostComponent = (props: PostProps) => {
-  console.log(props.postIsLiked);
   const [likes, setlikes] = useState(props.postLikeNum);
   const [liked, setliked] = useState(props.postIsLiked);
   const { toast } = useToast();

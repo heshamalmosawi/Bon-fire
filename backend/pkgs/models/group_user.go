@@ -10,9 +10,9 @@ import (
 )
 
 type GroupUser struct {
-	MemberID      uuid.UUID `json:"member_id"`
-	UserID      uuid.UUID `json:"user_id"`
-	GroupID    uuid.UUID `json:"group_id"`
+	MemberID uuid.UUID `json:"member_id"`
+	UserID   uuid.UUID `json:"user_id"`
+	GroupID  uuid.UUID `json:"group_id"`
 }
 
 func (gu *GroupUser) Save() error {
@@ -24,8 +24,8 @@ func (gu *GroupUser) Save() error {
 		gu.MemberID = uid
 	}
 
-	columns := []string{"member_id","user_id","group_id"}
-	values := []interface{}{gu.MemberID,gu.UserID,gu.GroupID}
+	columns := []string{"member_id", "user_id", "group_id"}
+	values := []interface{}{gu.MemberID, gu.UserID, gu.GroupID}
 
 	_, err := utils.Create("group_user", columns, values)
 	return err
@@ -39,10 +39,9 @@ func (gu *GroupUser) Del() error {
 
 func (gu *GroupUser) Update() error {
 	updates := map[string]interface{}{
-		"member_id" : gu.MemberID,
-		"user_id" : gu.UserID,
-		"group_id" : gu.GroupID,
-	
+		"member_id": gu.MemberID,
+		"user_id":   gu.UserID,
+		"group_id":  gu.GroupID,
 	}
 	condition := "attendance_id = ?"
 	_, err := utils.Update("group_user", updates, condition, gu.MemberID)
@@ -50,7 +49,7 @@ func (gu *GroupUser) Update() error {
 }
 
 func GetMemberUserByGroup(memberID string) (*GroupUser, error) {
-	columns := []string{"member_id","user_id","group_id"}
+	columns := []string{"member_id", "user_id", "group_id"}
 	condition := "member_id = ?"
 	rows, err := utils.Read("group_user", columns, condition, memberID)
 	if err != nil {
@@ -98,7 +97,7 @@ func IsUserInGroup(userID, groupID uuid.UUID) (bool, error) {
 func GetTotalMembers(groupID uuid.UUID) (int, error) {
 	// Prepare the query to count members
 	query := "SELECT COUNT(*) FROM group_user WHERE group_id = ?"
-	
+
 	// Execute the query
 	var totalMembers int
 	err := storage.DB.QueryRow(query, groupID).Scan(&totalMembers)
@@ -152,4 +151,35 @@ func GetMembersByGroupID(groupID uuid.UUID) ([]UserModel, error) {
 	return members, nil
 }
 
+// GetGroupsByUser retrieves all groups that a user with the given userID is a part of.
+func GetGroupsByUser(userID uuid.UUID) ([]*GroupUser, error) {
+	// Define the query to get all group memberships for a given user
+	columns := []string{"member_id", "user_id", "group_id"}
+	condition := "user_id = ?"
+
+	// Execute the query
+	rows, err := utils.Read("group_user", columns, condition, userID)
+	if err != nil {
+		log.Println("Error executing query in GetGroupsByUser:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Prepare a slice to hold the group membership details
+	var groupUsers []*GroupUser
+
+	// Iterate through the result set and populate the slice
+	for rows.Next() {
+		var groupUser GroupUser
+		err := rows.Scan(&groupUser.MemberID, &groupUser.UserID, &groupUser.GroupID)
+		if err != nil {
+			log.Println("Error scanning row in GetGroupsByUser:", err)
+			return nil, err
+		}
+		groupUsers = append(groupUsers, &groupUser)
+	}
+
+	// Return the slice of GroupUser records
+	return groupUsers, nil
+}
 

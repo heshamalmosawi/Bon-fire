@@ -110,6 +110,15 @@ export interface Notification {
   notiRead: boolean;
 }
 
+export interface BonfireEvent {
+  eventID: string;
+  groupID: string;
+  eventTitle: string;
+  eventDesc: string;
+  eventDate: Date;
+  eventDuration: number;
+}
+
 export interface GroupEvent {
   event_id: string;
   group_id: string;

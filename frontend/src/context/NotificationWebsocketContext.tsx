@@ -25,8 +25,9 @@ interface WebSocketProviderProps {
 export const NotificationWebSocketProvider: React.FC<
   WebSocketProviderProps
 > = ({ children }) => {
-  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const socketRef = useRef<WebSocket | null>(null); // Use ref to avoid re-rendering
   const onMessageCallbackRef = useRef<(event: MessageEvent) => void>(() => {});
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
     const connect = () => {
@@ -39,7 +40,10 @@ export const NotificationWebSocketProvider: React.FC<
       }
 
       // Avoid reconnecting if already connected
-      if (socket && socket.readyState === WebSocket.OPEN) {
+      if (
+        socketRef.current &&
+        socketRef.current.readyState === WebSocket.OPEN
+      ) {
         return;
       }
 
@@ -52,15 +56,17 @@ export const NotificationWebSocketProvider: React.FC<
             type: "noti_history",
           })
         );
+        setConnected(true); // Set connected to true on successful connection
       };
 
       ws.onclose = () => {
         console.log("Notification WebSocket connection closed.");
-        // Optionally implement reconnection logic here
+        setConnected(false); // Set connected to false if WebSocket closes
       };
 
       ws.onerror = (error) => {
         console.error("Notification WebSocket error:", error);
+        setConnected(false); // Handle connection errors
       };
 
       ws.onmessage = (event) => {
@@ -69,39 +75,38 @@ export const NotificationWebSocketProvider: React.FC<
         }
       };
 
-      setSocket(ws);
-    };
-
-    const handleCookieChange = () => {
-      if (Cookies.get("session_id")) {
-        connect();
-      }
+      socketRef.current = ws; // Store the WebSocket in ref
     };
 
     // Initial connection attempt
     connect();
 
-    // Watch for cookie changes (using a custom event or polling strategy)
     const interval = setInterval(() => {
-      if (!socket && Cookies.get("session_id")) {
-        handleCookieChange();
+      if (
+        (!socketRef.current ||
+          socketRef.current.readyState !== WebSocket.OPEN) &&
+        Cookies.get("session_id")
+      ) {
+        connect();
       }
-    }, 1000); // Poll every 1 second for cookie
+    }, 1000); // Poll every 1 second for cookie or WebSocket state
 
     return () => {
       clearInterval(interval);
-      if (socket) {
-        socket.close();
+      if (socketRef.current) {
+        socketRef.current.close();
       }
     };
-  }, []); // Remove socket from dependency array to avoid re-running on socket change (im a dumdum)
+  }, []); // Empty dependency array ensures this effect runs once on mount
 
   const setOnMessage = (callback: (event: MessageEvent) => void) => {
     onMessageCallbackRef.current = callback;
   };
 
   return (
-    <NotificationWebSocketContext.Provider value={{ socket, setOnMessage }}>
+    <NotificationWebSocketContext.Provider
+      value={{ socket: socketRef.current, setOnMessage }}
+    >
       {children}
     </NotificationWebSocketContext.Provider>
   );
