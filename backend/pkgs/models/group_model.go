@@ -325,35 +325,52 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 }
 
 func GetGroupMembers(groupID string) ([]UserModel, error) {
-	var users []UserModel
+    var users []UserModel
 
-	columns := []string{"user_id"}
-	condition := "group_id = ?"
-	args := []interface{}{groupID}
+    // Ensure the groupID is a valid UUID before querying
+    parsedGroupID, err := uuid.FromString(groupID)
+    if err != nil {
+        log.Printf("Invalid UUID format for groupID: %v", err)
+        return nil, err
+    }
 
-	rows, err := utils.Read("group_user", columns, condition, args)
-	if err != nil {
-		return nil, err
-	}
+    columns := []string{"user_id"}
+    condition := "group_id = ?"
+    
+    // Utilizing a helper function to perform the SQL read operation
+    rows, err := utils.Read("group_user", columns, condition, parsedGroupID) // Pass parsedGroupID directly
+    if err != nil {
+        log.Printf("Failed to read from group_user table: %v", err)
+        return nil, err
+    }
+    defer rows.Close()
 
-	for rows.Next() {
-		var userid string
-		if err := rows.Scan(&userid); err != nil {
-			return nil, err
-		}
+    for rows.Next() {
+        var userid string
+        if err := rows.Scan(&userid); err != nil {
+            log.Printf("Failed to scan userID: %v", err)
+            return nil, err
+        }
 
-		parsedUserId, err := uuid.FromString(userid)
-		if err != nil {
-			return nil, err
-		}
+        parsedUserId, err := uuid.FromString(userid)
+        if err != nil {
+            log.Printf("Invalid UUID format for userID: %v", err)
+            return nil, err
+        }
 
-		user, err := GetUserByID(parsedUserId)
-		if err != nil {
-			return nil, err
-		}
+        user, err := GetUserByID(parsedUserId)
+        if err != nil {
+            log.Printf("Failed to get user by ID: %v", err)
+            return nil, err
+        }
 
-		users = append(users, *user)
-	}
+        users = append(users, *user)
+    }
 
-	return users, nil
+    if err = rows.Err(); err != nil {
+        log.Printf("Error occurred during rows iteration: %v", err)
+        return nil, err
+    }
+
+    return users, nil
 }
