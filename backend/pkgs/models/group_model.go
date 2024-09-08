@@ -304,7 +304,7 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 		}
 		group.IsRequested = false
 		for _, request := range pendingRequests {
-			if request.UserID == userID && request.InteractionType == true && request.Status == "pending" {
+			if request.UserID == userID && request.InteractionType && request.Status == "pending" {
 				group.IsRequested = true
 				break
 			}

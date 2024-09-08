@@ -33,12 +33,12 @@ func Routers() {
 	mux.HandleFunc("POST /follow", HandleFollow)
 	mux.HandleFunc("POST /follow_response", HandleFollowRequest)
 	mux.HandleFunc("POST /people", HandlePeople)
-	mux.HandleFunc("GET /post/{id}", HandlePosts)               // ✅
-	mux.HandleFunc("POST /post/create", HandleCreatePosts)      // ✅
-	mux.HandleFunc("POST /like_post/{id}", HandleLikePost)      // ✅
-	mux.HandleFunc("GET /comment/{id}", HandleComment)          // ✅
-	mux.HandleFunc("POST /comment/create", HandleCreateComment) // ✅
-	mux.HandleFunc("POST /like_comment/{id}", HandleLikeComment)     // ✅
+	mux.HandleFunc("GET /post/{id}", HandlePosts)                // ✅
+	mux.HandleFunc("POST /post/create", HandleCreatePosts)       // ✅
+	mux.HandleFunc("POST /like_post/{id}", HandleLikePost)       // ✅
+	mux.HandleFunc("GET /comment/{id}", HandleComment)           // ✅
+	mux.HandleFunc("POST /comment/create", HandleCreateComment)  // ✅
+	mux.HandleFunc("POST /like_comment/{id}", HandleLikeComment) // ✅
 	mux.HandleFunc("GET /group/{id}", HandleGroup)
 	mux.HandleFunc("POST /group/create", HandleGroupCreate)
 	mux.HandleFunc("POST /group/invite", HandleGroupInvite)
@@ -51,11 +51,12 @@ func Routers() {
 	mux.HandleFunc("POST /authenticate", authenticate)
 	mux.HandleFunc("GET /ws", chat.HandleConnections)
 	mux.HandleFunc("GET /subscribe", notify.HandleSubscription)
+	// mux.HandleFunc("GET /notis", notify.SendAllNotis
 
 	mux.HandleFunc("GET /requests/{group_id}", HandleFetchGroupRequests)
 	mux.HandleFunc("GET /fetchpeople/{group_id}", HandleFetchUsersNotInGroup)
 	mux.HandleFunc("POST /addevent", HandleAddEvent)
-	mux.HandleFunc("GET /events/{group_id}",HandleFetchEventsByGroup)
+	mux.HandleFunc("GET /events/{group_id}", HandleFetchEventsByGroup)
 
 	// handle cors
 	cors_mux := middleware.CORS(mux)

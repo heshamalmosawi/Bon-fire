@@ -71,8 +71,9 @@ func HandleGroupInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	notification := models.UserNotificationModel{
+	notification := models.NotificationModel{
 		ReceiverID:  userID,
+		GroupID:     group.GroupID,
 		NotiType:    "group_invite",
 		NotiContent: fmt.Sprintf("You have been invited to join %s!", group.GroupName),
 		NotiTime:    time.Now(),
@@ -138,16 +139,34 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		notification := models.GroupNotificationModel{
-			GroupID:     group.GroupID,
-			NotiType:    "group_join",
-			NotiContent: "User has joined the group.",
-			NotiTime:    time.Now(),
-			NotiStatus:  "unread",
-		}
-		if err := notification.Save(); err != nil {
-			http.Error(w, "Failed to send notification to group admin", http.StatusInternalServerError)
+		members, err := models.GetGroupMembers(group.GroupID.String())
+		if err != nil {
+			http.Error(w, "Failed to get group members", http.StatusInternalServerError)
 			return
+		}
+
+		parsedGroupMember, err := models.GetUserByID(userID)
+		if err != nil {
+			http.Error(w, "Failed to get new group member", http.StatusInternalServerError)
+			return
+		}
+
+		for _, member := range members {
+			notification := models.NotificationModel{
+				GroupID:     group.GroupID,
+				ReceiverID:  member.UserID,
+				NotiType:    "group_join",
+				NotiContent: fmt.Sprintf("%s %s has joined %s!", parsedGroupMember.UserFirstName, parsedGroupMember.UserLastName, group.GroupName),
+				NotiTime:    time.Now(),
+				NotiStatus:  "unread",
+			}
+
+			if err := notification.Save(); err != nil {
+				http.Error(w, "Failed to save notification", http.StatusInternalServerError)
+				return
+			}
+
+			notify.NotifyUser(member.UserID, notification)
 		}
 
 		utils.EncodeJSON(w, map[string]string{"response": "Successfully joined the group"})
@@ -265,8 +284,10 @@ func HandleGroupRequests(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a notification for the group owner
-	notification := models.UserNotificationModel{
+	notification := models.NotificationModel{
 		ReceiverID:  group.OwnerID,
+		UserID:      session.User.UserID,
+		GroupID:     group.GroupID,
 		NotiType:    "join_request",
 		NotiContent: fmt.Sprintf("%s %s has requested to join %s", session.User.UserFirstName, session.User.UserLastName, group.GroupName), //discuss later
 		NotiTime:    time.Now(),
