@@ -329,9 +329,8 @@ func GetGroupMembers(groupID string) ([]UserModel, error) {
 
 	columns := []string{"user_id"}
 	condition := "group_id = ?"
-	args := []interface{}{groupID}
 
-	rows, err := utils.Read("group_user", columns, condition, args)
+	rows, err := utils.Read("group_user", columns, condition, groupID)
 	if err != nil {
 		return nil, err
 	}
