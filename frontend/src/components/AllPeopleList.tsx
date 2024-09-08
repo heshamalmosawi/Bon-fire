@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
-// import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { Forward, Heart, MessageSquare } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { handleFollow, fetchSessionUser, fetchPeople } from "../lib/api";
-// import ToolTipWrapper from "../ToolTipWrapper";
 
 interface Person {
   user_id: string;
@@ -18,16 +14,13 @@ interface Person {
 
 const AllPeopleList = () => {
   const [people, setPeople] = useState<Person[]>([]);
-  const [newFollowEvent, setNewFollowEvent] = useState(false);
   const [sessionUser, setSessionUser] = useState<string>("");
-  const [following, setFollowing] = useState<Set<string>>(new Set());
   const router = useRouter();
 
   useEffect(() => {
     const getPeople = async () => {
       const data = await fetchPeople();
       if (data) {
-        console.log("people data:", data);
         setPeople(data);
       }
     };
@@ -37,7 +30,7 @@ const AllPeopleList = () => {
       if (user) {
         setSessionUser(user.user_id);
       } else {
-        console.error(`Failed to fetch session user`);
+        console.error("Failed to fetch session user");
         router.push("/auth");
         return;
       }
@@ -45,8 +38,18 @@ const AllPeopleList = () => {
 
     getPeople();
     getSessionUser();
-    setNewFollowEvent(false);
-  }, [newFollowEvent]);
+  }, []);
+
+  const toggleFollow = async (personId: string, isFollowing: boolean) => {
+    await handleFollow(personId, isFollowing);
+    setPeople((prevPeople) =>
+      prevPeople.map((person) =>
+        person.user_id === personId
+          ? { ...person, is_follower: !isFollowing }
+          : person
+      )
+    );
+  };
 
   return (
     <div className="ml-1/4 p-2">
@@ -80,20 +83,14 @@ const AllPeopleList = () => {
                 {person.is_follower ? (
                   <button
                     className="mt-4 bg-red-600 text-white w-full py-2 rounded"
-                    onClick={async () => {
-                      await handleFollow(person.user_id, false);
-                      setNewFollowEvent(true);
-                    }}
+                    onClick={() => toggleFollow(person.user_id, true)}
                   >
                     UnFollow
                   </button>
                 ) : (
                   <button
                     className="mt-4 bg-blue-600 text-white w-full py-2 rounded"
-                    onClick={async () => {
-                      await handleFollow(person.user_id, true);
-                      setNewFollowEvent(true);
-                    }}
+                    onClick={() => toggleFollow(person.user_id, false)}
                   >
                     Follow
                   </button>
