@@ -3,7 +3,7 @@ import { ChatSidebar } from '@/components/chat/chat-message-list';
 import { ExpandableChat, ExpandableChatHeader, ExpandableChatBody } from '@/components/chat/expandable-chat';
 import { ChatBubbleAvatar } from '@/components/chat/chat-bubble';
 import { notFound, usePathname, useRouter } from 'next/navigation';
-import { handleClick, fetchSessionUser } from '@/lib/api';
+import { getChatList, fetchSessionUser } from '@/lib/api';
 import { set } from "animejs";
 // import { Button } from '@/components/ui/button';
 // import { ChatList, ChatListItem } from "@/components/chat/chat-list";
@@ -12,6 +12,7 @@ import { set } from "animejs";
 interface UserListProps {
   onSelectUser: (user: User) => void;
   sessionUser: string;
+  newMessageFlag: boolean;
 }
 
 export interface User {
@@ -24,7 +25,7 @@ export interface User {
   // user_email: string;
 }
 
-const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
+const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser, newMessageFlag }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [data, setData] = useState<any>(null);
@@ -55,7 +56,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       if (sessionUser != "") {
-        handleClick('followers', sessionUser1, setLoading, setError, setActiveTab, setData);
+        getChatList(setLoading, setError, setActiveTab, setData);
         if ((data && data.response === "Handling default message") || (data === null)) {
           setUsers([]);
         } else if (data && data.response === null) {
@@ -76,7 +77,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
       // getSessionUser()
       fetchUsers();
     // }
-  }, [sessionUser1, clickCount]);
+  }, [sessionUser1, clickCount, newMessageFlag]);
   // if (sessionUser != "" && clickCount == 0) {
   //   // return <div>Loading...</div>;4
   //   setSessionUser(sessionUser);
@@ -86,6 +87,11 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
   // if (myUser > -1) {
   //   users.splice(myUser, 1);
   // }
+
+  // TODO: REMOVE THIS
+  useEffect(() => {
+    console.log("flag has been changed", newMessageFlag);
+  }, [newMessageFlag]);
 
   const handleClickCount = () => {
     setClickCount(prevCount => prevCount + 1);
@@ -121,8 +127,8 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser }) => {
               </p>
             </div>
           </div>
-        ) : (
-          <ChatSidebar chats={users.map(user => ({
+        ) : ( 
+          <ChatSidebar chats={users.filter(user => user.user_id !== sessionUser).map(user => ({
             name: `${user.user_fname} ${user.user_lname}`,
             status: user.user_nickname,
             avatar: user.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg",

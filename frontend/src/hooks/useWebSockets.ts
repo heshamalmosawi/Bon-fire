@@ -8,8 +8,7 @@ export interface Message {
   message_timestamp?: string; // ISO date string for time
 }
 
-
-const useWebSocket = (url: string, senderId: string | null, recipientId: string | null, handleMessage: (message: Message) => void) => {
+const useWebSocket = (url: string, senderId: string | null, recipientId: string | null, handleMessage: (message: Message) => void, SetNewMessageFlag: Function, newMessageFlag: boolean) => {
   const [ws, setWs] = useState<WebSocket | null>(null);
 
   useEffect(() => {
@@ -22,6 +21,7 @@ const useWebSocket = (url: string, senderId: string | null, recipientId: string 
 
     socket.onmessage = (event) => {
       const message: Message = JSON.parse(event.data);
+      SetNewMessageFlag(!newMessageFlag);
       if (message.sender_id === senderId || message.sender_id === recipientId) {
         handleMessage(message);
       }
@@ -43,6 +43,7 @@ const useWebSocket = (url: string, senderId: string | null, recipientId: string 
   const sendMessage = (message: string) => {
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(message);
+      SetNewMessageFlag(!newMessageFlag);
     } else {
       console.error("WebSocket is not connected or still connecting");
     }

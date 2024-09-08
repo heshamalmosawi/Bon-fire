@@ -142,3 +142,41 @@ func GetAllUsers() ([]UserModel, error) {
 
 	return users, nil
 }
+
+func GetMessagersList(user uuid.UUID) ([]UserModel, error) {
+	columns := []string{"uf.user_id AS other_user_id, u.user_fname, u.user_lname, u.user_avatar_path, u.profile_exposure AS last_chat_timestamp"}
+	joinTable := "user_follow uf JOIN user u ON u.user_id = uf.user_id LEFT JOIN private_message c ON ((c.sender_id = uf.user_id AND c.recipient_id = ?) OR (c.sender_id = ? AND c.recipient_id = uf.user_id))"
+	condition := "uf.follower_id = ? OR uf.user_id = ? GROUP BY uf.user_id, u.user_fname, u.user_lname, u.user_avatar_path ORDER BY COALESCE(MAX(c.message_timestamp), '1970-01-01') DESC;"
+	rows, err := utils.Read(joinTable, columns, condition, user, user, user, user)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []UserModel
+	for rows.Next() {
+		var user UserModel
+		err := rows.Scan(&user.UserID, &user.UserFirstName, &user.UserLastName, &user.UserAvatarPath, &user.ProfileExposure)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func IsMessaged(user1, user2 uuid.UUID) (bool, error) {
+	condition := "sender_id = ? AND recipient_id = ? OR sender_id = ? AND recipient_id = ?"
+	rows, err := utils.Read("private_message", []string{"message_id"}, condition, user1, user2, user2, user1)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		return true, nil
+	}
+
+	return false, nil
+}

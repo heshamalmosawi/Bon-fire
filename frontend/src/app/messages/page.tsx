@@ -15,6 +15,7 @@ const MessagesPage = () => {
   const [user, setUser] = useState<User | null>(null);
   const [sessionUser, setSessionUser] = useState("");
   const [u_id, setU_id] = useState<string | undefined>(undefined);
+  const [newMessageReceived_flag, setNewMessageReceived_flag] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -46,8 +47,8 @@ const MessagesPage = () => {
       <div className="flex h-full flex-col text-white w-full">
         <div className="text-xl font-semibold h-[8%] flex items-center pl-10">Messages</div>
         <div className="flex w-full h-[92%] border border-customborder">
-          <UserList onSelectUser={setSelectedUser} sessionUser={sessionUser} />
-          <Chat selectedUser={selectedUser} sessionUser={user} />
+          <UserList onSelectUser={setSelectedUser} sessionUser={sessionUser} newMessageFlag={newMessageReceived_flag}/>
+          <Chat selectedUser={selectedUser} sessionUser={user} SetNewMessageFlag={setNewMessageReceived_flag} newMessageFlag={newMessageReceived_flag}/>
         </div>
       </div>
     </div>

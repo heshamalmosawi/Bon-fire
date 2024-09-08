@@ -14,9 +14,11 @@ import { ChatMessageList } from '@/components/chat/chat-message-list'
 interface ChatProps {
   selectedUser: User | null;
   sessionUser: User | null;
+  SetNewMessageFlag: Function;
+  newMessageFlag: boolean;
 }
 
-const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
+const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFlag, newMessageFlag }) => {
   const [newMessage, setNewMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
@@ -29,7 +31,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
     setChatHistory((prevHistory) => [ ...(prevHistory || []), message]);
   };
 
-  useWebSocket("ws://localhost:8080/ws", sessionUser?.user_id ?? null, selectedUser?.user_id ?? null, handleMessage);
+  useWebSocket("ws://localhost:8080/ws", sessionUser?.user_id ?? null, selectedUser?.user_id ?? null, handleMessage, SetNewMessageFlag, newMessageFlag);
 
     
 

@@ -52,7 +52,7 @@ func Routers() {
 	mux.HandleFunc("GET /ws", handleConnections)
 
 	mux.HandleFunc("GET /requests/{group_id}", HandleFetchGroupRequests)
-
+	mux.HandleFunc("POST /getmessagelist", MessagerListAPI)
 
 	// handle cors
 	cors_mux := middleware.CORS(mux)

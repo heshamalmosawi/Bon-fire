@@ -2,9 +2,12 @@ package server
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"sort"
 	"time"
 
+	"bonfire/api/middleware"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
 )
@@ -108,4 +111,43 @@ func HandleStoreMessages(w http.ResponseWriter, r *http.Request) {
 
 	// Return success response
 	w.WriteHeader(http.StatusCreated)
+}
+
+// This API endpoint will return the list of users that they will see in the chat page.
+func MessagerListAPI(w http.ResponseWriter, r *http.Request) {
+	session, err := middleware.Auth(r)
+	if err != nil {
+		log.Println("MessagerListAPI: ", err)
+		w.WriteHeader(http.StatusTeapot)
+		return
+	}
+
+	list, err := models.GetMessagersList(session.User.UserID)
+	if err != nil {
+		log.Println("MessagerListAPI: Couldn't get messagers lists: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var notMessaged []models.UserModel
+	var messaged []models.UserModel
+	for _, user := range list {
+		if ok, err := models.IsMessaged(user.UserID, session.User.UserID); !ok || err != nil {
+			notMessaged = append(notMessaged, user)
+		} else {
+			messaged = append(messaged, user)
+		}
+	}
+
+	sort.Slice(notMessaged, func(i, j int) bool {
+		return notMessaged[i].UserFirstName < notMessaged[j].UserFirstName
+	})
+
+	list = append(messaged, notMessaged...)
+
+	w.Header().Set("Content-Type", "application/json")
+	utils.EncodeJSON(w, map[string]interface{}{
+		"user":     session.User,
+		"response": list,
+	})
 }

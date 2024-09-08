@@ -123,3 +123,24 @@ export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) 
         setLoading(false);
     }
 };
+
+export const getChatList = async (setLoading: (loading: boolean) => void, setError: (error: string | null) => void, setActiveTab: (tab: string) => void, setData: (data: any) => void) => {
+    try {
+        const response = await fetch(`${Yori}/getmessagelist`, {
+            method: 'POST',
+            credentials: 'include',
+        });
+        if (response.ok) {
+            const result = await response.json();
+            console.log("result:", result);
+            setData(result);
+        } else {
+            throw new Error('getChatList: Network response was not ok');
+        }
+    } catch (error) {
+        console.error("Error fetching chat list:", error);
+        setError("Error fetching profile");
+    } finally {
+        setLoading(false);
+    }
+}; 
