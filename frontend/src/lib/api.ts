@@ -383,6 +383,7 @@ export const sendEventResponse = async (eventId: string, going: boolean) => {
   try {
     const response = await fetch("http://localhost:8080/group/event_response", {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
