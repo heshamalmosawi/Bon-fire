@@ -45,13 +45,18 @@ export const NotificationWebSocketProvider: React.FC<
 
   useEffect(() => {
     const connect = () => {
-      if (!Cookies.get("session_id")) {
+      const sessionId = Cookies.get("session_id");
+      if (!sessionId) {
+        console.log(
+          "No session available, WebSocket connection will not be established."
+        );
         return;
       }
+
       const ws = new WebSocket("ws://localhost:8080/subscribe");
 
-      ws.onopen = async () => {
-        console.log("Notification WebSocket connection established")
+      ws.onopen = () => {
+        console.log("Notification WebSocket connection established.");
         ws.send(
           JSON.stringify({
             type: "noti_history",
@@ -61,7 +66,7 @@ export const NotificationWebSocketProvider: React.FC<
 
       ws.onclose = () => {
         console.log("Notification WebSocket connection closed.");
-        // Reconnection logic has been disabled
+        // Optionally implement reconnection logic here
       };
 
       ws.onerror = (error) => {
@@ -77,14 +82,29 @@ export const NotificationWebSocketProvider: React.FC<
       setSocket(ws);
     };
 
-    connect(); // Initial connection attempt
+    const handleCookieChange = () => {
+      if (Cookies.get("session_id")) {
+        connect();
+      }
+    };
+
+    // Initial connection attempt
+    connect();
+
+    // Watch for cookie changes (using a custom event or polling strategy)
+    const interval = setInterval(() => {
+      if (!socket && Cookies.get("session_id")) {
+        handleCookieChange();
+      }
+    }, 1000); // Poll every 1 second for cookie
 
     return () => {
+      clearInterval(interval);
       if (socket) {
         socket.close();
       }
     };
-  }, []); // Run only on initial mount
+  }, [socket]); // Add socket as a dependency
 
   const setOnMessage = (callback: (event: MessageEvent) => void) => {
     onMessageCallbackRef.current = callback;
