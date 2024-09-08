@@ -45,7 +45,7 @@ export default function DarkNotificationPopover() {
                 await joinGroup(message.groupID, message.recieverID, true);
                 await deleteNotification(message.notiID);
               }}
-              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600"
+              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
             >
               Accept
             </Button>
@@ -56,7 +56,7 @@ export default function DarkNotificationPopover() {
                 await joinGroup(message.groupID, message.recieverID, false);
                 await deleteNotification(message.notiID);
               }}
-              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600"
+              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
             >
               Reject
             </Button>
@@ -72,7 +72,7 @@ export default function DarkNotificationPopover() {
                 await joinGroup(message.groupID, message.userID, true);
                 await deleteNotification(message.notiID);
               }}
-              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600"
+              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
             >
               Accept
             </Button>
@@ -83,7 +83,7 @@ export default function DarkNotificationPopover() {
                 await joinGroup(message.groupID, message.userID, false);
                 await deleteNotification(message.notiID);
               }}
-              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600"
+              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
             >
               Reject
             </Button>
@@ -99,7 +99,7 @@ export default function DarkNotificationPopover() {
                 await handleFollow(message.userID, true);
                 await deleteNotification(message.notiID);
               }}
-              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600"
+              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
             >
               Accept
             </Button>
@@ -110,7 +110,7 @@ export default function DarkNotificationPopover() {
                 await handleFollow(message.userID, false);
                 await deleteNotification(message.notiID);
               }}
-              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600"
+              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
             >
               Reject
             </Button>
@@ -126,7 +126,7 @@ export default function DarkNotificationPopover() {
                 await sendEventResponse(message.eventID, true);
                 await deleteNotification(message.notiID);
               }}
-              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600"
+              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
             >
               Going
             </Button>
@@ -137,14 +137,23 @@ export default function DarkNotificationPopover() {
                 await sendEventResponse(message.eventID, false);
                 await deleteNotification(message.notiID);
               }}
-              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600"
+              className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
             >
               Not Going
             </Button>
           </div>
         );
       default:
-        return null;
+        return (
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
+            onClick={async () => await deleteNotification(message.notiID)}
+          >
+            Nice!
+          </Button>
+        );
     }
   };
 
@@ -154,7 +163,7 @@ export default function DarkNotificationPopover() {
         <Button
           variant="outline"
           size="icon"
-          className="relative bg-neutral-800 border-neutral-700 hover:bg-neutral-700 hover:text-neutral-100"
+          className="relative bg-black hover:bg-neutral-900 hover:text-neutral-100 border-0"
           onClick={async () => await markAllAsRead()}
         >
           <Bell className="h-[1.2rem] w-[1.2rem] text-neutral-300" />
@@ -166,18 +175,18 @@ export default function DarkNotificationPopover() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 bg-neutral-900 border-neutral-800 text-neutral-100">
+      <PopoverContent className="w-80 bg-neutral-950 border-neutral-800 text-neutral-100">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-semibold text-neutral-100">Notifications</h3>
         </div>
         <ScrollArea className="h-[300px]">
           {notifications.length === 0 ? (
-            <p className="text-center text-neutral-400">No notifications</p>
+            <div className=" text-neutral-400 w-full h-[250px] flex items-center justify-center">No Notifications :(</div>
           ) : (
             notifications.map((notif) => (
               <div
                 key={notif.notiID}
-                className="mb-4 last:mb-0 bg-neutral-800 p-3 rounded-md"
+                className="mb-4 last:mb-0 bg-neutral-900 p-3 rounded-md"
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-grow">

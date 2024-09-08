@@ -64,7 +64,7 @@ const EventsList = () => {
               </div>
             ))
         ) : (
-          <h1 className="text-white">No events for you :(</h1>
+          <div className="text-white w-full h-[70%] flex items-center justify-center font-semibold">No events for you :(</div>
         )}
       </div>
     </div>

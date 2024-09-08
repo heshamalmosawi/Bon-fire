@@ -58,6 +58,7 @@ export const fetchPeople = async () => {
       method: "POST",
       credentials: "include",
     });
+    
     if (response.ok) {
       const data = await response.json();
       return data;
