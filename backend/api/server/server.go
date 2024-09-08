@@ -51,7 +51,8 @@ func Routers() {
 	mux.HandleFunc("POST /authenticate", authenticate)
 	mux.HandleFunc("GET /ws", chat.HandleConnections)
 	mux.HandleFunc("GET /subscribe", notify.HandleSubscription)
-	// mux.HandleFunc("GET /notis", notify.SendAllNotis
+	mux.HandleFunc("DELETE /notis/{id}", notify.DeleteNoti)
+	mux.HandleFunc("PUT /notis/read-all", notify.ReadAllNotis)
 
 	mux.HandleFunc("GET /requests/{group_id}", HandleFetchGroupRequests)
 	mux.HandleFunc("GET /fetchpeople/{group_id}", HandleFetchUsersNotInGroup)

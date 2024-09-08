@@ -113,7 +113,6 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 // 	    "user_about": "Just a regular John Doe",
 // 	    "profile_exposure": "public"
 // 	}
-
 func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	var user models.UserModel
 

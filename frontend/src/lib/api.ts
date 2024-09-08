@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Profile, RequestProps, GroupEvent } from "./interfaces";
 
 export const Yori = "http://localhost:8080";
@@ -401,4 +402,22 @@ export const sendEventResponse = async (eventId: string, going: boolean) => {
     console.error("Error submitting event response:", error);
     throw error;
   }
+};
+
+// deletes a notification
+export const delNoti = async (notiID: string) => {
+  await axios.delete(`${Yori}/notis/${notiID}`, {
+    withCredentials: true,
+  });
+};
+
+// marks all notifications as read
+export const readAllNotis = async () => {
+  await axios.put(
+    `${Yori}/notis/read-all`,
+    {},
+    {
+      withCredentials: true,
+    }
+  );
 };

@@ -64,6 +64,7 @@ func GetNotificationsByReceiverID(receiverID uuid.UUID) ([]NotificationModel, er
 	columns := []string{"noti_id", "receiver_id", "noti_type", "noti_content", "noti_time", "user_id", "group_id", "event_id", "noti_status"}
 	condition := "receiver_id = ?"
 	rows, err := utils.Read("notification", columns, condition, receiverID)
+	const layout = "2006-01-02 15:04:05.999999999-07:00"
 	if err != nil {
 		return nil, err
 	}
@@ -71,11 +72,18 @@ func GetNotificationsByReceiverID(receiverID uuid.UUID) ([]NotificationModel, er
 
 	var notifications []NotificationModel
 	for rows.Next() {
+		var timeString string
 		var notification NotificationModel
-		err := rows.Scan(&notification.NotiID, &notification.ReceiverID, &notification.NotiType, &notification.NotiContent, &notification.NotiTime, &notification.UserID, &notification.GroupID, &notification.EventID, &notification.NotiStatus)
+		err := rows.Scan(&notification.NotiID, &notification.ReceiverID, &notification.NotiType, &notification.NotiContent, &timeString, &notification.UserID, &notification.GroupID, &notification.EventID, &notification.NotiStatus)
 		if err != nil {
 			return nil, err
 		}
+
+		notification.NotiTime, err = time.Parse(layout, timeString)
+		if err != nil {
+			return nil, err
+		}
+
 		notifications = append(notifications, notification)
 	}
 
@@ -90,4 +98,37 @@ func MarkAllNotificationsAsRead(receiverID uuid.UUID) error {
 	condition := "receiver_id = ? AND noti_status = ?"
 	_, err := utils.Update("notification", updates, condition, receiverID, "unread")
 	return err
+}
+
+// niche method to delete a noti by ID
+func DeleteNotiByID(notiID string) error {
+	var noti NotificationModel
+
+	const layout = "2006-01-02 15:04:05.999999999-07:00"
+	condition := "noti_id = ?"
+	columns := []string{"noti_id", "receiver_id", "noti_type", "noti_content", "noti_time", "user_id", "group_id", "event_id", "noti_status"}
+
+	rows, err := utils.Read("notification", columns, condition, notiID)
+	if err != nil {
+		return err
+	}
+
+	for rows.Next() {
+		var timeString string
+		err := rows.Scan(&noti.NotiID, &noti.ReceiverID, &noti.NotiType, &noti.NotiContent, &timeString, &noti.UserID, &noti.GroupID, &noti.EventID, &noti.NotiStatus)
+		if err != nil {
+			return err
+		}
+
+		noti.NotiTime, err = time.Parse(layout, timeString)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := noti.Del(); err != nil {
+		return err
+	}
+
+	return nil
 }

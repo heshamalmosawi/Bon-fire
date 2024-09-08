@@ -340,8 +340,8 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 
 		followrequest := models.FollowRequestModel{
 			RequestID:     uuid.Must(uuid.NewV4()),
-			UserID:        uid,
-			RequesterID:   session.User.UserID,
+			UserID:        session.User.UserID,
+			RequesterID:   uid,
 			RequestStatus: "pending",
 		}
 		followrequest.Save()
@@ -457,16 +457,16 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 		notify.NotifyUser(followingUser.UserID, notification)
 
 		// Send notification to the user who sent the follow request
-		notification = models.NotificationModel{
-			ReceiverID:  followreq.UserID,
-			NotiType:    "follow",
-			NotiContent: fmt.Sprintf("%s %s has followed your account!", followingUser.UserFirstName, followingUser.UserLastName),
-			NotiTime:    time.Now(),
-			NotiStatus:  "unread",
-		}
-		notification.Save()
+		// notification = models.NotificationModel{
+		// 	ReceiverID:  followreq.UserID,
+		// 	NotiType:    "follow",
+		// 	NotiContent: fmt.Sprintf("%s %s has followed your account!", followingUser.UserFirstName, followingUser.UserLastName),
+		// 	NotiTime:    time.Now(),
+		// 	NotiStatus:  "unread",
+		// }
+		// notification.Save()
 
-		notify.NotifyUser(followedUser.UserID, notification)
+		// notify.NotifyUser(followedUser.UserID, notification)
 
 	} else {
 		// Update the follow request
