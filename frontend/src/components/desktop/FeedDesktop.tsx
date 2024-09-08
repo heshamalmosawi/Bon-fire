@@ -5,15 +5,15 @@ import EventsList from "./EventsList";
 import BirthdayList from "./BirthdayList";
 import { getFeed } from "@/lib/queries/feed";
 import { useToast } from "../ui/use-toast";
-import Joyride, { CallBackProps, ACTIONS, EVENTS, STATUS } from 'react-joyride';
+import Joyride, { CallBackProps, ACTIONS, EVENTS, STATUS } from "react-joyride";
 import { PostProps } from "@/lib/interfaces"; // Ensure you have this import if you're using PostProps
 
 interface HtmlContentProps {
-  html: string;  // Specify that 'html' should be a string
+  html: string; // Specify that 'html' should be a string
 }
 
 const HtmlContent: React.FC<HtmlContentProps> = ({ html }) => (
-<div dangerouslySetInnerHTML={{ __html: html }} />
+  <div dangerouslySetInnerHTML={{ __html: html }} />
 );
 
 const FeedDesktop: FC = () => {
@@ -52,28 +52,40 @@ const FeedDesktop: FC = () => {
   const handleTourCompleted = (data: CallBackProps) => {
     const { status } = data;
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
-      localStorage.setItem('tourCompleted', 'true');
+      localStorage.setItem("tourCompleted", "true");
       setRunTour(false);
     }
   };
 
   const steps = [
     {
-      target: '.navbar',
-      content: <HtmlContent html={`Navigate your options from here. <br><img src="/browse.gif" alt="Navigation Help" style="width:150px; height:auto;">`} />,
-      placement: 'right' as const, // Adjust based on desired appearance
+      target: ".navbar",
+      content: (
+        <HtmlContent
+          html={`Navigate your options from here. <br><img src="/browse.gif" alt="Navigation Help" style="width:150px; height:auto;">`}
+        />
+      ),
+      placement: "right" as const, // Adjust based on desired appearance
       offset: 10, // Distance from target
     },
     {
-      target: '.add-post',
-      content: <HtmlContent html={`Interact and post here! <br><img src="/post.gif" alt="Navigation Help" style="width:150px; height:auto;">`} />,
-      placement: 'right' as const, // Adjust based on desired appearance
+      target: ".add-post",
+      content: (
+        <HtmlContent
+          html={`Interact and post here! <br><img src="/post.gif" alt="Navigation Help" style="width:150px; height:auto;">`}
+        />
+      ),
+      placement: "right" as const, // Adjust based on desired appearance
       offset: 10, // Distance from target
     },
     {
-      target: '#right-nav',
-      content: <HtmlContent html={`Your groups and messages appear here. <br><img src="/chat.png" alt="Navigation Help" style="width:200px; height:auto; margin:auto;">`} />,
-      placement: 'left' as const, // Adjust based on desired appearance
+      target: "#right-nav",
+      content: (
+        <HtmlContent
+          html={`Your groups and messages appear here. <br><img src="/chat.png" alt="Navigation Help" style="width:200px; height:auto; margin:auto;">`}
+        />
+      ),
+      placement: "left" as const, // Adjust based on desired appearance
       offset: 10, // Distance from target
     },
   ];
@@ -89,14 +101,12 @@ const FeedDesktop: FC = () => {
           showProgress={true}
           showSkipButton={true}
           styles={tourStyles}
-         
-          
         />
       )}
       <div className="w-[70%] h-full px-5 py-10 space-y-8 overflow-y-scroll add-post">
         <CreatePost onPostCreated={() => setNewPost(true)} />
         {posts.length ? (
-          posts.map(post => <PostComponent {...post} key={post.id} />)
+          posts.map((post) => <PostComponent {...post} key={post.id} />)
         ) : (
           <h1 className="text-center">No posts found</h1>
         )}
@@ -114,28 +124,28 @@ export default FeedDesktop;
 const tourStyles = {
   options: {
     zIndex: 1000,
-    arrowColor: '#000', // Matches the background
-    backgroundColor: '#000', // Black background for the tooltip
-    textColor: '#fff', // White text color
-    overlayColor: 'rgba(0, 0, 0, 0.9)', // Dark overlay
+    arrowColor: "#000", // Matches the background
+    backgroundColor: "#000", // Black background for the tooltip
+    textColor: "#fff", // White text color
+    overlayColor: "rgba(0, 0, 0, 0.9)", // Dark overlay
   },
   tooltip: {
-    maxWidth: '500px', // Wider tooltip for more horizontal appearance
-    width: 'auto', // Adjust based on content
-    border: '1px solid #fff', // White border for the tooltip
-    boxShadow: '0px 0px 10px rgba(255, 255, 255, 0.5)', // Adding shadow
+    maxWidth: "500px", // Wider tooltip for more horizontal appearance
+    width: "auto", // Adjust based on content
+    border: "1px solid #fff", // White border for the tooltip
+    boxShadow: "0px 0px 10px rgba(255, 255, 255, 0.5)", // Adding shadow
   },
   tooltipContainer: {
-    textAlign: 'left' as const, // Ensure text alignment is consistent
+    textAlign: "left" as const, // Ensure text alignment is consistent
   },
   buttonNext: {
-    backgroundColor: 'white',
-    color: 'black',
+    backgroundColor: "white",
+    color: "black",
   },
   buttonBack: {
-    color: 'white',
+    color: "white",
   },
   buttonSkip: {
-    color: 'white',
+    color: "white",
   },
 };
