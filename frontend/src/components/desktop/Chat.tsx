@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import useWebSocket from "@/hooks/useWebSockets";
+import React, { useState, useEffect } from "react";
+// import useWebSocket from "@/hooks/useWebSockets";
 import chat from "../../../public/chat.png";
 import { User } from "@/components/desktop/UserList";
+import { useChatWebSocket } from "@/context/ChatWebsocketContext";
+import { chatMessage } from "@/lib/interfaces";
 
 interface ChatProps {
   selectedUser: User | null;
@@ -10,10 +12,50 @@ interface ChatProps {
 
 const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
   const [newMessage, setNewMessage] = useState<string>("");
-  const { messages, sendMessage } = useWebSocket("ws://localhost:8080/ws");
+  const [messages, setmessages] = useState<chatMessage[]>([])
+  const { socket, setOnMessage } = useChatWebSocket()
+
+
+  const sendMessage = (data: string) => {
+    socket?.send(JSON.stringify({
+      type: "chat",
+      payload: data
+    }))
+  }
+
+  useEffect(() => {
+    setOnMessage((ev) => {
+      if (ev.data.type === "history") {
+        setmessages(ev.data.payload)
+      } else if (ev.data.type === "chat") {
+        setmessages([...messages, ev.data.payload as chatMessage])
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    if (selectedUser) {
+      handleChatClick();
+    }
+  }, [selectedUser]);
+
+  const handleChatClick = () => {
+    if (selectedUser) {
+      console.log("handling chat history");
+      const historyRequest = {
+        type: 'history',
+        payload: {
+          user1: sessionUser,
+          user2: selectedUser.user_id,
+        },
+      };
+      sendMessage(JSON.stringify(historyRequest));
+    }
+  };
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
+      console.log("sending message");
       const messageObject = {
         from: sessionUser,
         to: selectedUser?.user_id,
@@ -21,6 +63,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
       };
       sendMessage(JSON.stringify(messageObject));
       setNewMessage("");
+      handleChatClick();
     }
   };
 
@@ -41,21 +84,20 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser }) => {
       <div className="flex-1 overflow-y-auto space-y-4  border border- p-4">
 
         {selectedUser ? (
-          messages
+          Array.isArray(messages) && messages
             .filter((msg) => (msg.from === selectedUser.user_id && msg.to === sessionUser) || (msg.from === sessionUser && msg.to === selectedUser.user_id)) // Filter messages based on selectedUser
             .map((msg, index) => (
               <div
                 key={index}
-                className={`p-4 rounded-lg w-[60%] ${
-                  msg.from === sessionUser ? "self-start bg-blue-600 text-white" : "self-end bg-gray-700 text-white"
-                }`}
+                className={`p-4 rounded-lg w-[60%] ${msg.from === sessionUser ? "self-start bg-blue-600 text-white" : "self-end bg-gray-700 text-white"
+                  }`}
               >
                 <strong>{msg.from === sessionUser ? "Me" : selectedUser.user_fname}:</strong> {msg.message}
               </div>
             ))
         ) : (
           <div className="flex flex-col items-center justify-center h-full bg-black">
-            <img src={chat.src} alt="chat" style={{maxWidth: "35%"}}/>
+            <img src={chat.src} alt="chat" style={{ maxWidth: "35%" }} />
             {/* {chat} */}
             <div>
               <div className="text-white mt-auto">No Selected Conversation</div>

@@ -116,7 +116,7 @@ func TogglePostLike(postID, userID uuid.UUID) error {
 // Function to get like by post ID and user ID
 func GetLikeByPostAndUser(postID, userID uuid.UUID) (*LikeModel, error) {
 	columns := []string{"like_id", "post_id", "user_id"}
-	condition := "post_id = ? AND user_id = ?"
+	condition := "post_id = ? AND user_id = ? AND comment_id = '00000000-0000-0000-0000-000000000000'"
 	rows, err := utils.Read("likes", columns, condition, postID, userID)
 	if err != nil {
 		return nil, err

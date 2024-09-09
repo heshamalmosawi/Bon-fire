@@ -20,6 +20,7 @@ type UserModel struct {
 	ProfileExposure string    `json:"profile_exposure"`
 	IsFollowed      bool      `json:"is_followed"`
 	IsReuested      bool      `json:"is_requested"`
+	IsInvited 		bool 	`json:"is_invited"`
 }
 
 // CRUD Operations

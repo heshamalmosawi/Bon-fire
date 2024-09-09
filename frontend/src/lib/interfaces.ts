@@ -40,6 +40,20 @@ export interface UserModel {
   profile_exposure: string;
 }
 
+export interface GroupUserModel {
+  user_id: string;
+  user_email: string;
+  user_password: string;
+  user_fname: string;
+  user_lname: string;
+  user_dob: string;
+  user_avatar_path: string;
+  user_nickname: string;
+  user_about: string;
+  profile_exposure: string;
+  is_invited: boolean;
+}
+
 export interface Profile {
   fname: string;
   lname: string;
@@ -59,14 +73,64 @@ export interface Group {
   group_name: string;
   group_desc: string;
   is_member: boolean;
-  total_members: number; // Extended
+  total_members: number;
+  is_requested: boolean; // Extended
 }
 
 export interface GroupProps {
   groupName: string;
   ownerName: string;
+  owner: string;
+  ownerEmail: string;
   description: string;
   session_user: string;
   groupID: string;
   total_members: number;
+}
+
+export interface RequestProps {
+  id: string; // The ID of the user making the request
+  username: string; // The username of the user
+  creationDate: string; // When the request was created
+  avatarUrl: string; // Optional avatar URL
+  groupID: string; // The ID of the group the user wants to join
+  onRequestHandled: (id: string) => void; // Function to handle the request
+}
+
+export interface chatMessage {
+  from: string;
+  to: string;
+  message: string;
+}
+
+export interface Notification {
+  notiID: string; // uuid
+  notiType: string;
+  notiContent: string;
+  recieverID: string;
+  userID: string;
+  groupID: string;
+  eventID: string;
+  notiRead: boolean;
+}
+
+export interface BonfireEvent {
+  eventID: string;
+  groupID: string;
+  eventTitle: string;
+  eventDesc: string;
+  eventDate: Date;
+  eventDuration: number;
+}
+
+export interface GroupEvent {
+  event_id: string;
+  group_id: string;
+  creator_id: string;
+  event_title: string;
+  event_description: string;
+  event_timestamp: string; // or Date if you prefer Date objects
+  is_going: boolean;
+  did_respond: boolean;
+  attendees: number;
 }

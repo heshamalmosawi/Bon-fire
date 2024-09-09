@@ -1,7 +1,11 @@
 package models
 
 import (
+	"bonfire/pkgs/storage"
 	"bonfire/pkgs/utils"
+	"database/sql"
+	"errors"
+
 	"github.com/gofrs/uuid"
 )
 
@@ -64,4 +68,28 @@ func GetAttendeeByGroup(attendeeID string) (*GroupEventAttend, error) {
 	}
 
 	return &attendee, nil
+}
+
+func GetAttendeeCountByEvent(eventID uuid.UUID) (int, error) {
+	query := "SELECT COUNT(*) FROM group_event_attendance WHERE event_id = ? AND response_Type = 'going'"
+	row := storage.DB.QueryRow(query, eventID)
+	var count int
+	if err := row.Scan(&count); err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// GetUserResponseToEvent checks a user's response to a specific event.
+func GetUserResponseToEvent(eventID uuid.UUID, userID uuid.UUID) (string, bool, error) {
+	query := "SELECT response_Type FROM group_event_attendance WHERE event_id = ? AND attendee_id = ?"
+	row := storage.DB.QueryRow(query, eventID, userID)
+	var responseType string
+	if err := row.Scan(&responseType); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", false, nil // No response from user
+		}
+		return "", false, err
+	}
+	return responseType, true, nil // User has responded
 }

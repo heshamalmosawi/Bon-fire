@@ -32,7 +32,7 @@ export const getFeed = async (): Promise<PostProps[] | string | undefined> => {
               postCommentNum: 200, //FIXME: serve this in the frontend
             })
           )
-        : "";
+        : undefined;
     }
   } catch (error) {
     console.error(error);
