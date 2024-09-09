@@ -72,7 +72,7 @@ func HandleGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Retrieve the posts for the group
-	posts, err := models.GetPostsByGroupID(groupID)
+	posts, err := models.GetPostsByGroupID(groupID,user.UserID)
 	if err != nil {
 		http.Error(w, "Failed to retrieve group posts", http.StatusInternalServerError)
 		log.Println("Error retrieving group posts:", err)

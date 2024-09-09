@@ -74,7 +74,7 @@ func GetAllPublicPosts() ([]PostModel, error) {
 	return posts, nil
 }
 
-func GetPostsByGroupID(groupID uuid.UUID) ([]PostModel, error) {
+func GetPostsByGroupID(groupID uuid.UUID,userID uuid.UUID) ([]PostModel, error) {
 	query := `
 	SELECT post_id, post_content, post_image_path, post_exposure, group_id, post_likecount, created_at, author_id
 	FROM post
@@ -95,6 +95,7 @@ func GetPostsByGroupID(groupID uuid.UUID) ([]PostModel, error) {
 			return nil, err
 		}
 		post.Author, err = GetUserByID(post.AuthorID)
+		post.IsLiked, _ = GetIsPostLiked(post.PostID,userID)
 		if err != nil {
 			return nil, err
 		}

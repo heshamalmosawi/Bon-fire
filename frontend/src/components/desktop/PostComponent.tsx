@@ -14,41 +14,39 @@ const PostComponent = (props: PostProps) => {
   const [liked, setliked] = useState(props.postIsLiked);
   const { toast } = useToast();
 
- const togglePostLike = async () => {
-   // Optimistically update the like state
-   setliked((prevLiked) => {
-     const newLikedState = !prevLiked;
-     setlikes((prevLikes) => (newLikedState ? prevLikes + 1 : prevLikes - 1));
-     return newLikedState;
-   });
+  const togglePostLike = async () => {
+    // Optimistically update the like state
+    const newLikedState = !liked;
+    const newLikesCount = newLikedState ? likes + 1 : likes - 1;
 
-   try {
-     const res = await fetch(`http://localhost:8080/like_post/${props.id}`, {
-       method: "POST",
-       credentials: "include",
-       headers: {
-         "Content-Type": "application/json",
-       },
-     });
+    setliked(newLikedState);
+    setlikes(newLikesCount);
 
-     if (res.status !== 200) {
-       throw new Error("Failed to toggle like");
-     }
-   } catch (error) {
-     // Revert the like state if there's an error
-     setliked((prevLiked) => {
-       const newLikedState = !prevLiked;
-       setlikes((prevLikes) => (newLikedState ? prevLikes + 1 : prevLikes - 1));
-       return newLikedState;
-     });
+    try {
+        const res = await fetch(`http://localhost:8080/like_post/${props.id}`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
 
-     toast({
-       variant: "destructive",
-       title: "Error",
-       description: "There was an error toggling the like of the post",
-     });
-   }
- };
+        if (res.status !== 200) {
+            throw new Error("Failed to toggle like");
+        }
+    } catch (error) {
+        // Revert the like state if there's an error
+        setliked(!newLikedState);
+        setlikes(newLikedState ? likes - 1 : likes + 1);
+
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "There was an error toggling the like of the post",
+        });
+    }
+};
+
 
  const firstNameInitial = props.firstName.charAt(0);
  const lastNameInitial = props.lastName.charAt(0);
