@@ -9,7 +9,7 @@ export interface Message {
   group_id?: string; 
 }
 
-const useWebSocket = (url: string, senderId: string | null, recipientId: string | null, handleMessage: (message: Message) => void, SetNewMessageFlag: Function, newMessageFlag: boolean) => {
+const useWebSocket = (url: string, senderId: string | null, recipientId: string | null, groupId: string | null, handleMessage: (message: Message) => void, SetNewMessageFlag: Function, newMessageFlag: boolean) => {
   const [ws, setWs] = useState<WebSocket | null>(null);
 
   useEffect(() => {
@@ -25,6 +25,8 @@ const useWebSocket = (url: string, senderId: string | null, recipientId: string 
       SetNewMessageFlag(!newMessageFlag);
       console.log("Received message:", newMessageFlag);
       if (message.sender_id === senderId || message.sender_id === recipientId) {
+        handleMessage(message);
+      } else if (message.group_id === groupId) {
         handleMessage(message);
       }
     };

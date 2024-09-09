@@ -2,6 +2,7 @@ package server
 
 import (
 	"bonfire/pkgs"
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -79,6 +80,21 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 				client.WriteJSON(msg)
 			} else {
 				log.Printf("Client with ID %s not found", to)
+			}
+			mutex.Unlock()
+		} else if group, ok := msg["group_id"]; ok {
+			mutex.Lock()
+			// TODO: I want to use the group_id to write to all clients that have access to that group?
+			for id, client := range clients {
+				inGroup := true
+				// !! MAYBE WE DON'T NEED THIS, BUT IT IS FOR PRECAUTIONS
+				// !! IF FRONTEND FAILS TO RESTRICT USER FROM A GROUP CHAT HE'S NOT PART OF
+				// ?? check if client id is in the group
+				// TODO: setting inGroup bool to true if client is part of the group
+				fmt.Print(group)
+				if id != userID && inGroup {
+					client.WriteJSON(msg)
+				}
 			}
 			mutex.Unlock()
 		} else {

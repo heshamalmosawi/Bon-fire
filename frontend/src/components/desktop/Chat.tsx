@@ -35,7 +35,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
     setChatHistory((prevHistory) => [...(prevHistory || []), message]);
   };
 
-  useWebSocket("ws://localhost:8080/ws", sessionUser?.user_id ?? null, selectedUser?.user_id ?? null, handleMessage, SetNewMessageFlag, newMessageFlag);
+  useWebSocket("ws://localhost:8080/ws", sessionUser?.user_id ?? null, selectedUser?.user_id ?? null, groupID ?? null, handleMessage, SetNewMessageFlag, newMessageFlag);
 
 
 
@@ -50,12 +50,14 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [newMessage, selectedUser]);
+  }, [newMessage, selectedUser, chatHistory]);
 
   const loadInitialChatHistory = async () => {
     try {
       setLoadingHistory(true);
-      const response = await fetch(`http://localhost:8080/messages?${groupID ? `group_id=${groupID}` : `user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`}`);
+      const response = await fetch(groupID ? `http://localhost:8080/messages?group_id=${groupID}` : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`);
+      console.log(groupID ? `http://localhost:8080/messages?group_id=${groupID}` : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`);
+      
       const data = await response.json();
       setChatHistory(data);  // Load initial messages
       console.log("Loaded chat history:", data);
@@ -71,16 +73,18 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
     try {
       setLoadingHistory(true);
       const lastMessageId = chatHistory[0]?.message_id;  // Get the ID of the oldest loaded message
-      const response = await fetch(`http://localhost:8080/messages?${groupID ? `group_id=${groupID}` : `user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`}&lastMessageId=${lastMessageId}`);
+      const response = await fetch(groupID ? `http://localhost:8080/messages?group_id=${groupID}&lastMessageId=${lastMessageId}` : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}&lastMessageId=${lastMessageId}`);
+      
+      console.log(groupID ? `http://localhost:8080/messages?group_id=${groupID}&lastMessageId=${lastMessageId}` : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}&lastMessageId=${lastMessageId}`);
       const data = await response.json();
-      if (Array.isArray(data)) {
+      if (Array.isArray(data)){
         setChatHistory((prevHistory) => [...data, ...(prevHistory || [])]);  // Prepend the older messages
         console.log("Loaded more messages:", data);
+        if (chatContainerRef.current && chatHistory.length > 0) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight - chatContainerRef.current.clientHeight - lastScrollTop + (groupID ? 80*5 : 20*4);
+        }
       }
       setLoadingHistory(false);
-      if (chatContainerRef.current && chatHistory.length > 0) {
-        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight - chatContainerRef.current.clientHeight - lastScrollTop;
-      }
     } catch (error) {
       console.error("Failed to load more messages:", error);
       setLoadingHistory(false);
@@ -90,9 +94,9 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
   // Scroll event handler
   const handleScroll = () => {
     if (chatContainerRef.current) {
-      const { scrollTop } = chatContainerRef.current;
+      const { scrollTop, scrollHeight } = chatContainerRef.current;
       if (scrollTop === 0) {
-        setLastScrollTop(scrollTop);
+        setLastScrollTop(scrollHeight);
         loadMoreMessages();  // Load more messages when scrolled to the top
       }
     }
@@ -101,18 +105,19 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
   // Attach the scroll event handler when the component mounts
   useEffect(() => {
     const chatContainer = chatContainerRef.current;
+    setNewMessage("");
     if (chatContainer) {
       chatContainer.addEventListener("scroll", handleScroll);
       return () => {
         chatContainer.removeEventListener("scroll", handleScroll);  // Cleanup event listener
       };
     }
-    setNewMessage("");
   }, [chatHistory]);  // Re-attach scroll listener if chat history changes
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       const newChatMessage: Message = {
+        group_id: groupID ?? "",
         sender_id: sessionUser?.user_id ?? "",
         recipient_id: selectedUser?.user_id ?? "",
         message_content: newMessage,
@@ -131,7 +136,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
       console.log("Chat history:", chatHistory);
 
       // Store the message in the database
-      if (groupID) {
+      if (groupID && groupID != ""){
         try {
           const response = await fetch("http://localhost:8080/groupmsg/create", {
             method: "POST",
@@ -145,6 +150,8 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
           } else {
             console.log("clear");
             setNewMessage("");
+            SetNewMessageFlag(!newMessageFlag);
+            console.log("newMessageFlag", newMessageFlag);
           }
         } catch (error) {
           console.error("Error storing message:", error);
@@ -205,8 +212,8 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
             <p>{group?.description}</p>
           </ExpandableChatHeader>
           <ExpandableChatBody>
-            <ChatMessageList>
-              {chatHistory.map((message, index) => (
+            <ChatMessageList  ref={chatContainerRef}>
+              {chatHistory && chatHistory.map((message, index) => (
                 <ChatBubble key={index}>
                   <ChatBubbleAvatar />
                   <ChatBubbleMessage>{message.message_content}</ChatBubbleMessage>

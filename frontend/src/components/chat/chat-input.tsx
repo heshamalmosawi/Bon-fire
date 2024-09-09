@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { EmojiPicker } from "@/components/chat/emoji-picker";
@@ -14,13 +13,17 @@ interface ChatInputProps {
 
 const ChatInput = React.forwardRef<HTMLTextAreaElement, ChatInputProps>(
   ({ className, value, onKeyDown, onChange, placeholder, ...props }, ref) => {
-    const [inputValue, setInputValue] = useState(value || "");
+    const isControlled = value !== undefined;
+    const [inputValue, setInputValue] = React.useState(value || "");
 
     const handleEmojiSelect = (emoji: string) => {
-      setInputValue((prev) => prev + emoji);
+      const newValue = (isControlled ? value : inputValue) + emoji;
+      if (!isControlled) {
+        setInputValue(newValue);
+      }
       if (onChange) {
         onChange({
-          target: { value: inputValue + emoji },
+          target: { value: newValue },
         } as React.ChangeEvent<HTMLTextAreaElement>);
       }
     };
@@ -29,11 +32,13 @@ const ChatInput = React.forwardRef<HTMLTextAreaElement, ChatInputProps>(
       <div className="relative flex items-center w-full">
         <Textarea
           autoComplete="off"
-          value={inputValue}
+          value={isControlled ? value : inputValue}
           ref={ref}
           onKeyDown={onKeyDown}
           onChange={(e) => {
-            setInputValue(e.target.value);
+            if (!isControlled) {
+              setInputValue(e.target.value);
+            }
             if (onChange) onChange(e);
           }}
           name="message"

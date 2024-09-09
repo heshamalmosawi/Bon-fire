@@ -18,7 +18,7 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 	// Get query parameters
 	user1 := r.URL.Query().Get("user1") // sessionUser
 	user2 := r.URL.Query().Get("user2") // selectedUser
-	group := r.URL.Query().Get("group")
+	group := r.URL.Query().Get("group_id")
 	lastMessageId := r.URL.Query().Get("lastMessageId")
 
 	if (user1 == "" || user2 == "") && group == "" {
@@ -29,7 +29,7 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 	// Get the messages between user1 and user2
 	var messages []interface{}
 	var err error
-	if group == "" {
+	if group != "" {
 		messages, err = GetMessageHistory("", "", lastMessageId, group)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -50,36 +50,36 @@ func HandleMessages(w http.ResponseWriter, r *http.Request) {
 
 // GetMessageHistory retrieves the message history between two users.
 func GetMessageHistory(user1, user2, lastMessageID, groupID string) ([]interface{}, error) {
-    var messages []interface{}
+	var messages []interface{}
 	var columns []string
 	var condition string
 	var args []interface{}
 	// var rows *sql.Rows
 	var table string
-    // var err error
+	// var err error
 
 	// Build the base condition for the query
-    if groupID != "" {
-        // Get group messages
-        columns = []string{"message_id", "sender_id", "group_id", "message_content", "message_timestamp"}
-        condition = "group_id = ?"
+	if groupID != "" {
+		// Get group messages
+		columns = []string{"message_id", "sender_id", "group_id", "message_content", "message_timestamp"}
+		condition = "group_id = ?"
 		table = "group_message"
 		args = []interface{}{groupID}
-        // rows, err = utils.Read("group_message", columns, condition, groupID)
-    } else {
-        // Get private messages
-        columns = []string{"message_id", "sender_id", "recipient_id", "message_content", "message_timestamp"}
-        condition = "((sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?))"
+		// rows, err = utils.Read("group_message", columns, condition, groupID)
+	} else {
+		// Get private messages
+		columns = []string{"message_id", "sender_id", "recipient_id", "message_content", "message_timestamp"}
+		condition = "((sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?))"
 		args = []interface{}{user1, user2, user2, user1}
 		table = "private_message"
-        // rows, err = utils.Read("private_message", columns, condition, user1, user2, user2, user1)
-    }
+		// rows, err = utils.Read("private_message", columns, condition, user1, user2, user2, user1)
+	}
 
-    // if err != nil {
-    //     return nil, err
-    // }
-    // defer rows.Close()
-	args = []interface{}{user1, user2, user2, user1}
+	// if err != nil {
+	//     return nil, err
+	// }
+	// defer rows.Close()
+	// args = []interface{}{user1, user2, user2, user1}
 	if lastMessageID != "" {
 		// Get the last message timestamp
 		lastMessage, err := models.GetMessageBySender(lastMessageID) // Ensure this function returns the correct timestamp
@@ -106,23 +106,23 @@ func GetMessageHistory(user1, user2, lastMessageID, groupID string) ([]interface
 	defer rows.Close()
 
 	// Parse the result rows into the PrivateMessage slice
-	 for rows.Next() {
-        if groupID != "" {
-            var message models.GroupMessage
-            err := rows.Scan(&message.MessageID, &message.SenderID, &message.GroupID, &message.MessageContent, &message.MessageTime)
-            if err != nil {
-                return nil, err
-            }
-            messages = append(messages, message)
-        } else {
-            var message models.PrivateMessage
-            err := rows.Scan(&message.MessageID, &message.SenderID, &message.RecipientID, &message.MessageContent, &message.MessageTime)
-            if err != nil {
-                return nil, err
-            }
-            messages = append(messages, message)
-        }
-    }
+	for rows.Next() {
+		if groupID != "" {
+			var message models.GroupMessage
+			err := rows.Scan(&message.MessageID, &message.SenderID, &message.GroupID, &message.MessageContent, &message.MessageTime)
+			if err != nil {
+				return nil, err
+			}
+			messages = append(messages, message)
+		} else {
+			var message models.PrivateMessage
+			err := rows.Scan(&message.MessageID, &message.SenderID, &message.RecipientID, &message.MessageContent, &message.MessageTime)
+			if err != nil {
+				return nil, err
+			}
+			messages = append(messages, message)
+		}
+	}
 
 	// Reverse the messages to show the oldest first
 	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
@@ -218,7 +218,6 @@ func HandleStoreGroupMessages(w http.ResponseWriter, r *http.Request) {
 	// Return success response
 	w.WriteHeader(http.StatusCreated)
 }
-
 
 // HandleGroupMessage handles the request for sending a message to a group.
 // func HandleGroupMessage(w http.ResponseWriter, r *http.Request) {
