@@ -374,3 +374,42 @@ func GetGroupMembers(groupID string) ([]UserModel, error) {
 
     return users, nil
 }
+
+
+// GetGroupsOwnedByUser retrieves all groups owned by a specific user using the utils package for database interaction.
+func GetGroupsOwnedByUser(userID uuid.UUID) ([]GroupModel, error) {
+    columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
+    condition := "owner_id = ?"
+
+    // Using utils.Read to execute the query
+    rows, err := utils.Read("`group`", columns, condition, userID)
+    if err != nil {
+        log.Printf("Error executing query in GetGroupsOwnedByUser: %v", err)
+        return nil, err
+    }
+    defer rows.Close()
+
+    var groups []GroupModel
+
+    // Iterate through the result set and populate the groups slice
+    for rows.Next() {
+        var group GroupModel
+        err := rows.Scan(&group.GroupID, &group.OwnerID, &group.GroupName, &group.GroupDescrip)
+        if err != nil {
+            log.Printf("Error scanning row in GetGroupsOwnedByUser: %v", err)
+            return nil, err
+        }
+
+        // Optionally, fetch the owner user model if necessary
+        group.Owner, _ = GetUserByID(group.OwnerID)
+
+        groups = append(groups, group)
+    }
+
+    if err := rows.Err(); err != nil {
+        log.Printf("Error with rows iteration in GetGroupsOwnedByUser: %v", err)
+        return nil, err
+    }
+
+    return groups, nil
+}

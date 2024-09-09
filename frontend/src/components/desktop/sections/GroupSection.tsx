@@ -13,6 +13,7 @@ const GroupSection = () => {
     fetchGroups().then((data) => {
       if (data) {
         setgroups(data);
+        console.log(data)
       } else {
         toast({
           variant: "destructive",

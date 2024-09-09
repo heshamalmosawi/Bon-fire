@@ -207,7 +207,26 @@ func HandleEventsByUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	 // Fetch groups where the user is the owner
+	 ownedGroups, err := models.GetGroupsOwnedByUser(userID)
+	 if err != nil {
+		 log.Printf("HandleEventsByUser: error getting owned groups: %v\n", err)
+		 http.Error(w, "internal server error", http.StatusInternalServerError)
+		 return
+	 }
+
 	for _, gu := range groupUsers {
+		group_events, err := models.GetEventsByGroup(gu.GroupID.String(), userID)
+		if err != nil {
+			log.Printf("HandleEventsByUser: error getting events: %v\n", err)
+			http.Error(w, "internal server error", http.StatusUnauthorized)
+			return
+		}
+		
+		events = append(events, group_events...)
+	}
+
+	for _, gu := range ownedGroups {
 		group_events, err := models.GetEventsByGroup(gu.GroupID.String(), userID)
 		if err != nil {
 			log.Printf("HandleEventsByUser: error getting events: %v\n", err)
