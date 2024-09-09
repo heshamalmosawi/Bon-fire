@@ -70,3 +70,26 @@ func GetMessageBySenderOfGroup(messageID string) (*GroupMessage, error) {
 
 	return &groupMessage, nil
 }
+
+// GetMessagesByGroupID returns a list of messages for a given group ID.
+func GetMessagesByGroupID(groupID string) ([]GroupMessage, error) {
+	columns := []string{"message_id","sender_id","group_id", "message_content", "message_timestamp"}
+	condition := "group_id = ?"
+	rows, err := utils.Read("group_message", columns, condition, groupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groupMessages []GroupMessage
+	for rows.Next() {
+		var groupMessage GroupMessage
+		err := rows.Scan(&groupMessage.MessageID, &groupMessage.SenderID, &groupMessage.GroupID,  &groupMessage.MessageContent,  &groupMessage.MessageTime)
+		if err != nil {
+			return nil, err
+		}
+		groupMessages = append(groupMessages, groupMessage)
+	}
+
+	return groupMessages, nil
+}

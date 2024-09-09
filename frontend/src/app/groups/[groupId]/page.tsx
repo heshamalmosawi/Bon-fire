@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import CreatePostForGroup from "@/components/CreatePostGroup";
 import EventsList from "@/components/desktop/EventsList";
+import Chat from "@/components/desktop/Chat";
 
 const GroupPage = () => {
   const [sessionUser, setSessionUser] = useState("");
@@ -33,6 +34,7 @@ const GroupPage = () => {
   const router = useRouter();
 
   const [posts, setPosts] = useState<any[]>([]); // State to hold posts data
+  const [user, setUser] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("posts");
@@ -50,6 +52,7 @@ const GroupPage = () => {
       } else if (response.status === 200) {
         const data = await response.json();
         setSessionUser(data.User.user_id);
+        setUser(data.User);
         if (groupID === undefined) {
           setGroupID(data.User.user_id);
         }
@@ -238,10 +241,11 @@ const GroupPage = () => {
                     lastName={post.author.user_lname} 
                     username={post.author.user_lname} 
                     avatarUrl={post.author.user_avatar_path} 
-                    creationDate={post.created_at}
-                    postTextContent={post.post_content}
-                    postImageContentUrl={post.post_image_path}
-                    postLikeNum={post.post_likecount}
+                    created_at={post.created_at}
+                    post_content={post.post_content}
+                    post_image_path={post.post_image_path}
+                    post_likecount={post.post_likecount}
+                    postIsLiked={post.postIsLiked}
                     postCommentNum={post.comment_count} // Add a comment count to your post structure
                   />
                 ))}
@@ -267,6 +271,14 @@ const GroupPage = () => {
           </div>
         </main>
       </div>
+       <Chat
+          sessionUser={user}
+          groupID={groupID}
+          group={groupProfile}
+          selectedUser={null}
+          SetNewMessageFlag={() => {}}
+          newMessageFlag={false}
+        />
     </div>
   );
 };

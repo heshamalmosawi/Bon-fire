@@ -4,6 +4,8 @@ import chat from "../../../public/chat.png";
 import { User } from "@/components/desktop/UserList";
 import { Message } from "@/hooks/useWebSockets";
 import { Button } from "../ui/button";
+import { Send, CornerDownLeft } from "react-feather";
+import { GroupProps } from "@/lib/interfaces";
 
 import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage, ChatBubbleTimestamp } from '@/components/chat/chat-bubble';
 import { format } from 'date-fns'; // Import the 'format' function from 'date-fns'
@@ -16,9 +18,11 @@ interface ChatProps {
   sessionUser: User | null;
   SetNewMessageFlag: Function;
   newMessageFlag: boolean;
+  groupID?: string;
+  group?: GroupProps;
 }
 
-const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFlag, newMessageFlag }) => {
+const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFlag, newMessageFlag, groupID, group }) => {
   const [newMessage, setNewMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
@@ -26,20 +30,20 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
   const [lastScrollTop, setLastScrollTop] = useState<number>(0);
 
 
-    // Define a function to handle incoming messages
+  // Define a function to handle incoming messages
   const handleMessage = (message: Message) => {
-    setChatHistory((prevHistory) => [ ...(prevHistory || []), message]);
+    setChatHistory((prevHistory) => [...(prevHistory || []), message]);
   };
 
   useWebSocket("ws://localhost:8080/ws", sessionUser?.user_id ?? null, selectedUser?.user_id ?? null, handleMessage, SetNewMessageFlag, newMessageFlag);
 
-    
+
 
   useEffect(() => {
-    if (selectedUser) {
-      loadInitialChatHistory();  // Load initial chat history when a user is selected
+    if (selectedUser || groupID) {
+      loadInitialChatHistory(); // Load initial chat history when a user is selected
     }
-  }, [selectedUser]);
+  }, [selectedUser, groupID]);
 
   useEffect(() => {
     // Scroll to the bottom whenever chatHistory changes
@@ -51,7 +55,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
   const loadInitialChatHistory = async () => {
     try {
       setLoadingHistory(true);
-      const response = await fetch(`http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`);
+      const response = await fetch(`http://localhost:8080/messages?${groupID ? `group_id=${groupID}` : `user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`}`);
       const data = await response.json();
       setChatHistory(data);  // Load initial messages
       console.log("Loaded chat history:", data);
@@ -67,7 +71,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
     try {
       setLoadingHistory(true);
       const lastMessageId = chatHistory[0]?.message_id;  // Get the ID of the oldest loaded message
-      const response = await fetch(`http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}&lastMessageId=${lastMessageId}`);
+      const response = await fetch(`http://localhost:8080/messages?${groupID ? `group_id=${groupID}` : `user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`}&lastMessageId=${lastMessageId}`);
       const data = await response.json();
       if (Array.isArray(data)) {
         setChatHistory((prevHistory) => [...data, ...(prevHistory || [])]);  // Prepend the older messages
@@ -121,32 +125,52 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
       };
 
       // Update chat history only here
-      setChatHistory((prevHistory) => [ ...(prevHistory || []), newChatMessage]);
+      setChatHistory((prevHistory) => [...(prevHistory || []), newChatMessage]);
       setNewMessage("");
 
       console.log("Chat history:", chatHistory);
 
       // Store the message in the database
-      try {
-        const response = await fetch("http://localhost:8080/messages/create", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newChatMessage),
-        });
-
-        if (!response.ok) {
-          console.error("Failed to store message:", response.statusText);
-        } else {
-          console.log("clear");
-          setNewMessage("");
-          SetNewMessageFlag(!newMessageFlag);
-          console.log("newMessageFlag", newMessageFlag);
+      if (groupID) {
+        try {
+          const response = await fetch("http://localhost:8080/groupmsg/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newChatMessage),
+          });
+          if (!response.ok) {
+            console.error("Failed to store message:", response.statusText);
+          } else {
+            console.log("clear");
+            setNewMessage("");
+          }
+        } catch (error) {
+          console.error("Error storing message:", error);
         }
-      } catch (error) {
-        console.error("Error storing message:", error);
-      } 
+      } else {
+        try {
+          const response = await fetch("http://localhost:8080/messages/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newChatMessage),
+          });
+
+          if (!response.ok) {
+            console.error("Failed to store message:", response.statusText);
+          } else {
+            console.log("clear");
+            setNewMessage("");
+            SetNewMessageFlag(!newMessageFlag);
+            console.log("newMessageFlag", newMessageFlag);
+          }
+        } catch (error) {
+          console.error("Error storing message:", error);
+        }
+      }
     }
   };
 
@@ -173,46 +197,83 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
 
   return (
     // <>
-    <div className="flex flex-col h-full w-full">
-      <ExpandableChatHeader>
-        {selectedUser ? (
-          <div className="flex items-center space-x-2">
-            <ChatBubbleAvatar src={selectedUser.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"} fallback={selectedUser.user_nickname} className="bg-gray-500" />
-            <div>
-              <h2 className="text-lg font-semibold">{selectedUser.user_nickname}</h2>
-              <p className="text-sm text-gray-500">{selectedUser.user_fname} {selectedUser.user_lname}</p>
-            </div>
-          </div>
-        ) : (
-          <h2 className="text-lg font-semibold">Select a user to chat</h2>
-        )}
-      </ExpandableChatHeader>
-      <ExpandableChatBody>
-        <ChatMessageList ref={chatContainerRef}>
-          {selectedUser ? (
-            <>
-              {chatHistory != null && chatHistory.map((msg, index) => (
-                <ChatBubble key={index} variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
-                  <ChatBubbleAvatar
-                    src={msg.sender_id === sessionUser?.user_id ? sessionUser?.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg" : selectedUser.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"}
-                    fallback={msg.sender_id === sessionUser?.user_id ? sessionUser?.user_nickname : selectedUser?.user_nickname}
-                  />
-                  <ChatBubbleMessage variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
-                    {msg.message_content}
-                  </ChatBubbleMessage>
-                  <ChatBubbleTimestamp timestamp={msg.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
+    <>
+      {groupID ? (
+        <ExpandableChat size="lg" position="bottom-right" className="bg-black">
+          <ExpandableChatHeader className="flex-col text-center justify-center">
+            <h1 className="text-xl font-semibold">Gruop Chat: {group?.groupName}</h1>
+            <p>{group?.description}</p>
+          </ExpandableChatHeader>
+          <ExpandableChatBody>
+            <ChatMessageList>
+              {chatHistory.map((message, index) => (
+                <ChatBubble key={index}>
+                  <ChatBubbleAvatar />
+                  <ChatBubbleMessage>{message.message_content}</ChatBubbleMessage>
                 </ChatBubble>
-                // <div
-                //   key={index}
-                //   className={`p-4 rounded-lg w-[60%] ${msg.sender_id === sessionUser ? "self-start bg-blue-600 text-white" : "self-end bg-gray-700 text-white"
-                //     }`}
-                // >
-                //   <strong>
-                //     {msg.sender_id === sessionUser ? "Me" : selectedUser.user_fname}:
-                //   </strong> {msg.message_content}
-                // </div>
               ))}
-              {/* {handleMessages().map((msg, index) => (
+            </ChatMessageList>
+          </ExpandableChatBody>
+          <ExpandableChatFooter>
+            <ChatInput
+              placeholder="Type your message..."
+              className="w-full p-2 rounded bg-black border border-customborder"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <Button
+              type="submit"
+              size="icon"
+              onClick={() => {
+                /* handle send message */
+              }}
+            >
+              <Send className="size-4" />
+            </Button>
+          </ExpandableChatFooter>
+        </ExpandableChat>
+      ) : (
+        <div className="flex flex-col h-full w-full">
+          <ExpandableChatHeader>
+            {selectedUser ? (
+              <div className="flex items-center space-x-2">
+                <ChatBubbleAvatar src={selectedUser.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"} fallback={selectedUser.user_nickname} className="bg-gray-500" />
+                <div>
+                  <h2 className="text-lg font-semibold">{selectedUser.user_nickname}</h2>
+                  <p className="text-sm text-gray-500">{selectedUser.user_fname} {selectedUser.user_lname}</p>
+                </div>
+              </div>
+            ) : (
+              <h2 className="text-lg font-semibold">Select a user to chat</h2>
+            )}
+          </ExpandableChatHeader>
+          <ExpandableChatBody>
+            <ChatMessageList ref={chatContainerRef}>
+              {selectedUser ? (
+                <>
+                  {chatHistory != null && chatHistory.map((msg, index) => (
+                    <ChatBubble key={index} variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
+                      <ChatBubbleAvatar
+                        src={msg.sender_id === sessionUser?.user_id ? sessionUser?.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg" : selectedUser.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"}
+                        fallback={msg.sender_id === sessionUser?.user_id ? sessionUser?.user_nickname : selectedUser?.user_nickname}
+                      />
+                      <ChatBubbleMessage variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
+                        {msg.message_content}
+                      </ChatBubbleMessage>
+                      <ChatBubbleTimestamp timestamp={msg.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
+                    </ChatBubble>
+                    // <div
+                    //   key={index}
+                    //   className={`p-4 rounded-lg w-[60%] ${msg.sender_id === sessionUser ? "self-start bg-blue-600 text-white" : "self-end bg-gray-700 text-white"
+                    //     }`}
+                    // >
+                    //   <strong>
+                    //     {msg.sender_id === sessionUser ? "Me" : selectedUser.user_fname}:
+                    //   </strong> {msg.message_content}
+                    // </div>
+                  ))}
+                  {/* {handleMessages().map((msg, index) => (
                 <ChatBubble key={index} variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
                   <ChatBubbleAvatar
                     src={msg.sender_id === sessionUser?.user_id ? sessionUser?.user_id : selectedUser.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"}
@@ -224,39 +285,41 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
                   <ChatBubbleTimestamp timestamp={msg.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
                 </ChatBubble>
               ))} */}
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full bg-black">
-              <img src={chat.src} alt="chat" style={{ maxWidth: "35%" }} />
-              {/* {chat} */}
-              <div>
-                <div className="text-white mt-auto">No Selected Conversation</div>
-                <div className="text-white mt-auto">Select a user to start chatting</div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full bg-black">
+                  <img src={chat.src} alt="chat" style={{ maxWidth: "35%" }} />
+                  {/* {chat} */}
+                  <div>
+                    <div className="text-white mt-auto">No Selected Conversation</div>
+                    <div className="text-white mt-auto">Select a user to start chatting</div>
+                  </div>
+                </div>
+              )}
+            </ChatMessageList>
+          </ExpandableChatBody>
+          {selectedUser && (
+            <ExpandableChatFooter>
+              <div className="flex items-center space-x-2">
+                <ChatInput
+                  placeholder="Type your message..."
+                  className="w-full p-2 rounded bg-black border border-customborder"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+                <Button
+                  className="py-10 rounded-r-lg text-white"
+                  size="sm" onClick={handleSendMessage}>
+                  {/* <CornerDownLeft className="h-4 w-4" /> */}
+                  Send
+                </Button>
               </div>
-            </div>
+            </ExpandableChatFooter>
           )}
-        </ChatMessageList>
-      </ExpandableChatBody>
-      {selectedUser && (
-        <ExpandableChatFooter>
-          <div className="flex items-center space-x-2">
-            <ChatInput
-              placeholder="Type your message..."
-              className="w-full p-2 rounded bg-black border border-customborder"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-            <Button 
-            className="py-10 rounded-r-lg text-white"
-            size="sm" onClick={handleSendMessage}>
-              {/* <CornerDownLeft className="h-4 w-4" /> */}
-              Send
-            </Button>
-          </div>
-        </ExpandableChatFooter>
+        </div>
       )}
-    </div>
+    </>
     /* <div className="flex flex-col h-full">
       <ChatMessageList>
         {messages.map((msg, index) => (

@@ -47,6 +47,7 @@ func Routers() {
 	mux.HandleFunc("GET /fetchGroups", FetchGroups)
 	mux.HandleFunc("GET /messages", HandleMessages)
 	mux.HandleFunc("POST /messages/create", HandleStoreMessages)
+	mux.HandleFunc("POST /groupmsg/create", HandleStoreGroupMessages)
 
 	mux.HandleFunc("POST /authenticate", authenticate)
 	mux.HandleFunc("GET /ws", handleConnections)

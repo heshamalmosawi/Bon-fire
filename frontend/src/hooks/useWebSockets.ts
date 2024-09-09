@@ -6,6 +6,7 @@ export interface Message {
   recipient_id: string;
   message_content: string;
   message_timestamp?: string; // ISO date string for time
+  group_id?: string; 
 }
 
 const useWebSocket = (url: string, senderId: string | null, recipientId: string | null, handleMessage: (message: Message) => void, SetNewMessageFlag: Function, newMessageFlag: boolean) => {
