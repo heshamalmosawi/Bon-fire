@@ -18,6 +18,8 @@ type UserModel struct {
 	UserNickname    string    `json:"user_nickname"`
 	UserBio         string    `json:"user_about"`
 	ProfileExposure string    `json:"profile_exposure"`
+	IsFollowed      bool      `json:"is_followed"`
+	IsReuested      bool      `json:"is_requested"`
 }
 
 // CRUD Operations

@@ -27,7 +27,7 @@ func TestPostVisibility(t *testing.T) {
 		UserAvatarPath:  "/path/to/avatar1",
 		UserNickname:    "user1",
 		UserBio:         "User 1 Bio",
-		ProfileExposure: "private",
+		ProfileExposure: "Private",
 	}
 
 	user2 := models.UserModel{
@@ -40,7 +40,7 @@ func TestPostVisibility(t *testing.T) {
 		UserAvatarPath:  "/path/to/avatar2",
 		UserNickname:    "user2",
 		UserBio:         "User 2 Bio",
-		ProfileExposure: "private",
+		ProfileExposure: "Private",
 	}
 
 	user3 := models.UserModel{
@@ -53,7 +53,7 @@ func TestPostVisibility(t *testing.T) {
 		UserAvatarPath:  "/path/to/avatar3",
 		UserNickname:    "user3",
 		UserBio:         "User 3 Bio",
-		ProfileExposure: "private",
+		ProfileExposure: "Private",
 	}
 
 	if err := user1.Save(); err != nil {
@@ -76,7 +76,7 @@ func TestPostVisibility(t *testing.T) {
 		PostID:        post1ID,
 		PostContent:   "Public post by user1",
 		PostImagePath: "/path/to/image1",
-		PostExposure:  "public",
+		PostExposure:  "Public",
 		GroupID:       uuid.Nil,
 		PostLikeCount: 0,
 		CreatedAt:     "2024-01-01T00:00:00Z",
@@ -88,7 +88,7 @@ func TestPostVisibility(t *testing.T) {
 		PostID:        post2ID,
 		PostContent:   "Private post by user2",
 		PostImagePath: "/path/to/image2",
-		PostExposure:  "private",
+		PostExposure:  "Private",
 		GroupID:        uuid.Nil,
 		PostLikeCount: 0,
 		CreatedAt:     "2024-01-02T00:00:00Z",
