@@ -400,10 +400,10 @@ const GroupPage = () => {
                       lastName={post.author.user_lname}
                       username={post.author.user_nickname}
                       avatarUrl={post.author.user_avatar_path}
-                      creationDate={post.created_at}
-                      postTextContent={post.post_content}
-                      postImageContentUrl={post.post_image_path}
-                      postLikeNum={post.post_likecount}
+                      created_at={post.created_at}
+                      post_content={post.post_content}
+                      post_image_path={post.post_image_path}
+                      post_likecount={post.post_likecount}
                       postCommentNum={post.comment_count}
                       postIsLiked={post.is_liked}
                     />
