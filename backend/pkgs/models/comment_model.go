@@ -61,7 +61,7 @@ func (c *Comment) Update() error {
 // GetCommentsByUserID retrieves comments made by a specific user.
 func GetCommentsByUserID(userID uuid.UUID) ([]Comment, error) {
 	columns := []string{"comment_id", "author_id", "post_id", "comment_content", "comment_likecount", "created_at", "comment_image_path"}
-	condition := "author_id = ?"
+	condition := "author_id = ? ORDER BY created_at DESC"
 	rows, err := utils.Read("comment", columns, condition, userID)
 	if err != nil {
 		return nil, err

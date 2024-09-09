@@ -92,6 +92,9 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
     });
   }, [post.id, created]);
 
+  const firstNameInitial = post.firstName.charAt(0);
+  const lastNameInitial = post.lastName.charAt(0);
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -112,17 +115,17 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
             <div className="flex items-center gap-2">
               <Avatar>
                 <AvatarImage src={post.avatarUrl} />
-                <AvatarFallback>{`${post.firstName[0]}${post.lastName[0]}`}</AvatarFallback>
+                <AvatarFallback>{`${firstNameInitial}${lastNameInitial}`}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
                 <h2 className="text-white font-bold">{`${post.firstName} ${post.lastName}`}</h2>
                 <h6 className="text-[#ffffff66]">
                   {post.username ? `@${post.username}` : ""} |{" "}
-                  {getAgo(post.creationDate)}
+                  {getAgo(post.created_at)}
                 </h6>
               </div>
             </div>
-            <div className="text-white text-sm">{post.postTextContent}</div>
+            <div className="text-white text-sm">{post.post_content}</div>
             <div className="mt-4 space-y-7 h-[400px] overflow-y-auto">
               {comments ? (
                 comments.map((item) => <CommentComponent {...item} />)

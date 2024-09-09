@@ -73,6 +73,29 @@ export const fetchPeople = async () => {
 };
 
 // a function to fetch the profile user content
+export const handleClick = async (endpoint: string, u_id: string, setLoading: (loading: boolean) => void, setError: (error: string | null) => void, setActiveTab: (tab: string) => void, setData: (data: any) => void) => {
+    console.log("endpoint:", endpoint);
+    setLoading(true);
+    setError(null);
+    setActiveTab(endpoint);
+    try {
+        const response = await fetch(`${Yori}/profile/${u_id}?q=${endpoint}`, { credentials: 'include' });
+        if (!response.ok && response.status != 403) {
+            throw new Error('Network response was not ok');
+        } else {
+            console.log("response:", response);
+            console.log("response.status:", response.status);
+        }
+        const result = await response.json();
+        console.log("result:", result);
+        setData(result);
+    } catch (error) {
+        setError((error as any).message);
+    } finally {
+        setLoading(false);
+    }
+}
+
 export const handleClick = async (
   endpoint: string,
   u_id: string,
@@ -356,6 +379,39 @@ export const sendGroupInvite = async (
     return false;
   }
 };
+
+// a function to fetch the profile user 
+export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) => void, setLoading: (loading: boolean) => void, setError: (error: string) => void) => {
+    try {
+        const response = await fetch(`${Yori}/profile/${u_id}`);
+        if (response.ok || response.status === 403) {
+            const data = await response.json();
+            if (data.user) {
+                setProfile({
+                    fname: data.user.user_fname,
+                    lname: data.user.user_lname,
+                    email: data.user.user_email,
+                    dob: data.user.user_dob,
+                    avatarUrl: data.user.user_avatar_path,
+                    bio: data.user.user_about,
+                    nickname: data.user.user_nickname,
+                    privacy: data.user.profile_exposure,
+                    is_followed: data.user.is_followed,
+                    is_requested: data.user.is_requested,
+                });
+            } else {
+                console.error("User data is null or undefined", data);
+            }
+        } else {
+            console.error(`Failed to fetch profile: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        setError("Error fetching profile");
+    } finally {
+        setLoading(false);
+    }
+}
 
 export const fetchEventsByGroup = async (
   groupId: string

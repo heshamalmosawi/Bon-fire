@@ -64,7 +64,7 @@ func (p *PostModel) Update() error {
 // Function to get posts by author ID
 func GetPostsByAuthorID(authorID uuid.UUID) ([]PostModel, error) {
 	columns := []string{"post_id", "post_content", "post_image_path", "post_exposure", "group_id", "post_likecount", "created_at", "author_id"}
-	condition := "author_id = ?"
+	condition := "author_id = ? ORDER BY created_at DESC"
 	rows, err := utils.Read("post", columns, condition, authorID)
 	if err != nil {
 		return nil, err

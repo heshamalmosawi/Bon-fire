@@ -19,18 +19,24 @@ interface ProfileFormData {
     fname: string;
     lname: string;
     username: string;
+    email: string;
+    dob: string;
     bio: string;
     privacy: boolean;
+    onEdit: Function;
 }
 
 
-const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, privacy }) => {
+const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, email, dob, bio, privacy, onEdit}) => {
     const [profileData, setProfileData] = useState<ProfileFormData>({
         fname,
         lname,
         username,
+        email,
+        dob,
         bio,
         privacy,
+        onEdit: ()=>{} // empty function just so we can ignore it.
     });
 
     // stupid useeffect cause rendering.
@@ -39,6 +45,8 @@ const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, p
             ...prevData,
             fname,
             lname,
+            email,
+            dob,
             username,
             bio,
             privacy,
@@ -87,16 +95,25 @@ const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, bio, p
                 throw new Error('Failed to update profile');
             }
             const result = await response.json();
+            onEdit({
+                fname: profileData.fname,
+                lname: profileData.lname,
+                nickname: profileData.username,
+                email: email,
+                dob: dob,
+                bio: profileData.bio,
+                privacy: profileData.privacy ? 'Private' : 'Public'
+            });
             console.log('Profile updated:', result);
             // TODO: Handle success (e.g., show a success message or notification)
         } catch (error) {
             console.error('Error updating profile:', error);
-            // Handle error (e.g., show an error message)
+            // TODO: Handle error (e.g., show an error message)
         }
     };
     return (
         <Dialog>
-            <DialogTrigger className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-full">Edit Profile</DialogTrigger>
+            <DialogTrigger className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-full w-full py-2 rounded">Edit Profile</DialogTrigger>
             <DialogContent className="pb-4 bg-neutral-900 text-white border-none">
                 <DialogHeader>
                     <DialogTitle>Edit Profile</DialogTitle>

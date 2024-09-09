@@ -9,49 +9,50 @@ import { PostProps } from "@/lib/interfaces";
 import { useToast } from "../ui/use-toast";
 
 const PostComponent = (props: PostProps) => {
-  const [likes, setlikes] = useState(props.postLikeNum);
+  console.log(props.postIsLiked);
+  const [likes, setlikes] = useState(props.post_likecount);
   const [liked, setliked] = useState(props.postIsLiked);
   const { toast } = useToast();
 
-  const togglePostLike = async () => {
-    // Optimistically update the like state
-    setliked((prevLiked) => {
-      const newLikedState = !prevLiked;
-      // Temporarily updating likes without changing the count here
-      return newLikedState;
-    });
-  
-    try {
-      const res = await fetch(`http://localhost:8080/like_post/${props.id}`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-  
-      if (res.status !== 200) {
-        throw new Error("Failed to toggle like");
-      }
-  
-      // Get the updated like count from the response
-      const data = await res.json();
-      setlikes(data.like_count); // Set the like count from the server response
-  
-    } catch (error) {
-      // Revert the like state if there's an error
-      setliked((prevLiked) => {
-        return !prevLiked;
-      });
-  
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "There was an error toggling the like of the post",
-      });
-    }
-  };
-  
+ const togglePostLike = async () => {
+   // Optimistically update the like state
+   setliked((prevLiked) => {
+     const newLikedState = !prevLiked;
+     setlikes((prevLikes) => (newLikedState ? prevLikes + 1 : prevLikes - 1));
+     return newLikedState;
+   });
+
+   try {
+     const res = await fetch(`http://localhost:8080/like_post/${props.id}`, {
+       method: "POST",
+       credentials: "include",
+       headers: {
+         "Content-Type": "application/json",
+       },
+     });
+
+     if (res.status !== 200) {
+       throw new Error("Failed to toggle like");
+     }
+   } catch (error) {
+     // Revert the like state if there's an error
+     setliked((prevLiked) => {
+       const newLikedState = !prevLiked;
+       setlikes((prevLikes) => (newLikedState ? prevLikes + 1 : prevLikes - 1));
+       return newLikedState;
+     });
+
+     toast({
+       variant: "destructive",
+       title: "Error",
+       description: "There was an error toggling the like of the post",
+     });
+   }
+ };
+
+ const firstNameInitial = props.firstName.charAt(0);
+ const lastNameInitial = props.lastName.charAt(0);
+
   return (
     <div
       className={`max-h-[540px] bg-black rounded-lg flex flex-col items-center justify-center px-4 py-4 gap-4`}
@@ -62,12 +63,12 @@ const PostComponent = (props: PostProps) => {
       >
         <Avatar>
           <AvatarImage src={props.avatarUrl} />
-          <AvatarFallback>{`${props.firstName[0]}${props.lastName[0]}`}</AvatarFallback>
+          <AvatarFallback>{`${firstNameInitial}${lastNameInitial}`}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col items-start justify-center">
           <div className="flex gap-2">
             <h2 className="text-white font-bold">{`${props.firstName} ${props.lastName}`}</h2>
-            <h6 className="text-[#ffffff66]">| {getAgo(props.creationDate)}</h6>
+            <h6 className="text-[#ffffff66]">| {getAgo(props.created_at)}</h6>
           </div>
           <h6 className="text-[#ffffff66]">
             {props.username ? `@${props.username}` : ""}
@@ -80,11 +81,11 @@ const PostComponent = (props: PostProps) => {
           className="w-full flex flex-col items-center justify-center gap-4 min-h-[50px]"
         >
           <div id="post-text-content" className="text-white text-sm w-full">
-            {props.postTextContent}
+            {props.post_content}
           </div>
-          {props.postImageContentUrl ? (
+          {props.post_image_path ? (
             <Image
-              src={props.postImageContentUrl}
+              src={props.post_image_path}
               className="w-full h-[200px] rounded-lg object-cover"
               alt="post image"
               width={400}

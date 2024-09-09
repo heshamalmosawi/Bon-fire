@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	// "net/url"
 	"reflect"
 	"strings"
 	"time"
@@ -45,24 +43,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	var user *models.UserModel
-	// Retrieve the user based on the session information
-	if err == nil || session_id != nil {
-		session, err1 := pkgs.MainSessionManager.GetSession(session_id.Value)
-		if err1 == nil {
-			user = session.User
-		}
-
-	}
-	// if err != nil || session == nil {
-	// 	log.Println("HandleProfile: Error getting session", err)
-	// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
-	// 	return
-	// }
-
 	theUrl := r.URL.Path
-
-	log.Println("HandleProfile: theUrl", theUrl)
 
 	urlParts := strings.Split(theUrl, "/")
 	if len(urlParts) < 3 || urlParts[2] == "" {
@@ -76,50 +57,81 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	// if no profile user id is provided, use the session user id
 	var profileUserIDUUID uuid.UUID
+	var err1 error
 	if profileUserID == "" {
 		log.Println("HandleProfile: No profile user ID provided")
 		http.Error(w, "HandleProfile: Cannot get user profile", http.StatusBadRequest)
 		return
 	} else {
 		// get the profile user uuid
-		profileUserIDUUID, err = uuid.FromString(profileUserID)
-		if err != nil {
+		profileUserIDUUID, err1 = uuid.FromString(profileUserID)
+		if err1 != nil {
 			log.Println("the user id:", profileUserID)
 			log.Println("HandleProfile: Error converting profileUserID to UUID", err, profileUserID)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
 	}
 
-	profileUser, err := models.GetUserByID(profileUserIDUUID)
-	if err != nil {
+	profileUser, err3 := models.GetUserByID(profileUserIDUUID)
+	if err3 != nil {
 		log.Println("HandleProfile: Error getting profile user by ID", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	} else {
 		log.Println("HandleProfile: profileUser", profileUser)
 	}
 
+	var user *models.UserModel
+	// Retrieve the user based on the session information
+	if err == nil || session_id != nil {
+		session, err1 := pkgs.MainSessionManager.GetSession(session_id.Value)
+		if err1 == nil {
+			user = session.User
+			followrequestcheck, err := models.GetPendingRequest(profileUserIDUUID, user.UserID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting follow request:", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			if followrequestcheck.RequestID != uuid.Nil {
+				profileUser.IsReuested = true
+				log.Println("HandleProfile: profileUser, update", profileUser)
+			} else {
+				log.Println("HandleProfile: profileUser, no update", profileUser)
+			}
+		}
+	}
+
 	// Check if the profile is private
-	if profileUser.ProfileExposure == "private" && user != nil {
+	if profileUser.ProfileExposure == "Private" && user != nil {
 		// Check if the session user is one of the profile's followers
-		isFollower, err := models.IsFollower(user.UserID, profileUserIDUUID)
+		isFollower, err := models.IsFollower(profileUserIDUUID, user.UserID)
 		if err != nil {
 			log.Println("HandleProfile: Error checking if user is a follower", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		if !isFollower {
-			http.Error(w, "Forbidden", http.StatusForbidden)
+		profileUser.IsFollowed = isFollower
+		if !isFollower && user.UserID != profileUser.UserID {
+			w.WriteHeader(http.StatusForbidden)
+			utils.EncodeJSON(w, map[string]interface{}{
+				"user":     profileUser,
+				"response": "Private",
+			})
 			return
 		}
-	} else if profileUser.ProfileExposure == "private" && user == nil {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+	} else if profileUser.ProfileExposure == "Private" && user == nil {
+		w.WriteHeader(http.StatusForbidden)
+		utils.EncodeJSON(w, map[string]interface{}{
+			"user":     profileUser,
+			"response": "Private",
+		})
 		return
 	}
 
 	// Retrieve user-related data based on the query parameter
-	var response interface{}
+	var response any
 
 	switch r.URL.Query().Get("q") {
 
@@ -131,7 +143,37 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		response = user_followers
+		var followers []models.UserModel
+		for _, follower := range user_followers {
+			userf, err := models.GetUserByID(follower.FollowerID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting user by ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+
+			if user != nil {
+				isFollowing, err := models.IsFollowing(user.UserID, userf.UserID)
+				if err != nil {
+					log.Println("HandleProfile: Error checking if user is a follower", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+
+				isReusted, err := models.GetPendingRequest(userf.UserID, user.UserID)
+				if err != nil {
+					log.Println("HandleProfile: Error getting follow request:", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				if isReusted.RequestID != uuid.Nil {
+					userf.IsReuested = true
+				}
+				userf.IsFollowed = isFollowing
+			}
+			followers = append(followers, *userf)
+		}
+		response = followers
 
 	// Placeholder for followings
 	case "followings":
@@ -141,7 +183,37 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		response = user_followings
+		var followings []models.UserModel
+		for _, following := range user_followings {
+			userf, err := models.GetUserByID(following.FollowerID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting user by ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+
+			if user != nil {
+				isFollowing, err := models.IsFollowing(user.UserID, userf.UserID)
+				if err != nil {
+					log.Println("HandleProfile: Error checking if user is a follower", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+
+				isReusted, err := models.GetPendingRequest(userf.UserID, user.UserID)
+				if err != nil {
+					log.Println("HandleProfile: Error getting follow request:", err)
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				if isReusted.RequestID != uuid.Nil {
+					userf.IsReuested = true
+				}
+				userf.IsFollowed = isFollowing
+			}
+			followings = append(followings, *userf)
+		}
+		response = followings
 
 	// Placeholder for comments
 	case "comments":
@@ -151,8 +223,28 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		response = user_comments
 
+		var posts []models.PostModel
+		for _, comment := range user_comments {
+			post, err := models.GetPostByPostID(comment.PostID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting post by ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			
+			// Check if the post already exists, remove the old one so it is a unique and ordered list.
+			for i, existingPost := range posts {
+				if existingPost.PostID == post.PostID {
+					posts = append(posts[:i], posts[i+1:]...)
+					break
+				}
+			}
+			posts = append(posts, *post)
+		}
+
+		response = posts
+		
 	// Placeholder for posts liked
 	case "post_likes":
 		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
@@ -176,28 +268,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 		response = posts
 
-	// Placeholder for posts liked
-	case "comments_liked":
-		user_posts_comments, err := models.GetCommentLikeByUserID(profileUserIDUUID)
-		if err != nil {
-			log.Println("HandleProfile: Error getting comments by user ID", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		var comments []models.Comment
-
-		for _, like := range user_posts_comments {
-			comment, err := models.GetCommentByCommentID(like.CommentID)
-			if err != nil {
-				log.Println("HandleProfile: Error getting post by ID", err)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-			comments = append(comments, *comment)
-		}
-		response = comments
-
 	// Placeholder for posts
 	default:
 		user_posts, err := models.GetPostsByAuthorID(profileUserIDUUID)
@@ -208,6 +278,17 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response = user_posts
+	}
+
+	// if profile is public it is not getting it, so we need to check if the user is following the profile user
+	// this is necessary in case of non-early return from the function.
+	if user != nil && user.UserID != uuid.Nil {
+		profileUser.IsFollowed, err = models.IsFollowing(user.UserID, profileUser.UserID)
+		if err != nil {
+			log.Println("HandleProfile: Error checking if user is a follower", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Serve the JSON of the user profile
@@ -263,6 +344,24 @@ func HandleProfileUpdate(w http.ResponseWriter, r *http.Request) {
 
 	session.User.Update()
 
+	// if the profile is public, then accept all the requests
+	if session.User.ProfileExposure == "Public" {
+		// Get all the follow requests
+		followRequests, err := models.GetRequestsByUserID(session.User.UserID)
+		if err != nil {
+			log.Println("HandleProfileUpdate: Error getting follow requests by user ID", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		for _, followRequest := range followRequests {
+			follow := models.UserFollowModel{
+				UserID:     session.User.UserID,
+				FollowerID: followRequest.RequesterID,
+			}
+			follow.Save()
+			followRequest.Del()
+		}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Profile updated successfully"})
 }
@@ -302,7 +401,7 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Check if follow  already exists, delete if it does
-	followingcheck, err := models.GetFollowingUser(session.User.UserID, uid)
+	followingcheck, err := models.GetFollowingUser(uid, session.User.UserID)
 	if err == nil && followingcheck.UserID != uuid.Nil {
 		followingcheck.Del()
 		log.Println("HandleFollow: Unfollowed user")
@@ -509,14 +608,14 @@ func HandlePeople(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a response structure
-	type UserResponse struct {
-		models.UserModel
-		IsFollowing bool `json:"is_follower"`
-	}
+	// type UserResponse struct {
+	// 	models.UserModel
+	// 	IsFollowing bool `json:"is_follower"`
+	// }
 
-	var userResponses []UserResponse
+	// var userResponses []UserResponse
 
-	for _, user := range users {
+	for i, user := range users {
 		isFollowing, err := models.IsFollowing(authUser.User.UserID, user.UserID)
 		if err != nil {
 			log.Println("HandlePeople: Error checking follower status", err)
@@ -524,12 +623,24 @@ func HandlePeople(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		userResponses = append(userResponses, UserResponse{
-			UserModel:   user,
-			IsFollowing: isFollowing,
-		})
+		Reuested, err := models.GetPendingRequest(user.UserID, authUser.User.UserID)
+		if err != nil {
+			log.Println("HandlePeople: Error checking follower status", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		users[i].IsFollowed = isFollowing
+		if Reuested.RequestID != uuid.Nil {
+			users[i].IsReuested = true
+		}
+
+		// userResponses = append(userResponses, UserResponse{
+		// 	UserModel:   user,
+		// 	IsFollowing: isFollowing,
+		// })
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(userResponses)
+	json.NewEncoder(w).Encode(users)
 }

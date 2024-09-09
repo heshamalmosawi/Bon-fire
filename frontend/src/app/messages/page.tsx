@@ -19,9 +19,7 @@ const MessagesPage = () => {
   useEffect(() => {
     const getSessionUser = async () => {
       const data = await fetchSessionUser();
-      console.log("user:", data, "status:", data.status);
-      if (data.status !== 200 && u_id === undefined) {
-        console.log(`Failed to authenticate user: ${data.status}`);
+      if (!data && u_id === undefined) {
         router.push('/auth');
         return;
       } else if (data.status === 200) { // if user is authenticated and u_id is defined in URL

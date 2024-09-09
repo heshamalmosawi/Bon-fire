@@ -4,6 +4,9 @@ import { CommentModel } from "../interfaces";
 export const getComments = async (
   postID: string
 ): Promise<CommentModel[] | string> => {
+  if (!postID) {
+    return "";
+  }
   const res = await axios.get(`http://localhost:8080/comment/${postID}`, {
     withCredentials: true,
   });

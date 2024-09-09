@@ -7,10 +7,10 @@ export interface PostProps {
   lastName: string;
   username: string;
   avatarUrl: string;
-  creationDate: string;
-  postTextContent: string;
-  postImageContentUrl: string;
-  postLikeNum: number;
+  created_at: string;
+  post_content: string;
+  post_image_path: string;
+  post_likecount: number;
   postIsLiked: boolean;
   postCommentNum: number;
 }
@@ -57,10 +57,14 @@ export interface GroupUserModel {
 export interface Profile {
   fname: string;
   lname: string;
+  email: string;
   avatarUrl: string;
+  dob: string;
   bio: string;
   nickname: string;
   privacy: string;
+  is_followed: boolean;
+  is_requested: boolean;
 }
 
 export interface Group {

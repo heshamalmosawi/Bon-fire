@@ -23,7 +23,7 @@ func TestPostCRUD(t *testing.T) {
 		UserAvatarPath:  "/path/to/avatar",
 		UserNickname:    "testuser",
 		UserBio:         "This is a test user",
-		ProfileExposure: "private",
+		ProfileExposure: "Private",
 	}
 
 	if err := user.Save(); err != nil {
@@ -36,7 +36,7 @@ func TestPostCRUD(t *testing.T) {
 		PostID:        postID,
 		PostContent:   "This is a test post",
 		PostImagePath: "/path/to/image",
-		PostExposure:  "public",
+		PostExposure:  "Public",
 		GroupID:       uuid.Nil, 
 		PostLikeCount: 0,
 		CreatedAt:     "2024-01-01T00:00:00Z",
@@ -84,7 +84,7 @@ func TestPostLikeToggle(t *testing.T) {
 		UserAvatarPath:  "/path/to/avatar",
 		UserNickname:    "testuser",
 		UserBio:         "This is a test user",
-		ProfileExposure: "private",
+		ProfileExposure: "Private",
 	}
 
 	if err := user.Save(); err != nil {
@@ -97,7 +97,7 @@ func TestPostLikeToggle(t *testing.T) {
 		PostID:        postID,
 		PostContent:   "This is a test post",
 		PostImagePath: "/path/to/image",
-		PostExposure:  "public",
+		PostExposure:  "Public",
 		GroupID:       uuid.Nil, 
 		PostLikeCount: 0,
 		CreatedAt:     "2024-01-01T00:00:00Z",
