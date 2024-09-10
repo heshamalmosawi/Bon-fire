@@ -17,7 +17,7 @@ import { useNotificationWebSocket } from "./NotificationWebsocketContext";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Notification } from "@/lib/interfaces";
-import { handleFollow, joinGroup, sendEventResponse } from "@/lib/api";
+import { handleFollowReq, joinGroup, sendEventResponse } from "@/lib/api";
 
 /**
  * NotificationContextType defines the shape of the notification context.
@@ -152,13 +152,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             <div className="flex flex-col gap-2">
               <ToastAction
                 altText="accept request"
-                onClick={async () => handleFollow(message.user_id, true)}
+                onClick={async () => handleFollowReq(message.user_id, true)}
               >
                 Accept
               </ToastAction>
               <ToastAction
                 altText="Reject request"
-                onClick={async () => handleFollow(message.user_id, false)}
+                onClick={async () => handleFollowReq(message.user_id, false)}
               >
                 Reject
               </ToastAction>

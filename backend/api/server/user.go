@@ -439,8 +439,8 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 
 		followrequest := models.FollowRequestModel{
 			RequestID:     uuid.Must(uuid.NewV4()),
-			UserID:        session.User.UserID,
-			RequesterID:   uid,
+			UserID:        uid,
+			RequesterID:   session.User.UserID,
 			RequestStatus: "pending",
 		}
 		followrequest.Save()
@@ -461,7 +461,6 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 
 	notification := models.NotificationModel{
 		ReceiverID:  uid,
-		UserID:      session.User.UserID,
 		NotiType:    notiType,
 		NotiContent: noti,
 		NotiTime:    time.Now(),
@@ -503,7 +502,7 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the follow request from the database
-	followreq, err := models.GetPendingRequest(session.User.UserID, followreq_response.RequesterID)
+	followreq, err := models.GetPendingRequest(followreq_response.UserID, session.User.UserID)
 	if err != nil {
 		log.Println("HandleFollowResponse: Error getting follow request by ID", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -545,7 +544,7 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 
 		// Send notification to the user who sent the follow request
 		notification := models.NotificationModel{
-			ReceiverID:  followreq.RequesterID,
+			ReceiverID:  followreq.UserID,
 			NotiType:    "follow_response_accept",
 			NotiContent: fmt.Sprintf("%s %s has accepted your follow request!", followedUser.UserFirstName, followedUser.UserLastName),
 			NotiTime:    time.Now(),
@@ -623,7 +622,7 @@ func HandlePeople(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		Reuested, err := models.GetPendingRequest(user.UserID, authUser.User.UserID)
+		Reuested, err := models.GetPendingRequest(authUser.User.UserID, user.UserID)
 		if err != nil {
 			log.Println("HandlePeople: Error checking follower status", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)

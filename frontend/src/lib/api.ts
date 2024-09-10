@@ -25,10 +25,33 @@ export const fetchSessionUser = async () => {
   }
 };
 
-// a function to fetch the follow request
-export const handleFollow = async (userId: string, accept: boolean) => {
+// a function to fetch follow
+export const handleFollow = async (userId: string) => {
   try {
-    const response = await fetch(`${Yori}/follow?user_id=${userId}`, {
+      const response = await fetch(`${Yori}/follow?user_id=${userId}`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user_id: userId }),
+          credentials: 'include',
+      });
+      if (response.ok) {
+          return { success: true, userId };
+      } else {
+          console.error("Failed to follow user");
+          return { success: false };
+      }
+  } catch (error) {
+      console.error("Error following user:", error);
+      return { success: false, error };
+  }
+};
+
+// a function to fetch the follow request
+export const handleFollowReq = async (userId: string, accept: boolean) => {
+  try {
+    const response = await fetch(`${Yori}/follow_response?user_id=${userId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
