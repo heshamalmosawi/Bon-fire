@@ -544,7 +544,7 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 
 		// Send notification to the user who sent the follow request
 		notification := models.NotificationModel{
-			ReceiverID:  followreq.UserID,
+			ReceiverID:  followreq.RequesterID,
 			NotiType:    "follow_response_accept",
 			NotiContent: fmt.Sprintf("%s %s has accepted your follow request!", followedUser.UserFirstName, followedUser.UserLastName),
 			NotiTime:    time.Now(),
@@ -554,33 +554,10 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 
 		notify.NotifyUser(followingUser.UserID, notification)
 
-		// Send notification to the user who sent the follow request
-		// notification = models.NotificationModel{
-		// 	ReceiverID:  followreq.UserID,
-		// 	NotiType:    "follow",
-		// 	NotiContent: fmt.Sprintf("%s %s has followed your account!", followingUser.UserFirstName, followingUser.UserLastName),
-		// 	NotiTime:    time.Now(),
-		// 	NotiStatus:  "unread",
-		// }
-		// notification.Save()
-
-		// notify.NotifyUser(followedUser.UserID, notification)
-
 	} else {
 		// Update the follow request
 		followreq.RequestStatus = "reject"
 		followreq.Update()
-
-		notification := models.NotificationModel{
-			ReceiverID:  followreq.UserID,
-			NotiType:    "follow_response_reject",
-			NotiContent: fmt.Sprintf("%s %s has Rejected your follow request...", followedUser.UserFirstName, followedUser.UserLastName),
-			NotiTime:    time.Now(),
-			NotiStatus:  "unread",
-		}
-		notification.Save()
-
-		notify.NotifyUser(followingUser.UserID, notification)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
