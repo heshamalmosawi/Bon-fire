@@ -444,7 +444,7 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 			RequestStatus: "pending",
 		}
 		followrequest.Save()
-		noti = session.User.UserNickname + " has requested to follow your account!"
+		noti = fmt.Sprintf("%s %s has requested to follow your account!", session.User.UserFirstName, session.User.UserLastName)
 		notiType = "follow_request"
 		resp = "Follow Request Sent"
 	} else {
@@ -454,7 +454,7 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 			FollowerID: session.User.UserID,
 		}
 		follow.Save()
-		noti = session.User.UserNickname + " has followed your account!"
+		noti = fmt.Sprintf("%s %s has followed your account!", session.User.UserFirstName, session.User.UserLastName)
 		notiType = "follow"
 		resp = "Follow"
 	}
@@ -600,7 +600,7 @@ func HandlePeople(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		Reuested, err := models.GetPendingRequest(authUser.User.UserID, user.UserID)
+		Reuested, err := models.GetPendingRequest(user.UserID, authUser.User.UserID)
 		if err != nil {
 			log.Println("HandlePeople: Error checking follower status", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
