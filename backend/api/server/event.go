@@ -57,7 +57,7 @@ func HandleAddEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	members, err := models.GetGroupMembers(event.GroupID.String())
+	members, err := models.GetGroupMembers(event.GroupID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		utils.EncodeJSON(w, map[string]string{"error": "error getting members"})
@@ -73,6 +73,16 @@ func HandleAddEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	owner, err2 := models.GetUserByID(group.OwnerID)
+	if err2 != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		utils.EncodeJSON(w, map[string]string{"error": "error getting group"})
+		log.Println("Failed to get group:", err)
+		return
+	}
+
+ 	members = append(members,*owner)
+	
 	for _, member := range members {
 		noti := models.NotificationModel{
 			EventID:     eventID,

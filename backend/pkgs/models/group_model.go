@@ -324,21 +324,17 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 	return groupResponses, nil
 }
 
-func GetGroupMembers(groupID string) ([]UserModel, error) {
+func GetGroupMembers(groupID uuid.UUID) ([]UserModel, error) {
     var users []UserModel
 
     // Ensure the groupID is a valid UUID before querying
-    parsedGroupID, err := uuid.FromString(groupID)
-    if err != nil {
-        log.Printf("Invalid UUID format for groupID: %v", err)
-        return nil, err
-    }
+    
 
     columns := []string{"user_id"}
     condition := "group_id = ?"
     
     // Utilizing a helper function to perform the SQL read operation
-    rows, err := utils.Read("group_user", columns, condition, parsedGroupID) // Pass parsedGroupID directly
+    rows, err := utils.Read("group_user", columns, condition, groupID) // Pass parsedGroupID directly
     if err != nil {
         log.Printf("Failed to read from group_user table: %v", err)
         return nil, err
