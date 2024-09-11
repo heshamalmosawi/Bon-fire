@@ -239,9 +239,9 @@ const GroupPage = () => {
       <div className="flex">
         <Navbar />
         <main className="w-3/4 p-8">
-          <div className="h-45 bg-gray-200 rounded-lg flex items-center justify-center my-6">
-            {/* Placeholder content for background */}
-          </div>
+          {/* <div className="h-45 bg-gray-200 rounded-lg flex items-center justify-center my-6">
+            {/* Placeholder content for background 
+          </div> */}
 
           {/* Group Info */}
           <Group
@@ -293,17 +293,6 @@ const GroupPage = () => {
                 }`}
               >
                 Members
-              </button>
-              <button
-                id="description"
-                onClick={() => setActiveTab("description")}
-                className={`p-2 rounded-lg ${
-                  activeTab === "description"
-                    ? "text-white bg-indigo-500"
-                    : "text-gray-400"
-                }`}
-              >
-                Description
               </button>
               <button
                 id="events"
@@ -464,11 +453,6 @@ const GroupPage = () => {
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-              {activeTab === "description" && (
-                <div>
-                  <h1>{groupProfile.description}</h1>
                 </div>
               )}
               {activeTab === "find" && (
