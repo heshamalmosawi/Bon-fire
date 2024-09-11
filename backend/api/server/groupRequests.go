@@ -139,7 +139,7 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		members, err := models.GetGroupMembers(group.GroupID.String())
+		members, err := models.GetGroupMembers(group.GroupID)
 		if err != nil {
 			http.Error(w, "Failed to get group members", http.StatusInternalServerError)
 			return

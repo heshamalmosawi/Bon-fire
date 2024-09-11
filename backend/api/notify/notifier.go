@@ -25,7 +25,7 @@ func NotifyUser(userID uuid.UUID, notification models.NotificationModel) error {
 }
 
 func BrodcastNotiToGroup(groupID uuid.UUID, notification models.NotificationModel) error {
-	users, err := models.GetGroupMembers(groupID.String())
+	users, err := models.GetGroupMembers(groupID)
 	if err != nil {
 		return err
 	}
