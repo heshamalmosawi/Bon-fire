@@ -128,7 +128,7 @@ const CreatePostForGroup = ({
         onOpenChange={() => setIsDialogOpen(!isDialogOpen)}
       >
         <DialogTrigger className="w-full" onClick={() => setIsDialogOpen(true)}>
-          <div className="cursor-pointer bg-black h-fit flex items-center justify-start gap-4 py-2 px-4 rounded-lg">
+          <div className="cursor-pointer bg-black h-fit flex items-center justify-start gap-4 py-2 px-4 rounded-lg mb-7">
             <Avatar>
               <AvatarImage src={User.avatarUrl} />
               <AvatarFallback>

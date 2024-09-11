@@ -7,6 +7,7 @@ import { getAgo } from "@/lib/utils";
 import CommentDialog from "../CommentDialog"; // Import the CommentDialog component
 import { PostProps } from "@/lib/interfaces";
 import { useToast } from "../ui/use-toast";
+import { log } from "console";
 
 const PostComponent = (props: PostProps) => {
   console.log(props.postIsLiked);
@@ -32,6 +33,7 @@ const PostComponent = (props: PostProps) => {
         });
 
         if (res.status !== 200) {
+            console.log(res.status);
             throw new Error("Failed to toggle like");
         }
     } catch (error) {

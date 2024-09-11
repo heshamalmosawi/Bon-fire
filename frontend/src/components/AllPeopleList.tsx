@@ -25,6 +25,7 @@ const AllPeopleList = () => {
     const getPeople = async () => {
       const data = await fetchPeople();
       if (data) {
+        console.log("Data: ", data);
         setPeople(data);
       }
     };
@@ -43,21 +44,13 @@ const AllPeopleList = () => {
     getPeople();
     getSessionUser();
 
-    const handleClick = () => {
-      getPeople();
-    };
-
-    window.addEventListener('click', handleClick);
-
-    return () => {
-      window.removeEventListener('click', handleClick);
-    };
   }, [sessionUser, router]);
 
   useEffect(() => {
     const updateButtonText = () => {
       const newButtonText: { [key: string]: string } = {};
       people.forEach(person => {
+        // console.log("person: ", person);
         if (person.user_id === sessionUser) {
           newButtonText[person.user_id] = "You";
         } else if (person.is_followed) {
@@ -78,6 +71,9 @@ const AllPeopleList = () => {
     let resp = await handleFollow(person.user_id);
     if (resp.success) {
       let follow = person.is_followed;
+      if (person.user_fname === "Larry"){
+        console.log("hello");
+      }
       if (person.profile_exposure === "Public") {
         person.is_followed = !follow;
         person.is_requested = false;
@@ -104,7 +100,7 @@ const AllPeopleList = () => {
   return (
     <div className="ml-1/4 p-2">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl text-white">People ({people.length - 1})</h2>
+        <h2 className="text-2xl text-white">People ({people.length})</h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {people.map((person) => (

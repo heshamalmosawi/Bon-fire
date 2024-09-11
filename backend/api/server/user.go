@@ -439,12 +439,12 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 
 		followrequest := models.FollowRequestModel{
 			RequestID:     uuid.Must(uuid.NewV4()),
-			UserID:        session.User.UserID,
-			RequesterID:   uid,
+			UserID:        uid,
+			RequesterID:   session.User.UserID,
 			RequestStatus: "pending",
 		}
 		followrequest.Save()
-		noti = session.User.UserNickname + " has requested to follow your account!"
+		noti = fmt.Sprintf("%s %s has requested to follow your account!", session.User.UserFirstName, session.User.UserLastName)
 		notiType = "follow_request"
 		resp = "Follow Request Sent"
 	} else {
@@ -454,14 +454,14 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 			FollowerID: session.User.UserID,
 		}
 		follow.Save()
-		noti = session.User.UserNickname + " has followed your account!"
+		noti = fmt.Sprintf("%s %s has followed your account!", session.User.UserFirstName, session.User.UserLastName)
 		notiType = "follow"
 		resp = "Follow"
 	}
 
 	notification := models.NotificationModel{
 		ReceiverID:  uid,
-		UserID:      session.User.UserID,
+		UserID: session.User.UserID,
 		NotiType:    notiType,
 		NotiContent: noti,
 		NotiTime:    time.Now(),
@@ -503,7 +503,7 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the follow request from the database
-	followreq, err := models.GetPendingRequest(session.User.UserID, followreq_response.RequesterID)
+	followreq, err := models.GetPendingRequest(session.User.UserID, followreq_response.UserID)
 	if err != nil {
 		log.Println("HandleFollowResponse: Error getting follow request by ID", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -555,33 +555,10 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 
 		notify.NotifyUser(followingUser.UserID, notification)
 
-		// Send notification to the user who sent the follow request
-		// notification = models.NotificationModel{
-		// 	ReceiverID:  followreq.UserID,
-		// 	NotiType:    "follow",
-		// 	NotiContent: fmt.Sprintf("%s %s has followed your account!", followingUser.UserFirstName, followingUser.UserLastName),
-		// 	NotiTime:    time.Now(),
-		// 	NotiStatus:  "unread",
-		// }
-		// notification.Save()
-
-		// notify.NotifyUser(followedUser.UserID, notification)
-
 	} else {
 		// Update the follow request
 		followreq.RequestStatus = "reject"
 		followreq.Update()
-
-		notification := models.NotificationModel{
-			ReceiverID:  followreq.UserID,
-			NotiType:    "follow_response_reject",
-			NotiContent: fmt.Sprintf("%s %s has Rejected your follow request...", followedUser.UserFirstName, followedUser.UserLastName),
-			NotiTime:    time.Now(),
-			NotiStatus:  "unread",
-		}
-		notification.Save()
-
-		notify.NotifyUser(followingUser.UserID, notification)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
