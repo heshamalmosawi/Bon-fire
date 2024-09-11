@@ -461,6 +461,7 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 
 	notification := models.NotificationModel{
 		ReceiverID:  uid,
+		UserID: session.User.UserID,
 		NotiType:    notiType,
 		NotiContent: noti,
 		NotiTime:    time.Now(),
@@ -502,7 +503,7 @@ func HandleFollowRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the follow request from the database
-	followreq, err := models.GetPendingRequest(followreq_response.UserID, session.User.UserID)
+	followreq, err := models.GetPendingRequest(session.User.UserID, followreq_response.UserID)
 	if err != nil {
 		log.Println("HandleFollowResponse: Error getting follow request by ID", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

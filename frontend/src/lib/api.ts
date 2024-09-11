@@ -435,26 +435,31 @@ export const delNoti = async (notiID: string) => {
 
 // marks all notifications as read
 export const readAllNotis = async () => {
-  await axios.put(
-    `${Yori}/notis/read-all`,
-    {},
-    {
-      withCredentials: true,
-    }
-  );
+  try {
+    const res = await axios.put(
+      `${Yori}/notis/read-all`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const getEventsIndex = async (): Promise<BonfireEvent[] | undefined> => {
-  const res = await axios.get(`${Yori}/user-events`, {
-    withCredentials: true,
-  });
+  try {
+    const res = await axios.get(`${Yori}/user-events`, {
+      withCredentials: true,
+    });
 
-  if (res.status !== 200) {
-    return;
-  }
+    if (res.status !== 200) {
+      return;
+    }
 
-  return res.data
-    ? res.data.map(
+    return res.data
+      ? res.data.map(
         (ev: any): BonfireEvent => ({
           eventID: ev.event_id,
           groupID: ev.group_id,
@@ -464,5 +469,8 @@ export const getEventsIndex = async (): Promise<BonfireEvent[] | undefined> => {
           eventDuration: 86400000,
         })
       )
-    : [];
+      : [];
+  } catch (error) {
+    console.error(error);
+  }
 };
