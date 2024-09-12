@@ -2,11 +2,17 @@ package pkgs
 
 import (
 	"bonfire/pkgs/models"
+	"bonfire/pkgs/utils"
 	"errors"
 	"sync"
 	"time"
 
 	"github.com/gofrs/uuid"
+)
+
+var (
+	ExpiredSessionChatChan       = make(chan Session)
+	ExpiredSessionSubscriberChan = make(chan Session)
 )
 
 // Session represents a user session
@@ -53,15 +59,7 @@ func (sm *SessionManager) GetSession(sessionID string) (*Session, error) {
 		return nil, errors.New("session not found")
 	}
 
-	session := value.(*Session)
-
-	// Check if session has expired
-	if session.ExpiresAt.Before(time.Now()) {
-		sm.sessions.Delete(sessionID)
-		return nil, errors.New("session expired")
-	}
-
-	return session, nil
+	return value.(*Session), nil
 }
 
 // GetSessionByUser retrieves a session by the user model, will return error if no session found
@@ -70,18 +68,14 @@ func (sm *SessionManager) GetSessionByUser(user *models.UserModel) (*Session, er
 	sm.sessions.Range(func(_, value interface{}) bool {
 		session := value.(*Session)
 		if session.User.UserID == user.UserID {
-			if session.ExpiresAt.After(time.Now()) {
-				foundSession = session
-				return false // Stop iteration as we found the session
-			} else {
-				sm.sessions.Delete(session.ID) // Cleanup expired session
-			}
+			foundSession = session
+			return false // Stop iteration
 		}
 		return true // Continue iteration
 	})
 
 	if foundSession == nil {
-		return nil, errors.New("session not found or expired")
+		return nil, errors.New("session not found")
 	}
 	return foundSession, nil
 }
@@ -93,14 +87,26 @@ func (sm *SessionManager) DeleteSession(sessionID string) {
 
 // CleanupExpiredSessions removes expired sessions from the session manager
 func (sm *SessionManager) CleanupExpiredSessions() {
-	now := time.Now()
-	sm.sessions.Range(func(key, value interface{}) bool {
-		session := value.(*Session)
-		if session.ExpiresAt.Before(now) {
-			sm.sessions.Delete(key)
-		}
-		return true
-	})
+	ticker := time.NewTicker(time.Second * 2)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		sm.sessions.Range(func(key, value interface{}) bool {
+			session := value.(*Session)
+			if session.ExpiresAt.Before(time.Now()) {
+				sm.sessions.Delete(key)
+				select {
+				case ExpiredSessionChatChan <- *session:
+					utils.BonfireLogger.Info("expired session ID for chat " + session.ID)
+				case ExpiredSessionSubscriberChan <- *session:
+					utils.BonfireLogger.Info("expired session ID for noti " + session.ID)
+				default:
+					// Avoid blocking if no one is receiving from the channel
+				}
+			}
+			return true
+		})
+	}
 }
 
 var MainSessionManager = NewSessionManager(time.Hour * 24)

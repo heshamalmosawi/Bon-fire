@@ -1,6 +1,8 @@
 package models
 
 import (
+	"log"
+
 	"github.com/gofrs/uuid"
 
 	"bonfire/pkgs/storage"
@@ -72,7 +74,7 @@ func GetAllPublicPosts() ([]PostModel, error) {
 	return posts, nil
 }
 
-func GetPostsByGroupID(groupID uuid.UUID) ([]PostModel, error) {
+func GetPostsByGroupID(groupID uuid.UUID,userID uuid.UUID) ([]PostModel, error) {
 	query := `
 	SELECT post_id, post_content, post_image_path, post_exposure, group_id, post_likecount, created_at, author_id
 	FROM post
@@ -93,10 +95,39 @@ func GetPostsByGroupID(groupID uuid.UUID) ([]PostModel, error) {
 			return nil, err
 		}
 		post.Author, err = GetUserByID(post.AuthorID)
+		post.IsLiked, _ = GetIsPostLiked(post.PostID,userID)
 		if err != nil {
 			return nil, err
 		}
 		posts = append(posts, post)
 	}
 	return posts, nil
+}
+
+// GetUsersNotInGroup retrieves all users not in the specified group.
+func GetUsersNotInGroup(groupID uuid.UUID) ([]UserModel, error) {
+    query := `
+    SELECT u.user_id, u.user_fname, u.user_lname, u.user_email, u.user_avatar_path, u.user_nickname, u.user_about
+    FROM user u
+    LEFT JOIN group_user gu ON u.user_id = gu.user_id AND gu.group_id = ?
+    WHERE gu.user_id IS NULL`
+
+    rows, err := storage.DB.Query(query, groupID)
+    if err != nil {
+        log.Println("Error querying users not in group:", err)
+        return nil, err
+    }
+    defer rows.Close()
+
+    var users []UserModel
+    for rows.Next() {
+        var user UserModel
+        if err := rows.Scan(&user.UserID, &user.UserFirstName, &user.UserLastName, &user.UserEmail, &user.UserAvatarPath, &user.UserNickname, &user.UserBio); err != nil {
+            log.Println("Error scanning user not in group:", err)
+            return nil, err
+        }
+        users = append(users, user)
+    }
+
+    return users, nil
 }

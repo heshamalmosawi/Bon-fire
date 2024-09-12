@@ -53,8 +53,11 @@ const SignupForm: FC = () => {
       targets: "#pic-div",
       translateX: "0",
       update: () => {
-        document.getElementById("pic-div")!.className =
-          "relative w-[50%] h-full bg-bonfire bg-cover rounded-r-3xl z-10";
+        const picDiv = document.getElementById("pic-div");
+        if (picDiv) {
+          picDiv.className =
+            "relative w-[50%] h-full bg-bonfire bg-cover rounded-r-3xl z-10";
+        }
       },
       duration: 3000,
       easing: "easeOutExpo",

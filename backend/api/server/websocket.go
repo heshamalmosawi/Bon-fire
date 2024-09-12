@@ -1,13 +1,14 @@
 package server
 
 import (
-	"bonfire/pkgs"
 	"fmt"
 	"log"
 	"net/http"
 	"sync"
 
 	"github.com/gorilla/websocket"
+
+	"bonfire/pkgs"
 )
 
 var clients = make(map[string]*websocket.Conn)

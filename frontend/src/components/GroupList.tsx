@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 
 const AllGroupList: React.FC = () => {
   const [filter, setFilter] = useState("all"); 
+  const [newGroup, setNewGroup] = useState(false)
+  const [newjoinrequest, setnewjoinrequest] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]); 
   const [isDialogOpen, setIsDialogOpen] = useState(false); 
   const [sessionUser, setSessionUser] = useState<string | null>(null); 
@@ -44,8 +46,15 @@ const AllGroupList: React.FC = () => {
 
   // Fetch groups from the backend
   useEffect(() => {
-    fetchGroups().then((data) => setGroups(data || []));
-  }, []);
+    const loadGroups = async () => {
+      const data = await fetchGroups();
+      console.log("Fetched Groups:", data); // Debugging: Print fetched groups data
+      setGroups(data || []);
+    };
+    loadGroups();
+    setNewGroup(false)
+    setnewjoinrequest(false)
+  }, [newGroup, newjoinrequest]);
 
   // Filter the groups based on the selected filter
   const filteredGroups = groups.filter((group) => {
@@ -59,7 +68,10 @@ const AllGroupList: React.FC = () => {
   });
 
   const openDialog = () => setIsDialogOpen(true);
-  const closeDialog = () => setIsDialogOpen(false);
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    setNewGroup(true)
+  }
 
   const openConfirmJoinDialog = (group: Group) => {
     setSelectedGroup(group);
@@ -69,37 +81,41 @@ const AllGroupList: React.FC = () => {
   const closeConfirmJoinDialog = () => {
     setSelectedGroup(null);
     setIsConfirmJoinDialogOpen(false);
+    setnewjoinrequest(true);
   };
 
-  const handleConfirmJoin = async () => {
-    if (selectedGroup && sessionUser) {
-      try {
-        const response = await fetch(`http://localhost:8080/group/request`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            group_id: selectedGroup.group_id,
-          }),
-        });
+const handleConfirmJoin = async () => {
+  if (selectedGroup && sessionUser) {
+    try {
+      const response = await fetch(`http://localhost:8080/group/request`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          group_id: selectedGroup.group_id,
+        }),
+      });
 
-        if (response.ok) {
-          console.log(`Request to join group ${selectedGroup.group_name} has been sent.`);
-          // Optionally, you can show a success message or update the UI
-        } else {
-          console.error("Failed to send join request:", response.statusText);
-          // Optionally, you can show an error message
-        }
-      } catch (error) {
-        console.error("Error sending join request:", error);
-        // Optionally, you can show an error message
+      if (response.ok) {
+        console.log(`Request to join group ${selectedGroup.group_name} has been sent.`);
+        // Update the group in the local state to reflect the requested status
+        const updatedGroups = groups.map(group => 
+          group.group_id === selectedGroup.group_id ? { ...group, isRequested: true } : group
+        );
+        setGroups(updatedGroups);
+      } else {
+        console.error("Failed to send join request:", response.statusText);
       }
-
-      closeConfirmJoinDialog();
+    } catch (error) {
+      console.error("Error sending join request:", error);
     }
-  };
+
+    closeConfirmJoinDialog();
+  }
+};
+
 
   return (
     <div className="ml-1/4 p-2">
@@ -145,7 +161,8 @@ const AllGroupList: React.FC = () => {
             description={group.group_desc}
             members={group.total_members} // Updated to use the actual number of members
             isMine={group.owner_id === sessionUser} // Determine ownership
-            isMember={group.is_member} // Determine membership
+            isMember={group.is_member}
+            isRequested = {group.is_requested} // Determine membership
             onJoinClick={() => openConfirmJoinDialog(group)} // Pass the group to the confirmation dialog
           />
         ))}

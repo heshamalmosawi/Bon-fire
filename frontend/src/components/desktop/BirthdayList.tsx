@@ -1,21 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { fetchPeople } from "@/lib/api";
 
 interface User {
+  id: string;
+  avatar: string;
   name: string;
   birthday: Date;
 }
 
-const sampleUsers: User[] = [
-  { name: "Alice", birthday: new Date("1995-08-29") },
-  { name: "Bob", birthday: new Date("1993-08-31") },
-  { name: "Charlie", birthday: new Date("1997-08-30") },
-  { name: "Dave", birthday: new Date("1990-08-29") },
-];
-
 const BirthdayList = () => {
+  const [users, setusers] = useState<User[]>();
+
   const isBirthdayToday = (birthday: Date) => {
     const today = new Date();
     return (
@@ -41,10 +39,41 @@ const BirthdayList = () => {
     );
   };
 
-  const sortedUsers = [...sampleUsers].sort(
+  const sortedUsers = users?.sort(
     (a, b) =>
       getDaysUntilBirthday(b.birthday) - getDaysUntilBirthday(a.birthday)
   );
+
+  const calculateAge = (birthday: Date): number => {
+    const today = new Date();
+    let age = today.getFullYear() - birthday.getFullYear();
+    const monthDifference = today.getMonth() - birthday.getMonth();
+
+    // Check if the birthday hasn't occurred yet this year
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birthday.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
+  useEffect(() => {
+    fetchPeople().then((data) => {
+      if (data && Array.isArray(data)) {
+        data.map(
+          (user: any): User => ({
+            id: user.user_id,
+            avatar: user.user_avatar_path,
+            name: user.user_fname + " " + user.user_lname,
+            birthday: new Date(user.user_dob),
+          })
+        );
+      }
+    });
+  }, []);
 
   return (
     <div className="[&>*]:w-full w-[260px] h-[350px] flex flex-col gap-2 items-center justify-center bg-black rounded-lg px-4">
@@ -52,7 +81,7 @@ const BirthdayList = () => {
         Birthdays
       </div>
       <div className="w-full h-[85%] overflow-y-scroll">
-        {sortedUsers.map((user, index) => (
+        {sortedUsers && sortedUsers.map((user, index) => (
           <div
             key={index}
             className={`w-full h-30 py-4 flex flex-col justify-between text-white ${
@@ -80,7 +109,8 @@ const BirthdayList = () => {
               )}
             </div>
             <div className="text-sm text-gray-400">
-              {user.birthday.toLocaleDateString()}
+              Born on {user.birthday.toLocaleDateString()}, will turn{" "}
+              {calculateAge(user.birthday)}!
             </div>
           </div>
         ))}

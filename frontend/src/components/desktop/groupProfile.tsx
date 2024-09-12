@@ -21,12 +21,15 @@ export const Group: React.FC<GroupProps> = ({
   return (
     <div className="ml-1/4 p-2">
       <div className="w-[100%] h-full shadow-md mx-auto mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-1">
           <h1 className="text-white text-3xl font-semibold">{groupName}</h1>
-          <h1 className="text-white/50 text-l font-semibold order-last">
+          <h1 className="text-white/50 text-l font-semibold order-last mt-5">
             Members: {totalMembers}
           </h1>
         </div>
+        <div className="mb-4">
+      <p className="text-white/50 text-l font-semibold">{description}</p>
+    </div>
         <div className="w-full border-t-[0.1px] border-gray-700 mx-auto mb-8"></div>
       </div>
 
@@ -34,8 +37,8 @@ export const Group: React.FC<GroupProps> = ({
         {/* Additional group content like members, posts, etc., can be displayed here */}
       </div>
 
-      <div className="text-center mt-4">
-        <h2 className="text-2xl font-semibold">{ownerName}</h2>
+      <div>
+        {/* <h2 className="text-2xl font-semibold">{ownerName}</h2> */}
         {/* <p className="text-gray-400 mt-2">{description}</p> */}
         {/* Example: Allow the group owner to edit the group details */}
         {session_user && session_user === groupID && (

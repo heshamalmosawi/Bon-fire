@@ -14,6 +14,8 @@ type GroupInteractions struct {
 	InteractionType bool    `json:"interaction_Type"`
 	Status string `json:"status"`
 	InteractionTime time.Time `json:"interaction_Time"`
+
+	FullUser *UserModel   `json:"user_sent"`
 }
 
 func (gi *GroupInteractions) Save() error {
@@ -89,8 +91,35 @@ func GetPendingRequestsByGroupID(groupID uuid.UUID) ([]GroupInteractions, error)
 		if err != nil {
 			return nil, err
 		}
+		interaction.FullUser,_ = GetUserByID(interaction.UserID)
 		requests = append(requests, interaction)
 	}
 
 	return requests, nil
+}
+
+
+func DeleteGroupInteraction(groupID, userID uuid.UUID, interactionType bool) error {
+    condition := "group_id = ? AND user_id = ? AND interaction_type = ?"
+    _, err := utils.Delete("group_interactions", condition, groupID, userID, interactionType)
+    return err
+}
+
+// IsUserInvited checks if there is a pending invitation for the user in the specified group.
+func IsUserInvited(groupID, userID uuid.UUID) (bool, error) {
+    // Define the columns to retrieve from the database
+    columns := []string{"interaction_ID"}
+
+    // Define the condition to find the specific interaction
+    condition := "group_id = ? AND user_id = ? AND interaction_Type = false AND status = 'pending'"
+
+    // Execute the read operation
+    rows, err := utils.Read("group_interactions", columns, condition, groupID, userID)
+    if err != nil {
+        return false, err
+    }
+    defer rows.Close()
+
+    // Check if any rows are returned
+    return rows.Next(), nil
 }

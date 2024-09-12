@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { handleFollow, fetchSessionUser, fetchPeople } from '../lib/api';
 import Link from "next/link";
 
-
 interface Person {
   user_id: string;
   user_fname: string;
@@ -26,7 +25,7 @@ const AllPeopleList = () => {
     const getPeople = async () => {
       const data = await fetchPeople();
       if (data) {
-        console.log("people data:", data);
+        console.log("Data: ", data);
         setPeople(data);
       }
     };
@@ -36,8 +35,8 @@ const AllPeopleList = () => {
       if (user) {
         setSessionUser(user.User.user_id);
       } else {
-        console.error(`Failed to fetch session user: ${user.status}`);
-        router.push('/auth');
+        console.error("Failed to fetch session user");
+        router.push("/auth");
         return;
       }
     };
@@ -45,22 +44,13 @@ const AllPeopleList = () => {
     getPeople();
     getSessionUser();
 
-    const handleClick = () => {
-      getPeople();
-    };
-
-    window.addEventListener('click', handleClick);
-
-    return () => {
-      window.removeEventListener('click', handleClick);
-    };
   }, [sessionUser, router]);
 
   useEffect(() => {
     const updateButtonText = () => {
       const newButtonText: { [key: string]: string } = {};
       people.forEach(person => {
-        console.log("person:", person);
+        // console.log("person: ", person);
         if (person.user_id === sessionUser) {
           newButtonText[person.user_id] = "You";
         } else if (person.is_followed) {
@@ -68,7 +58,6 @@ const AllPeopleList = () => {
         } else if (person.is_requested) {
           newButtonText[person.user_id] = "Follow Request Sent";
         } else {
-          console.log("person.user_id:", person.user_id, "sessionUser:", sessionUser);
           newButtonText[person.user_id] = "Follow";
         }
       });
@@ -82,6 +71,9 @@ const AllPeopleList = () => {
     let resp = await handleFollow(person.user_id);
     if (resp.success) {
       let follow = person.is_followed;
+      if (person.user_fname === "Larry"){
+        console.log("hello");
+      }
       if (person.profile_exposure === "Public") {
         person.is_followed = !follow;
         person.is_requested = false;
@@ -113,7 +105,6 @@ const AllPeopleList = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {people.map((person) => (
           <div key={person.user_id} className="bg-black rounded-lg overflow-hidden shadow-md text-white">
-
             <Link href={`/profile/${person.user_id}`} legacyBehavior>
               <a>
                 <Avatar className="w-32 h-32 rounded-full mx-auto object-cover mt-5">
@@ -122,7 +113,6 @@ const AllPeopleList = () => {
                 </Avatar>
               </a>
             </Link>
-
             <div className="p-4">
               <Link href={`/profile/${person.user_id}`} legacyBehavior>
                 <a>
@@ -133,9 +123,7 @@ const AllPeopleList = () => {
                 </a>
               </Link>
               <button
-                // className="mt-4 bg-indigo-500 text-white w-full py-2 rounded-full"
                 className={`mt-4 w-full py-2 rounded-full ${person.user_id === sessionUser ? 'text-indigo-400 font-semibold text-lg border-solid border-2 border-indigo-400' : 'bg-indigo-500 text-white'}`}
-
                 onClick={() => updateFollow(person)}
                 disabled={person.user_id === sessionUser}
               >
@@ -145,8 +133,8 @@ const AllPeopleList = () => {
           </div>
         ))}
       </div>
-    </div >
+    </div>
   );
-}
+};
 
 export default AllPeopleList;
