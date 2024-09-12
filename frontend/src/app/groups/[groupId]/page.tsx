@@ -122,6 +122,7 @@ const GroupPage = () => {
         const data = await fetchSessionUser();
         if (data && data.status === 200) {
           setSessionUser(data.User.user_id);
+          setUser(data.User);
           if (!groupID) {
             setGroupID(data.User.user_id);
           }

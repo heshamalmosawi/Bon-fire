@@ -208,7 +208,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
       {groupID ? (
         <ExpandableChat size="lg" position="bottom-right" className="bg-black">
           <ExpandableChatHeader className="flex-col text-center justify-center">
-            <h1 className="text-xl font-semibold">Gruop Chat: {group?.groupName}</h1>
+            <h1 className="text-xl font-semibold">Group Chat: {group?.groupName}</h1>
             <p>{group?.description}</p>
           </ExpandableChatHeader>
           <ExpandableChatBody>
