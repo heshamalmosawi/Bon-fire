@@ -45,12 +45,13 @@ func HandlePosts(w http.ResponseWriter, r *http.Request) {
 
 	/// Check if the group ID is provided in the query parameters
 	if groupIDStr != "" {
+		user := session.User
 		groupID, err := uuid.FromString(groupIDStr)
 		if err != nil {
 			http.Error(w, "Invalid group ID", http.StatusBadRequest)
 			return
 		}
-		posts, err = models.GetPostsByGroupID(groupID)
+		posts, err = models.GetPostsByGroupID(groupID,user.UserID)
 		if err != nil {
 			http.Error(w, "Error retrieving posts", http.StatusInternalServerError)
 			return

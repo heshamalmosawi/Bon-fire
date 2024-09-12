@@ -25,10 +25,33 @@ export const fetchSessionUser = async () => {
   }
 };
 
-// a function to fetch the follow request
-export const handleFollow = async (userId: string, accept: boolean) => {
+// a function to fetch follow
+export const handleFollow = async (userId: string) => {
   try {
-    const response = await fetch(`${Yori}/follow?user_id=${userId}`, {
+      const response = await fetch(`${Yori}/follow?user_id=${userId}`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user_id: userId }),
+          credentials: 'include',
+      });
+      if (response.ok) {
+          return { success: true, userId };
+      } else {
+          console.error("Failed to follow user");
+          return { success: false };
+      }
+  } catch (error) {
+      console.error("Error following user:", error);
+      return { success: false, error };
+  }
+};
+
+// a function to fetch the follow request
+export const handleFollowReq = async (userId: string, accept: boolean) => {
+  try {
+    const response = await fetch(`${Yori}/follow_response?user_id=${userId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -58,7 +81,7 @@ export const fetchPeople = async () => {
       method: "POST",
       credentials: "include",
     });
-    
+
     if (response.ok) {
       const data = await response.json();
       return data;
@@ -73,29 +96,6 @@ export const fetchPeople = async () => {
 };
 
 // a function to fetch the profile user content
-export const handleClick = async (endpoint: string, u_id: string, setLoading: (loading: boolean) => void, setError: (error: string | null) => void, setActiveTab: (tab: string) => void, setData: (data: any) => void) => {
-    console.log("endpoint:", endpoint);
-    setLoading(true);
-    setError(null);
-    setActiveTab(endpoint);
-    try {
-        const response = await fetch(`${Yori}/profile/${u_id}?q=${endpoint}`, { credentials: 'include' });
-        if (!response.ok && response.status != 403) {
-            throw new Error('Network response was not ok');
-        } else {
-            console.log("response:", response);
-            console.log("response.status:", response.status);
-        }
-        const result = await response.json();
-        console.log("result:", result);
-        setData(result);
-    } catch (error) {
-        setError((error as any).message);
-    } finally {
-        setLoading(false);
-    }
-}
-
 export const handleClick = async (
   endpoint: string,
   u_id: string,
@@ -112,13 +112,14 @@ export const handleClick = async (
     const response = await fetch(`${Yori}/profile/${u_id}?q=${endpoint}`, {
       credentials: "include",
     });
-    if (!response.ok) {
+    if (!response.ok && response.status != 403) {
       throw new Error("Network response was not ok");
     } else {
       console.log("response:", response);
       console.log("response.status:", response.status);
     }
     const result = await response.json();
+    console.log("result:", result);
     setData(result);
   } catch (error) {
     setError((error as any).message);
@@ -128,36 +129,35 @@ export const handleClick = async (
 };
 
 // a function to fetch the profile user
-export const fetchProfile = async (
-  u_id: string,
-  setProfile: (profile: Profile) => void,
-  setLoading: (loading: boolean) => void,
-  setError: (error: string) => void
-) => {
+export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) => void, setLoading: (loading: boolean) => void, setError: (error: string) => void) => {
   try {
-    const response = await fetch(`${Yori}/profile/${u_id}`);
-    if (response.ok) {
-      const data = await response.json();
-      if (data.user) {
-        setProfile({
-          fname: data.user.user_fname,
-          lname: data.user.user_lname,
-          avatarUrl: data.user.user_avatar_path,
-          bio: data.user.user_about,
-          nickname: data.user.user_nickname,
-          privacy: data.user.profile_exposure,
-        });
+      const response = await fetch(`${Yori}/profile/${u_id}`);
+      if (response.ok || response.status === 403) {
+          const data = await response.json();
+          if (data.user) {
+              setProfile({
+                  fname: data.user.user_fname,
+                  lname: data.user.user_lname,
+                  email: data.user.user_email,
+                  dob: data.user.user_dob,
+                  avatarUrl: data.user.user_avatar_path,
+                  bio: data.user.user_about,
+                  nickname: data.user.user_nickname,
+                  privacy: data.user.profile_exposure,
+                  is_followed: data.user.is_followed,
+                  is_requested: data.user.is_requested,
+              });
+          } else {
+              console.error("User data is null or undefined", data);
+          }
       } else {
-        console.error("User data is null or undefined", data);
+          console.error(`Failed to fetch profile: ${response.status}`);
       }
-    } else {
-      console.error(`Failed to fetch profile: ${response.status}`);
-    }
   } catch (error) {
-    console.error("Error fetching profile:", error);
-    setError("Error fetching profile");
+      console.error("Error fetching profile:", error);
+      setError("Error fetching profile");
   } finally {
-    setLoading(false);
+      setLoading(false);
   }
 };
 
@@ -380,39 +380,6 @@ export const sendGroupInvite = async (
   }
 };
 
-// a function to fetch the profile user 
-export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) => void, setLoading: (loading: boolean) => void, setError: (error: string) => void) => {
-    try {
-        const response = await fetch(`${Yori}/profile/${u_id}`);
-        if (response.ok || response.status === 403) {
-            const data = await response.json();
-            if (data.user) {
-                setProfile({
-                    fname: data.user.user_fname,
-                    lname: data.user.user_lname,
-                    email: data.user.user_email,
-                    dob: data.user.user_dob,
-                    avatarUrl: data.user.user_avatar_path,
-                    bio: data.user.user_about,
-                    nickname: data.user.user_nickname,
-                    privacy: data.user.profile_exposure,
-                    is_followed: data.user.is_followed,
-                    is_requested: data.user.is_requested,
-                });
-            } else {
-                console.error("User data is null or undefined", data);
-            }
-        } else {
-            console.error(`Failed to fetch profile: ${response.status}`);
-        }
-    } catch (error) {
-        console.error("Error fetching profile:", error);
-        setError("Error fetching profile");
-    } finally {
-        setLoading(false);
-    }
-}
-
 export const fetchEventsByGroup = async (
   groupId: string
 ): Promise<GroupEvent[] | null> => {
@@ -468,26 +435,31 @@ export const delNoti = async (notiID: string) => {
 
 // marks all notifications as read
 export const readAllNotis = async () => {
-  await axios.put(
-    `${Yori}/notis/read-all`,
-    {},
-    {
-      withCredentials: true,
-    }
-  );
+  try {
+    const res = await axios.put(
+      `${Yori}/notis/read-all`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const getEventsIndex = async (): Promise<BonfireEvent[] | undefined> => {
-  const res = await axios.get(`${Yori}/user-events`, {
-    withCredentials: true,
-  });
+  try {
+    const res = await axios.get(`${Yori}/user-events`, {
+      withCredentials: true,
+    });
 
-  if (res.status !== 200) {
-    return;
-  }
+    if (res.status !== 200) {
+      return;
+    }
 
-  return res.data
-    ? res.data.map(
+    return res.data
+      ? res.data.map(
         (ev: any): BonfireEvent => ({
           eventID: ev.event_id,
           groupID: ev.group_id,
@@ -497,5 +469,8 @@ export const getEventsIndex = async (): Promise<BonfireEvent[] | undefined> => {
           eventDuration: 86400000,
         })
       )
-    : [];
+      : [];
+  } catch (error) {
+    console.error(error);
+  }
 };

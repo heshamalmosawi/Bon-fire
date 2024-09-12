@@ -324,21 +324,17 @@ func GetGroupsExtended(userID uuid.UUID) ([]ExtendedGroupModel, error) {
 	return groupResponses, nil
 }
 
-func GetGroupMembers(groupID string) ([]UserModel, error) {
+func GetGroupMembers(groupID uuid.UUID) ([]UserModel, error) {
     var users []UserModel
 
     // Ensure the groupID is a valid UUID before querying
-    parsedGroupID, err := uuid.FromString(groupID)
-    if err != nil {
-        log.Printf("Invalid UUID format for groupID: %v", err)
-        return nil, err
-    }
+    
 
     columns := []string{"user_id"}
     condition := "group_id = ?"
     
     // Utilizing a helper function to perform the SQL read operation
-    rows, err := utils.Read("group_user", columns, condition, parsedGroupID) // Pass parsedGroupID directly
+    rows, err := utils.Read("group_user", columns, condition, groupID) // Pass parsedGroupID directly
     if err != nil {
         log.Printf("Failed to read from group_user table: %v", err)
         return nil, err
@@ -373,4 +369,43 @@ func GetGroupMembers(groupID string) ([]UserModel, error) {
     }
 
     return users, nil
+}
+
+
+// GetGroupsOwnedByUser retrieves all groups owned by a specific user using the utils package for database interaction.
+func GetGroupsOwnedByUser(userID uuid.UUID) ([]GroupModel, error) {
+    columns := []string{"group_id", "owner_id", "group_name", "group_desc"}
+    condition := "owner_id = ?"
+
+    // Using utils.Read to execute the query
+    rows, err := utils.Read("`group`", columns, condition, userID)
+    if err != nil {
+        log.Printf("Error executing query in GetGroupsOwnedByUser: %v", err)
+        return nil, err
+    }
+    defer rows.Close()
+
+    var groups []GroupModel
+
+    // Iterate through the result set and populate the groups slice
+    for rows.Next() {
+        var group GroupModel
+        err := rows.Scan(&group.GroupID, &group.OwnerID, &group.GroupName, &group.GroupDescrip)
+        if err != nil {
+            log.Printf("Error scanning row in GetGroupsOwnedByUser: %v", err)
+            return nil, err
+        }
+
+        // Optionally, fetch the owner user model if necessary
+        group.Owner, _ = GetUserByID(group.OwnerID)
+
+        groups = append(groups, group)
+    }
+
+    if err := rows.Err(); err != nil {
+        log.Printf("Error with rows iteration in GetGroupsOwnedByUser: %v", err)
+        return nil, err
+    }
+
+    return groups, nil
 }

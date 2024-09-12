@@ -108,7 +108,7 @@ const FeedDesktop: FC = () => {
         {posts.length ? (
           posts.map((post) => <PostComponent {...post} key={post.id} />)
         ) : (
-          <h1 className="text-center">No posts found</h1>
+          <h1 className="text-center text-white">No posts found</h1>
         )}
       </div>
       <div className="w-[30%] h-full flex flex-col items-center justify-center gap-7">

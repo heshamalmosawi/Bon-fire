@@ -1,9 +1,7 @@
 "use client";
 
-import AuthDesktop from "@/components/desktop/AuthDesktop";
 import AllPeopleList from "@/components/AllPeopleList";
 import Navbar from "@/components/desktop/Navbar";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import React from "react";
 
 const PeoplePage = () => {

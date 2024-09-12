@@ -17,7 +17,12 @@ import { useNotificationWebSocket } from "./NotificationWebsocketContext";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Notification } from "@/lib/interfaces";
-import { handleFollow, joinGroup, sendEventResponse } from "@/lib/api";
+import {
+  delNoti,
+  handleFollowReq,
+  joinGroup,
+  sendEventResponse,
+} from "@/lib/api";
 
 /**
  * NotificationContextType defines the shape of the notification context.
@@ -94,17 +99,19 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             <div className="flex flex-col gap-2">
               <ToastAction
                 altText="accept invite"
-                onClick={async () =>
-                  await joinGroup(message.group_id, message.receiver_id, true)
-                }
+                onClick={async () => {
+                  await joinGroup(message.group_id, message.receiver_id, true);
+                  await delNoti(message.noti_id);
+                }}
               >
                 Accept
               </ToastAction>
               <ToastAction
                 altText="Reject invite"
-                onClick={async () =>
-                  await joinGroup(message.group_id, message.receiver_id, false)
-                }
+                onClick={async () => {
+                  await joinGroup(message.group_id, message.receiver_id, false);
+                  await delNoti(message.noti_id);
+                }}
               >
                 Reject
               </ToastAction>
@@ -120,17 +127,19 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             <div className="flex flex-col gap-2">
               <ToastAction
                 altText="accept request"
-                onClick={async () =>
-                  await joinGroup(message.group_id, message.user_id, true)
-                }
+                onClick={async () => {
+                  await joinGroup(message.group_id, message.user_id, true);
+                  await delNoti(message.noti_id);
+                }}
               >
                 Accept
               </ToastAction>
               <ToastAction
                 altText="Reject request"
-                onClick={async () =>
-                  await joinGroup(message.group_id, message.user_id, false)
-                }
+                onClick={async () => {
+                  await joinGroup(message.group_id, message.user_id, false);
+                  await delNoti(message.noti_id);
+                }}
               >
                 Reject
               </ToastAction>
@@ -152,13 +161,19 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             <div className="flex flex-col gap-2">
               <ToastAction
                 altText="accept request"
-                onClick={async () => handleFollow(message.user_id, true)}
+                onClick={async () => {
+                  await handleFollowReq(message.user_id, true);
+                  await delNoti(message.noti_id);
+                }}
               >
                 Accept
               </ToastAction>
               <ToastAction
                 altText="Reject request"
-                onClick={async () => handleFollow(message.user_id, false)}
+                onClick={async () => {
+                  await handleFollowReq(message.user_id, false);
+                  await delNoti(message.noti_id);
+                }}
               >
                 Reject
               </ToastAction>
@@ -186,17 +201,19 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             <div className="flex flex-col gap-2">
               <ToastAction
                 altText="going"
-                onClick={async () =>
-                  await sendEventResponse(message.event_id, true)
-                }
+                onClick={async () => {
+                  await sendEventResponse(message.event_id, true);
+                  await delNoti(message.noti_id);
+                }}
               >
                 Going
               </ToastAction>
               <ToastAction
                 altText="not going"
-                onClick={async () =>
-                  await sendEventResponse(message.event_id, false)
-                }
+                onClick={async () => {
+                  await sendEventResponse(message.event_id, false);
+                  await delNoti(message.noti_id);
+                }}
               >
                 Not Going
               </ToastAction>

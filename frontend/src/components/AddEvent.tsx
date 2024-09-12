@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,6 +23,7 @@ export default function EventDialog() {
     const [dateTime, setDateTime] = useState("");
     const [groupId, setGroupId] = useState("");
     const [creatorId, setCreatorId] = useState("");
+    const [minDate, setMinDate] = useState("");
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -45,6 +47,7 @@ export default function EventDialog() {
         };
 
         authenticate();
+        setMinDate(new Date().toISOString().split('T')[0]); // Set the minimum date to today's date
     }, []);
 
     const handleSubmit = async (event: React.FormEvent) => {
@@ -127,6 +130,7 @@ export default function EventDialog() {
                                 onChange={(e) => setDateTime(e.target.value)}
                                 className="col-span-3 bg-black text-white"
                                 required
+                                min={minDate} // Setting the minimum date attribute to disable past dates
                             />
                         </div>
                     </div>

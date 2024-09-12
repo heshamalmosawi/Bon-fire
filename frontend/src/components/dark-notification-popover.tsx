@@ -13,7 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNotifications } from "@/context/NotificationContext";
 import {
   delNoti,
-  handleFollow,
+  handleFollowReq,
   joinGroup,
   readAllNotis,
   sendEventResponse,
@@ -96,7 +96,7 @@ export default function DarkNotificationPopover() {
               variant="outline"
               size="sm"
               onClick={async () => {
-                await handleFollow(message.userID, true);
+                await handleFollowReq(message.userID, true);
                 await deleteNotification(message.notiID);
               }}
               className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
@@ -107,7 +107,7 @@ export default function DarkNotificationPopover() {
               variant="outline"
               size="sm"
               onClick={async () => {
-                await handleFollow(message.userID, false);
+                await handleFollowReq(message.userID, false);
                 await deleteNotification(message.notiID);
               }}
               className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"

@@ -239,9 +239,9 @@ const GroupPage = () => {
       <div className="flex">
         <Navbar />
         <main className="w-3/4 p-8">
-          <div className="h-45 bg-gray-200 rounded-lg flex items-center justify-center my-6">
-            {/* Placeholder content for background */}
-          </div>
+          {/* <div className="h-45 bg-gray-200 rounded-lg flex items-center justify-center my-6">
+            {/* Placeholder content for background 
+          </div> */}
 
           {/* Group Info */}
           <Group
@@ -293,17 +293,6 @@ const GroupPage = () => {
                 }`}
               >
                 Members
-              </button>
-              <button
-                id="description"
-                onClick={() => setActiveTab("description")}
-                className={`p-2 rounded-lg ${
-                  activeTab === "description"
-                    ? "text-white bg-indigo-500"
-                    : "text-gray-400"
-                }`}
-              >
-                Description
               </button>
               <button
                 id="events"
@@ -400,10 +389,10 @@ const GroupPage = () => {
                       lastName={post.author.user_lname}
                       username={post.author.user_nickname}
                       avatarUrl={post.author.user_avatar_path}
-                      creationDate={post.created_at}
-                      postTextContent={post.post_content}
-                      postImageContentUrl={post.post_image_path}
-                      postLikeNum={post.post_likecount}
+                      created_at={post.created_at}
+                      post_content={post.post_content}
+                      post_image_path={post.post_image_path}
+                      post_likecount={post.post_likecount}
                       postCommentNum={post.comment_count}
                       postIsLiked={post.is_liked}
                     />
@@ -464,11 +453,6 @@ const GroupPage = () => {
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-              {activeTab === "description" && (
-                <div>
-                  <h1>{groupProfile.description}</h1>
                 </div>
               )}
               {activeTab === "find" && (

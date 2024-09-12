@@ -57,7 +57,7 @@ func HandleAddEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	members, err := models.GetGroupMembers(event.GroupID.String())
+	members, err := models.GetGroupMembers(event.GroupID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		utils.EncodeJSON(w, map[string]string{"error": "error getting members"})
@@ -73,6 +73,16 @@ func HandleAddEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	owner, err2 := models.GetUserByID(group.OwnerID)
+	if err2 != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		utils.EncodeJSON(w, map[string]string{"error": "error getting group"})
+		log.Println("Failed to get group:", err)
+		return
+	}
+
+ 	members = append(members,*owner)
+	
 	for _, member := range members {
 		noti := models.NotificationModel{
 			EventID:     eventID,
@@ -207,7 +217,26 @@ func HandleEventsByUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	 // Fetch groups where the user is the owner
+	 ownedGroups, err := models.GetGroupsOwnedByUser(userID)
+	 if err != nil {
+		 log.Printf("HandleEventsByUser: error getting owned groups: %v\n", err)
+		 http.Error(w, "internal server error", http.StatusInternalServerError)
+		 return
+	 }
+
 	for _, gu := range groupUsers {
+		group_events, err := models.GetEventsByGroup(gu.GroupID.String(), userID)
+		if err != nil {
+			log.Printf("HandleEventsByUser: error getting events: %v\n", err)
+			http.Error(w, "internal server error", http.StatusUnauthorized)
+			return
+		}
+		
+		events = append(events, group_events...)
+	}
+
+	for _, gu := range ownedGroups {
 		group_events, err := models.GetEventsByGroup(gu.GroupID.String(), userID)
 		if err != nil {
 			log.Printf("HandleEventsByUser: error getting events: %v\n", err)
