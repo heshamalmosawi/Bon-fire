@@ -214,10 +214,16 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
           <ExpandableChatBody>
             <ChatMessageList  ref={chatContainerRef}>
               {chatHistory && chatHistory.map((message, index) => (
-                <ChatBubble key={index}>
-                  <ChatBubbleAvatar />
-                  <ChatBubbleMessage>{message.message_content}</ChatBubbleMessage>
-                </ChatBubble>
+                <ChatBubble key={index} variant={message.sender_id === sessionUser?.user_id ? "sent" : "received"}>
+                <ChatBubbleAvatar
+                  src={message.sender_id === sessionUser?.user_id ? sessionUser?.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg" : selectedUser?.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"}
+                  fallback={message.sender_id === sessionUser?.user_id ? sessionUser?.user_nickname : selectedUser?.user_nickname}
+                />
+                <ChatBubbleMessage variant={message.sender_id === sessionUser?.user_id ? "sent" : "received"}>
+                  {message.message_content}
+                </ChatBubbleMessage>
+                <ChatBubbleTimestamp timestamp={message.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
+              </ChatBubble>
               ))}
             </ChatMessageList>
           </ExpandableChatBody>
