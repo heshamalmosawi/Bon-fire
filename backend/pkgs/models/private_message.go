@@ -25,16 +25,20 @@ func (pm *PrivateMessage) Save() error {
 		pm.MessageID = uid
 	}
 
+	if pm.MessageTime.IsZero() {
+		pm.MessageTime = time.Now()
+	}
+
 	columns := []string{"message_id", "sender_id", "recipient_id", "message_content", "message_timestamp"}
 	values := []interface{}{pm.MessageID, pm.SenderID, pm.RecipientID, pm.MessageContent, pm.MessageTime}
 
-	_, err := utils.Create("message", columns, values)
+	_, err := utils.Create("private_message", columns, values)
 	return err
 }
 
 func (pm *PrivateMessage) Del() error {
 	condition := "message_id = ?"
-	_, err := utils.Delete("message", condition, pm.MessageID)
+	_, err := utils.Delete("private_message", condition, pm.MessageID)
 	return err
 }
 
@@ -47,14 +51,14 @@ func (pm *PrivateMessage) Update() error {
 		"message_timestamp": pm.MessageTime,
 	}
 	condition := "message_id = ?"
-	_, err := utils.Update("message", updates, condition, pm.MessageID)
+	_, err := utils.Update("private_message", updates, condition, pm.MessageID)
 	return err
 }
 
 func GetMessageBySender(messageID string) (*PrivateMessage, error) {
 	columns := []string{"message_id", "sender_id", "recipient_id", "message_content", "message_timestamp"}
 	condition := "message_id = ?"
-	rows, err := utils.Read("message", columns, condition, messageID)
+	rows, err := utils.Read("private_message", columns, condition, messageID)
 	if err != nil {
 		return nil, err
 	}

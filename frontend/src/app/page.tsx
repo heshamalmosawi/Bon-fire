@@ -4,18 +4,28 @@ import FeedDesktop from "@/components/desktop/FeedDesktop";
 import Navbar from "@/components/desktop/Navbar";
 import RightSidebar from "@/components/rightNav";
 import { useNotifications } from "@/context/NotificationContext";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { fetchSessionUser } from "@/lib/api";
 
 export default function Home() {
   const router = useRouter();
   const { notifications, addNotification } = useNotifications();
+
   useEffect(() => {
-    if (!Cookies.get("session_id")) {
-      router.replace("/auth");
-    }
-  }, []);
+    const getSessionUser = async () => {
+      const data = await fetchSessionUser();
+      if (!data) {
+        console.log("user not authenticated");
+        router.push("/auth");
+        return;
+      } else if (data && data.status === 200) {
+        // if user is authenticated
+        console.log("user authenticated");
+      }
+    };
+    getSessionUser();
+  }, [router]);
 
   return (
     <div className="w-screen h-screen flex items-center justify-evenly bg-neutral-950">

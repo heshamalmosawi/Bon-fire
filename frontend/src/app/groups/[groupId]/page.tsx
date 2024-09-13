@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import CreatePostForGroup from "@/components/CreatePostGroup";
 import EventsList from "@/components/desktop/EventsList";
+import Chat from "@/components/desktop/Chat";
 import RequestComponent from "@/components/desktop/RequestComponent";
 import {
   fetchRequest,
@@ -54,6 +55,7 @@ const GroupPage = () => {
   const [members, setMembers] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [groups, setGroups] = useState<any[]>([]); // State for groups
+  const [user, setUser] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("posts");
@@ -120,6 +122,7 @@ const GroupPage = () => {
         const data = await fetchSessionUser();
         if (data && data.status === 200) {
           setSessionUser(data.User.user_id);
+          setUser(data.User);
           if (!groupID) {
             setGroupID(data.User.user_id);
           }
@@ -548,6 +551,14 @@ const GroupPage = () => {
           </div>
         </main>
       </div>
+       <Chat
+          sessionUser={user}
+          groupID={groupID}
+          group={groupProfile}
+          selectedUser={null}
+          SetNewMessageFlag={() => {}}
+          newMessageFlag={false}
+        />
     </div>
   );
 };

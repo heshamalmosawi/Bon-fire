@@ -48,6 +48,10 @@ func Routers() {
 	mux.HandleFunc("POST /group/event_response", HandleGroupEventResponse)
 	mux.HandleFunc("POST /group/request", HandleGroupRequests)
 	mux.HandleFunc("GET /fetchGroups", FetchGroups)
+	mux.HandleFunc("GET /messages", HandleMessages)
+	mux.HandleFunc("POST /messages/create", HandleStoreMessages)
+	mux.HandleFunc("POST /groupmsg/create", HandleStoreGroupMessages)
+
 	mux.HandleFunc("POST /authenticate", authenticate)
 	mux.HandleFunc("GET /ws", chat.HandleConnections)
 	mux.HandleFunc("GET /subscribe", notify.HandleSubscription)
@@ -58,7 +62,8 @@ func Routers() {
 	mux.HandleFunc("GET /fetchpeople/{group_id}", HandleFetchUsersNotInGroup)
 	mux.HandleFunc("POST /addevent", HandleAddEvent)
 	mux.HandleFunc("GET /events/{group_id}", HandleFetchEventsByGroup)
-	mux.HandleFunc("GET /user-events", HandleEventsByUser)
+	mux.HandleFunc("GET /user-events", HandleEventsByUser)	
+	mux.HandleFunc("POST /getmessagelist", MessagerListAPI)
 
 	// handle cors
 	cors_mux := middleware.CORS(mux)
@@ -85,6 +90,7 @@ func Routers() {
 
 func HandleDefault(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling default message")
+	fmt.Println(r.URL.Path)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"response": "Default message Handled"})
 

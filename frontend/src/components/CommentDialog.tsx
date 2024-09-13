@@ -100,13 +100,13 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="bg-black rounded-lg p-0 max-w-6xl mx-auto flex overflow-hidden h-[90vh]">
         {/* Left Section - Placeholder or Image */}
-        <div className="flex-1 bg-gray-800 flex items-center justify-center">
+        <div className="flex-1 bg-black flex items-center justify-center">
           <Image
-            src="/landing.jpg"
+            src={post.post_image_path ? post.post_image_path : "/landing.jpg"}
             alt="post image"
             width={700}
             height={900}
-            className="object-cover h-full w-full"
+            className="object-cover max-h-full max-w-full "
           />
         </div>
         {/* Right Section - Comments and Details */}
