@@ -239,15 +239,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-            <Button
-              type="submit"
-              size="icon"
-              onClick={() => {
-                /* handle send message */
-              }}
-            >
-              <Send className="size-4" />
-            </Button>
           </ExpandableChatFooter>
         </ExpandableChat>
       ) : (

@@ -67,13 +67,6 @@ const Navbar = () => {
         <h3 className="text-lg font-semibold mb-4 text-white">Explore</h3>
         <nav className="space-y-4 gap-4">
           <button
-            onClick={() => handleNavigation('/events', 'events')}
-            className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'events' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
-          >
-            <Calendar />
-            <span>Events</span>
-          </button>
-          <button
             onClick={() => handleNavigation('/groups', 'groups')}
             className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'groups' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
           >
