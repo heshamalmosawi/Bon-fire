@@ -152,6 +152,8 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
             setNewMessage("");
             SetNewMessageFlag(!newMessageFlag);
             console.log("newMessageFlag", newMessageFlag);
+            // fake click #CHAT
+            document.getElementById("CHAT")?.click();
           }
         } catch (error) {
           console.error("Error storing message:", error);
@@ -173,6 +175,8 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
             setNewMessage("");
             SetNewMessageFlag(!newMessageFlag);
             console.log("newMessageFlag", newMessageFlag);
+            // fake click #CHAT
+            document.getElementById("CHAT")?.click();
           }
         } catch (error) {
           console.error("Error storing message:", error);
@@ -181,10 +185,10 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      handleSendMessage();
+      await handleSendMessage();
       setNewMessage(""); // Clear the input
     }
   };

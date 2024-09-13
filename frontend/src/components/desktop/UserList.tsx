@@ -56,7 +56,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser, newMessa
   useEffect(() => {
     const fetchUsers = async () => {
       if (sessionUser != "") {
-        getChatList(setLoading, setError, setActiveTab, setData);
+        await getChatList(setLoading, setError, setActiveTab, setData);
         if ((data && data.response === "Handling default message") || (data === null)) {
           setUsers([]);
         } else if (data && data.response === null) {
@@ -77,7 +77,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser, newMessa
       // getSessionUser()
       fetchUsers();
     // }
-  }, [sessionUser1, clickCount, newMessageFlag]);
+  }, [sessionUser1, clickCount]);
   // if (sessionUser != "" && clickCount == 0) {
   //   // return <div>Loading...</div>;4
   //   setSessionUser(sessionUser);
@@ -88,9 +88,11 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser, newMessa
   //   users.splice(myUser, 1);
   // }
 
-  // TODO: REMOVE THIS
   useEffect(() => {
     console.log("flag has been changed", newMessageFlag);
+    setTimeout(() => {
+      setClickCount((prevCount) => prevCount - 1);
+    }, 50);
   }, [newMessageFlag]);
 
   const handleClickCount = () => {
@@ -113,7 +115,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser, newMessa
   };
 
   return (
-    <div className="flex flex-col h-full bg-black" onClick={handleClickCount}>
+    <div className="flex flex-col h-full bg-black" onClick={handleClickCount} id="CHAT">
       <ExpandableChatHeader>
         <h2 className="text-xl font-semibold">Users</h2>
       </ExpandableChatHeader>
