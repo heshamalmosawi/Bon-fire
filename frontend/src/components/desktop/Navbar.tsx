@@ -1,27 +1,42 @@
-"use client"
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import DisplayLogo from "../DisplayLogo";
-import { useRouter } from 'next/navigation';
-import logo from "/public/logo.png";
-// import { Button } from "../ui/button";
-import Image from "next/image";
 import {
-  BellRing,
   CircleUser,
   House,
   MessagesSquare,
-  UsersRound,
   Users,
-  Calendar,
   Boxes,
-  Component,
+  LogOut,
 } from "lucide-react";
 
 const Navbar = () => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('feed');
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState("feed");
 
+  useEffect(() => {
+    if (pathname.includes("groups")) {
+      setActiveTab("groups");
+    } else {
+       switch (pathname) {
+         case "/messages":
+           setActiveTab("messages");
+           break;
+         case "/people":
+           setActiveTab("people");
+           break;
+         case "/profile":
+           setActiveTab("profile");
+           break;
+         case "/groups":
+           setActiveTab("groups");
+           break;
+         default:
+           setActiveTab("feed");
+       }
+    }
+  }, [pathname]);
 
   const handleNavigation = (path: string, tab: string) => {
     setActiveTab(tab);
@@ -34,32 +49,59 @@ const Navbar = () => {
       <h3 className="text-lg font-semibold mb-4 text-white">Main Menu</h3>
       <nav className="space-y-4 gap-4">
         <button
-          onClick={() => handleNavigation('/messages', 'messages')}
-          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'messages' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
-        >
-          <MessagesSquare />
-          <span>Messages</span>
-        </button>
-        <button
-          onClick={() => handleNavigation('/people', 'people')}
-          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'people' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
-        >
-          <Users />
-          <span>People</span>
-        </button>
-        <button
-          onClick={() => handleNavigation('/', 'feed')}
-          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'feed' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
+          onClick={() => handleNavigation("/", "feed")}
+          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
+            activeTab === "feed"
+              ? "text-white bg-customGray x-spacings2"
+              : "text-gray-400 hover:text-white"
+          }`}
         >
           <House />
           <span>Feed</span>
         </button>
         <button
-          onClick={() => handleNavigation('/profile', 'profile')}
-          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'profile' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
+          onClick={() => handleNavigation("/people", "people")}
+          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
+            activeTab === "people"
+              ? "text-white bg-customGray x-spacings2"
+              : "text-gray-400 hover:text-white"
+          }`}
+        >
+          <Users />
+          <span>People</span>
+        </button>
+        <button
+          onClick={() => handleNavigation("/messages", "messages")}
+          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
+            activeTab === "messages"
+              ? "text-white bg-customGray x-spacings2"
+              : "text-gray-400 hover:text-white"
+          }`}
+        >
+          <MessagesSquare />
+          <span>Messages</span>
+        </button>
+        <button
+          onClick={() => handleNavigation("/profile", "profile")}
+          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
+            activeTab === "profile"
+              ? "text-white bg-customGray x-spacings2"
+              : "text-gray-400 hover:text-white"
+          }`}
         >
           <CircleUser />
-          <span>My Timeline</span>
+          <span>My Profile</span>
+        </button>
+        <button
+          onClick={() => handleNavigation("/logout", "logout")}
+          className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
+            activeTab === "logout"
+              ? "text-white bg-customGray x-spacings2"
+              : "text-gray-400 hover:text-white"
+          }`}
+        >
+          <LogOut />
+          <span>Logout</span>
         </button>
       </nav>
       <hr className="my-8 border-gray-700"></hr>
@@ -67,8 +109,12 @@ const Navbar = () => {
         <h3 className="text-lg font-semibold mb-4 text-white">Explore</h3>
         <nav className="space-y-4 gap-4">
           <button
-            onClick={() => handleNavigation('/groups', 'groups')}
-            className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${activeTab === 'groups' ? 'text-white bg-customGray x-spacings2' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => handleNavigation("/groups", "groups")}
+            className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
+              activeTab === "groups"
+                ? "text-white bg-customGray x-spacings2"
+                : "text-gray-400 hover:text-white"
+            }`}
           >
             <Boxes />
             <span>Groups</span>

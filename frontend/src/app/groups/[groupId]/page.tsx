@@ -241,7 +241,7 @@ const GroupPage = () => {
     <div className="bg-neutral-950 min-h-screen text-gray-200">
       <div className="flex">
         <Navbar />
-        <main className="w-3/4 p-8">
+        <main className="w-screen p-8">
           {/* <div className="h-45 bg-gray-200 rounded-lg flex items-center justify-center my-6">
             {/* Placeholder content for background 
           </div> */}

@@ -13,7 +13,7 @@ const PeoplePage = () => {
         {/* <aside className="w-1/4 h-screen bg-black p-4 sticky top-0 left-0"> */}
           <Navbar />
         {/* </aside> */}
-        <main className="w-3/4 p-8">
+        <main className="w-screen p-8">
             <AllPeopleList/>
         </main>
       </div>
