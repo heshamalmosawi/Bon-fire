@@ -167,11 +167,11 @@ const ContactSection = () => {
               </Avatar>
               <div className="flex flex-col">
                 <span>{contact.name}</span>
-                <span
+                {/* <span
                   className={`w-2 h-2 rounded-full mt-1 -ml-4 z-10 ${
                     contact.online ? "bg-green-500" : "bg-gray-500"
                   }`}
-                />
+                /> */}
               </div>
             </div>
           </div>
