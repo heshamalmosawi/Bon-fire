@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import DisplayLogo from "../DisplayLogo";
-import { CircleUser, House, MessagesSquare, Users, Boxes, LogOut } from "lucide-react";
+import {
+  CircleUser,
+  House,
+  MessagesSquare,
+  Users,
+  Boxes,
+  LogOut,
+} from "lucide-react";
 
 const Navbar = () => {
   const router = useRouter();
@@ -9,21 +16,25 @@ const Navbar = () => {
   const [activeTab, setActiveTab] = useState("feed");
 
   useEffect(() => {
-    switch (pathname) {
-      case "/messages":
-        setActiveTab("messages");
-        break;
-      case "/people":
-        setActiveTab("people");
-        break;
-      case "/profile":
-        setActiveTab("profile");
-        break;
-      case "/groups":
-        setActiveTab("groups");
-        break;
-      default:
-        setActiveTab("feed");
+    if (pathname.includes("groups")) {
+      setActiveTab("groups");
+    } else {
+       switch (pathname) {
+         case "/messages":
+           setActiveTab("messages");
+           break;
+         case "/people":
+           setActiveTab("people");
+           break;
+         case "/profile":
+           setActiveTab("profile");
+           break;
+         case "/groups":
+           setActiveTab("groups");
+           break;
+         default:
+           setActiveTab("feed");
+       }
     }
   }, [pathname]);
 
