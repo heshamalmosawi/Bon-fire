@@ -113,7 +113,7 @@ const BirthdayList = () => {
                   )}
                 </div>
                 <div className="text-sm text-gray-400">
-                  Born on {user.birthday.toLocaleDateString()}, will turn {calculateAge(user.birthday)}!
+                  Born on {user.birthday.toLocaleDateString()}
                 </div>
               </div>
             ))}
