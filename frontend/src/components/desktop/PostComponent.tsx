@@ -24,34 +24,33 @@ const PostComponent = (props: PostProps) => {
     setlikes(newLikesCount);
 
     try {
-        const res = await fetch(`http://localhost:8080/like_post/${props.id}`, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+      const res = await fetch(`http://localhost:8080/like_post/${props.id}`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        if (res.status !== 200) {
-            console.log(res.status);
-            throw new Error("Failed to toggle like");
-        }
+      if (res.status !== 200) {
+        console.log(res.status);
+        throw new Error("Failed to toggle like");
+      }
     } catch (error) {
-        // Revert the like state if there's an error
-        setliked(!newLikedState);
-        setlikes(newLikedState ? likes - 1 : likes + 1);
+      // Revert the like state if there's an error
+      setliked(!newLikedState);
+      setlikes(newLikedState ? likes - 1 : likes + 1);
 
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "There was an error toggling the like of the post",
-        });
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "There was an error toggling the like of the post",
+      });
     }
-};
+  };
 
-
- const firstNameInitial = props.firstName.charAt(0);
- const lastNameInitial = props.lastName.charAt(0);
+  const firstNameInitial = props.firstName.charAt(0);
+  const lastNameInitial = props.lastName.charAt(0);
 
   return (
     <div
@@ -80,8 +79,13 @@ const PostComponent = (props: PostProps) => {
           id="post-content"
           className="w-full flex flex-col items-center justify-center gap-4 min-h-[50px]"
         >
-          <div id="post-text-content" className="text-white text-sm w-full"
-            dangerouslySetInnerHTML={{ __html: props.post_content.replace(/\n/g, "<br/>") }}>
+          <div
+            id="post-text-content"
+            className="text-white text-sm w-full"
+            dangerouslySetInnerHTML={{
+              __html: props.post_content.replace(/\n/g, "<br/>"),
+            }}
+          >
             {/* {props.post_content} */}
           </div>
           {props.post_image_path ? (

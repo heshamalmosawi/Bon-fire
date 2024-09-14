@@ -134,10 +134,28 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
               )}
             </div>
           </div>
+          <div className="w-full flex items-center justify-between">
+            <div className="flex gap-2">
+              <Heart
+                color="white"
+                className={`cursor-pointer hover:stroke-red-300 duration-300 ${
+                  liked ? "stroke-red-600" : "stroke-white"
+                }`}
+              />
+              <h6 className="text-white font-bold">
+                {post.post_likecount}{" "}
+                {post.post_likecount > 1 ? "likes" : "like"}
+              </h6>
+            </div>
+            <h6 className="text-neutral-500 text-sm">
+              {post.postCommentNum}{" "}
+              {post.postCommentNum > 1 ? "Comments" : "Comment"}
+            </h6>
+          </div>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="w-full flex items-center justify-around gap-3 mt-4"
+              className="w-full flex items-center justify-around gap-3 mt-2"
             >
               <FormField
                 control={form.control}
