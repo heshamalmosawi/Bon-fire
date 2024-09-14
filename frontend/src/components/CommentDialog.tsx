@@ -125,7 +125,8 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
                 </h6>
               </div>
             </div>
-            <div className="text-white text-sm">{post.post_content}</div>
+            <div className="text-white text-sm break-all"
+            dangerouslySetInnerHTML={{ __html: post.post_content.replace(/\n/g, "<br/>") }}></div>
             <div className="mt-4 space-y-7 h-[400px] overflow-y-auto">
               {comments ? (
                 comments.map((item) => <CommentComponent {...item} />)
