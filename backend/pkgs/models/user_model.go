@@ -149,7 +149,7 @@ func GetAllUsers() ([]UserModel, error) {
 func GetMessagedUsers(user uuid.UUID) ([]UserModel, error) {
 	query := `SELECT
 				CASE 
-						WHEN c.sender_id = 'a3bdc5f1-ae6c-436c-a0b8-b1549f0fca61' THEN c.recipient_id
+						WHEN c.sender_id = ? THEN c.recipient_id
 						ELSE c.sender_id
 					END AS other_user_id, 
 					u.user_fname, 
@@ -159,14 +159,14 @@ func GetMessagedUsers(user uuid.UUID) ([]UserModel, error) {
 				FROM private_message c
 				JOIN user u ON u.user_id = 
 					CASE 
-						WHEN c.sender_id = 'a3bdc5f1-ae6c-436c-a0b8-b1549f0fca61' THEN c.recipient_id
+						WHEN c.sender_id = ? THEN c.recipient_id
 						ELSE c.sender_id
 					END
-				WHERE c.sender_id = 'a3bdc5f1-ae6c-436c-a0b8-b1549f0fca61'
-				OR c.recipient_id = 'a3bdc5f1-ae6c-436c-a0b8-b1549f0fca61'
+				WHERE c.sender_id = ?
+				OR c.recipient_id = ?
 				GROUP BY 
 					CASE 
-						WHEN c.sender_id = 'a3bdc5f1-ae6c-436c-a0b8-b1549f0fca61' THEN c.recipient_id
+						WHEN c.sender_id = ? THEN c.recipient_id
 						ELSE c.sender_id
 					END,
 					u.user_fname, 
@@ -174,7 +174,7 @@ func GetMessagedUsers(user uuid.UUID) ([]UserModel, error) {
 					u.user_avatar_path
 				ORDER BY last_chat_timestamp DESC;
 				`
-	rows, err := storage.DB.Query(query)
+	rows, err := storage.DB.Query(query, user, user, user, user, user)
 	if err != nil {
 		return nil, err
 	}
