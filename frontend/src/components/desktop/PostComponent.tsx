@@ -81,7 +81,7 @@ const PostComponent = (props: PostProps) => {
         >
           <div
             id="post-text-content"
-            className="text-white text-sm w-full"
+            className="text-white text-sm w-full break-all"
             dangerouslySetInnerHTML={{
               __html: props.post_content.replace(/\n/g, "<br/>"),
             }}
