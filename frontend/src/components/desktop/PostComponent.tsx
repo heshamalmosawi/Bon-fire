@@ -80,7 +80,7 @@ const PostComponent = (props: PostProps) => {
           id="post-content"
           className="w-full flex flex-col items-center justify-center gap-4 min-h-[50px]"
         >
-          <div id="post-text-content" className="text-white text-sm w-full"
+          <div id="post-text-content" className="text-white text-sm w-full break-all"
             dangerouslySetInnerHTML={{ __html: props.post_content.replace(/\n/g, "<br/>") }}>
             {/* {props.post_content} */}
           </div>
