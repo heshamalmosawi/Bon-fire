@@ -7,11 +7,21 @@ import { Button } from "../ui/button";
 import { Send, CornerDownLeft } from "react-feather";
 import { GroupProps } from "@/lib/interfaces";
 
-import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage, ChatBubbleTimestamp } from '@/components/chat/chat-bubble';
-import { format } from 'date-fns'; // Import the 'format' function from 'date-fns'
-import { ChatInput } from '@/components/chat/chat-input'
-import { ExpandableChat, ExpandableChatHeader, ExpandableChatBody, ExpandableChatFooter } from '@/components/chat/expandable-chat'
-import { ChatMessageList } from '@/components/chat/chat-message-list'
+import {
+  ChatBubble,
+  ChatBubbleAvatar,
+  ChatBubbleMessage,
+  ChatBubbleTimestamp,
+} from "@/components/chat/chat-bubble";
+import { format } from "date-fns"; // Import the 'format' function from 'date-fns'
+import { ChatInput } from "@/components/chat/chat-input";
+import {
+  ExpandableChat,
+  ExpandableChatHeader,
+  ExpandableChatBody,
+  ExpandableChatFooter,
+} from "@/components/chat/expandable-chat";
+import { ChatMessageList } from "@/components/chat/chat-message-list";
 
 interface ChatProps {
   selectedUser: User | null;
@@ -22,22 +32,34 @@ interface ChatProps {
   group?: GroupProps;
 }
 
-const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFlag, newMessageFlag, groupID, group }) => {
+const Chat: React.FC<ChatProps> = ({
+  selectedUser,
+  sessionUser,
+  SetNewMessageFlag,
+  newMessageFlag,
+  groupID,
+  group,
+}) => {
   const [newMessage, setNewMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const [lastScrollTop, setLastScrollTop] = useState<number>(0);
 
-
   // Define a function to handle incoming messages
   const handleMessage = (message: Message) => {
     setChatHistory((prevHistory) => [...(prevHistory || []), message]);
   };
 
-  useWebSocket("ws://localhost:8080/ws", sessionUser?.user_id ?? null, selectedUser?.user_id ?? null, groupID ?? null, handleMessage, SetNewMessageFlag, newMessageFlag);
-
-
+  useWebSocket(
+    "ws://localhost:8080/ws",
+    sessionUser?.user_id ?? null,
+    selectedUser?.user_id ?? null,
+    groupID ?? null,
+    handleMessage,
+    SetNewMessageFlag,
+    newMessageFlag
+  );
 
   useEffect(() => {
     if (selectedUser || groupID) {
@@ -48,18 +70,27 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
   useEffect(() => {
     // Scroll to the bottom whenever chatHistory changes
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [newMessage, selectedUser, chatHistory]);
 
   const loadInitialChatHistory = async () => {
     try {
       setLoadingHistory(true);
-      const response = await fetch(groupID ? `http://localhost:8080/messages?group_id=${groupID}` : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`);
-      console.log(groupID ? `http://localhost:8080/messages?group_id=${groupID}` : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`);
-      
+      const response = await fetch(
+        groupID
+          ? `http://localhost:8080/messages?group_id=${groupID}`
+          : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`
+      );
+      console.log(
+        groupID
+          ? `http://localhost:8080/messages?group_id=${groupID}`
+          : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}`
+      );
+
       const data = await response.json();
-      setChatHistory(data);  // Load initial messages
+      setChatHistory(data); // Load initial messages
       console.log("Loaded chat history:", data);
       setLoadingHistory(false);
     } catch (error) {
@@ -69,19 +100,31 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
   };
 
   const loadMoreMessages = async () => {
-    if (loadingHistory || chatHistory.length === 0) return;  // Prevent multiple requests
+    if (loadingHistory || chatHistory.length === 0) return; // Prevent multiple requests
     try {
       setLoadingHistory(true);
-      const lastMessageId = chatHistory[0]?.message_id;  // Get the ID of the oldest loaded message
-      const response = await fetch(groupID ? `http://localhost:8080/messages?group_id=${groupID}&lastMessageId=${lastMessageId}` : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}&lastMessageId=${lastMessageId}`);
-      
-      console.log(groupID ? `http://localhost:8080/messages?group_id=${groupID}&lastMessageId=${lastMessageId}` : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}&lastMessageId=${lastMessageId}`);
+      const lastMessageId = chatHistory[0]?.message_id; // Get the ID of the oldest loaded message
+      const response = await fetch(
+        groupID
+          ? `http://localhost:8080/messages?group_id=${groupID}&lastMessageId=${lastMessageId}`
+          : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}&lastMessageId=${lastMessageId}`
+      );
+
+      console.log(
+        groupID
+          ? `http://localhost:8080/messages?group_id=${groupID}&lastMessageId=${lastMessageId}`
+          : `http://localhost:8080/messages?user1=${sessionUser?.user_id}&user2=${selectedUser?.user_id}&lastMessageId=${lastMessageId}`
+      );
       const data = await response.json();
-      if (Array.isArray(data)){
-        setChatHistory((prevHistory) => [...data, ...(prevHistory || [])]);  // Prepend the older messages
+      if (Array.isArray(data)) {
+        setChatHistory((prevHistory) => [...data, ...(prevHistory || [])]); // Prepend the older messages
         console.log("Loaded more messages:", data);
         if (chatContainerRef.current && chatHistory.length > 0) {
-          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight - chatContainerRef.current.clientHeight - lastScrollTop + (groupID ? 80*5 : 20*4);
+          chatContainerRef.current.scrollTop =
+            chatContainerRef.current.scrollHeight -
+            chatContainerRef.current.clientHeight -
+            lastScrollTop +
+            (groupID ? 80 * 5 : 20 * 4);
         }
       }
       setLoadingHistory(false);
@@ -97,7 +140,7 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
       const { scrollTop, scrollHeight } = chatContainerRef.current;
       if (scrollTop === 0) {
         setLastScrollTop(scrollHeight);
-        loadMoreMessages();  // Load more messages when scrolled to the top
+        loadMoreMessages(); // Load more messages when scrolled to the top
       }
     }
   };
@@ -109,10 +152,10 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
     if (chatContainer) {
       chatContainer.addEventListener("scroll", handleScroll);
       return () => {
-        chatContainer.removeEventListener("scroll", handleScroll);  // Cleanup event listener
+        chatContainer.removeEventListener("scroll", handleScroll); // Cleanup event listener
       };
     }
-  }, [chatHistory]);  // Re-attach scroll listener if chat history changes
+  }, [chatHistory]); // Re-attach scroll listener if chat history changes
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
@@ -136,15 +179,18 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
       console.log("Chat history:", chatHistory);
 
       // Store the message in the database
-      if (groupID && groupID != ""){
+      if (groupID && groupID != "") {
         try {
-          const response = await fetch("http://localhost:8080/groupmsg/create", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newChatMessage),
-          });
+          const response = await fetch(
+            "http://localhost:8080/groupmsg/create",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(newChatMessage),
+            }
+          );
           if (!response.ok) {
             console.error("Failed to store message:", response.statusText);
           } else {
@@ -160,13 +206,16 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
         }
       } else {
         try {
-          const response = await fetch("http://localhost:8080/messages/create", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newChatMessage),
-          });
+          const response = await fetch(
+            "http://localhost:8080/messages/create",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(newChatMessage),
+            }
+          );
 
           if (!response.ok) {
             console.error("Failed to store message:", response.statusText);
@@ -185,7 +234,9 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
     }
   };
 
-  const handleKeyDown = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = async (
+    event: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       await handleSendMessage();
@@ -195,15 +246,15 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
 
   // Handle filtering of messages to show only those exchanged between sessionUser and selectedUser
   const handleMessages = (): Message[] => {
-    return (
-      Array.isArray(chatHistory)
-        ? chatHistory.filter(
+    return Array.isArray(chatHistory)
+      ? chatHistory.filter(
           (msg) =>
-            (msg.sender_id === selectedUser?.user_id && msg.recipient_id === sessionUser?.user_id) ||
-            (msg.sender_id === sessionUser?.user_id && msg.recipient_id === selectedUser?.user_id)
+            (msg.sender_id === selectedUser?.user_id &&
+              msg.recipient_id === sessionUser?.user_id) ||
+            (msg.sender_id === sessionUser?.user_id &&
+              msg.recipient_id === selectedUser?.user_id)
         )
-        : []
-    );
+      : [];
   };
 
   return (
@@ -212,23 +263,54 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
       {groupID ? (
         <ExpandableChat size="lg" position="bottom-right" className="bg-black">
           <ExpandableChatHeader className="flex-col text-center justify-center">
-            <h1 className="text-xl font-semibold">Group Chat: {group?.groupName}</h1>
+            <h1 className="text-xl font-semibold">
+              Group Chat: {group?.groupName}
+            </h1>
             <p>{group?.description}</p>
           </ExpandableChatHeader>
           <ExpandableChatBody>
-            <ChatMessageList  ref={chatContainerRef}>
-              {chatHistory && chatHistory.map((message, index) => (
-                <ChatBubble key={index} variant={message.sender_id === sessionUser?.user_id ? "sent" : "received"}>
-                <ChatBubbleAvatar
-                  src={message.sender_id === sessionUser?.user_id ? sessionUser?.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg" : selectedUser?.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"}
-                  fallback={message.sender_id === sessionUser?.user_id ? sessionUser?.user_nickname : selectedUser?.user_nickname}
-                />
-                <ChatBubbleMessage variant={message.sender_id === sessionUser?.user_id ? "sent" : "received"}>
-                  {message.message_content}
-                </ChatBubbleMessage>
-                <ChatBubbleTimestamp timestamp={message.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
-              </ChatBubble>
-              ))}
+            <ChatMessageList ref={chatContainerRef}>
+              {chatHistory &&
+                chatHistory.map((message, index) => (
+                  <ChatBubble
+                    key={index}
+                    variant={
+                      message.sender_id === sessionUser?.user_id
+                        ? "sent"
+                        : "received"
+                    }
+                  >
+                    <ChatBubbleAvatar
+                      src={
+                        message.sender_id === sessionUser?.user_id
+                          ? sessionUser?.user_profile_pic ||
+                            "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"
+                          : selectedUser?.user_profile_pic ||
+                            "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"
+                      }
+                      fallback={
+                        message.sender_id === sessionUser?.user_id
+                          ? sessionUser?.user_nickname
+                          : selectedUser?.user_nickname
+                      }
+                    />
+                    <ChatBubbleMessage
+                      variant={
+                        message.sender_id === sessionUser?.user_id
+                          ? "sent"
+                          : "received"
+                      }
+                    >
+                      {message.message_content}
+                    </ChatBubbleMessage>
+                    <ChatBubbleTimestamp
+                      timestamp={
+                        message.message_timestamp?.toString() ||
+                        new Date().toLocaleTimeString()
+                      }
+                    />
+                  </ChatBubble>
+                ))}
             </ChatMessageList>
           </ExpandableChatBody>
           <ExpandableChatFooter>
@@ -246,10 +328,21 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
           <ExpandableChatHeader>
             {selectedUser ? (
               <div className="flex items-center space-x-2">
-                <ChatBubbleAvatar src={selectedUser.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"} fallback={selectedUser.user_nickname} className="bg-gray-500" />
+                <ChatBubbleAvatar
+                  src={
+                    selectedUser.user_profile_pic ||
+                    "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"
+                  }
+                  fallback={selectedUser.user_nickname}
+                  className="bg-gray-500"
+                />
                 <div>
-                  <h2 className="text-lg font-semibold">{selectedUser.user_nickname}</h2>
-                  <p className="text-sm text-gray-500">{selectedUser.user_fname} {selectedUser.user_lname}</p>
+                  <h2 className="text-lg font-semibold">
+                    {selectedUser.user_nickname}
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    {selectedUser.user_fname} {selectedUser.user_lname}
+                  </p>
                 </div>
               </div>
             ) : (
@@ -260,27 +353,56 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
             <ChatMessageList ref={chatContainerRef}>
               {selectedUser ? (
                 <>
-                  {chatHistory != null && chatHistory.map((msg, index) => (
-                    <ChatBubble key={index} variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
-                      <ChatBubbleAvatar
-                        src={msg.sender_id === sessionUser?.user_id ? sessionUser?.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg" : selectedUser.user_profile_pic || "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"}
-                        fallback={msg.sender_id === sessionUser?.user_id ? sessionUser?.user_nickname : selectedUser?.user_nickname}
-                      />
-                      <ChatBubbleMessage variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
-                        {msg.message_content}
-                      </ChatBubbleMessage>
-                      <ChatBubbleTimestamp timestamp={msg.message_timestamp?.toString() || new Date().toLocaleTimeString()} />
-                    </ChatBubble>
-                    // <div
-                    //   key={index}
-                    //   className={`p-4 rounded-lg w-[60%] ${msg.sender_id === sessionUser ? "self-start bg-blue-600 text-white" : "self-end bg-gray-700 text-white"
-                    //     }`}
-                    // >
-                    //   <strong>
-                    //     {msg.sender_id === sessionUser ? "Me" : selectedUser.user_fname}:
-                    //   </strong> {msg.message_content}
-                    // </div>
-                  ))}
+                  {chatHistory != null &&
+                    chatHistory.map((msg, index) => (
+                      <ChatBubble
+                        key={index}
+                        variant={
+                          msg.sender_id === sessionUser?.user_id
+                            ? "sent"
+                            : "received"
+                        }
+                      >
+                        <ChatBubbleAvatar
+                          src={
+                            msg.sender_id === sessionUser?.user_id
+                              ? sessionUser?.user_profile_pic ||
+                                "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"
+                              : selectedUser.user_profile_pic ||
+                                "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"
+                          }
+                          fallback={
+                            msg.sender_id === sessionUser?.user_id
+                              ? sessionUser?.user_nickname
+                              : selectedUser?.user_nickname
+                          }
+                        />
+                        <ChatBubbleMessage
+                          variant={
+                            msg.sender_id === sessionUser?.user_id
+                              ? "sent"
+                              : "received"
+                          }
+                        >
+                          {msg.message_content}
+                        </ChatBubbleMessage>
+                        <ChatBubbleTimestamp
+                          timestamp={
+                            msg.message_timestamp?.toString() ||
+                            new Date().toLocaleTimeString()
+                          }
+                        />
+                      </ChatBubble>
+                      // <div
+                      //   key={index}
+                      //   className={`p-4 rounded-lg w-[60%] ${msg.sender_id === sessionUser ? "self-start bg-blue-600 text-white" : "self-end bg-gray-700 text-white"
+                      //     }`}
+                      // >
+                      //   <strong>
+                      //     {msg.sender_id === sessionUser ? "Me" : selectedUser.user_fname}:
+                      //   </strong> {msg.message_content}
+                      // </div>
+                    ))}
                   {/* {handleMessages().map((msg, index) => (
                 <ChatBubble key={index} variant={msg.sender_id === sessionUser?.user_id ? "sent" : "received"}>
                   <ChatBubbleAvatar
@@ -299,8 +421,12 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
                   <img src={chat.src} alt="chat" style={{ maxWidth: "35%" }} />
                   {/* {chat} */}
                   <div>
-                    <div className="text-white mt-auto">No Selected Conversation</div>
-                    <div className="text-white mt-auto">Select a user to start chatting</div>
+                    <div className="text-white mt-auto">
+                      No Selected Conversation
+                    </div>
+                    <div className="text-white mt-auto">
+                      Select a user to start chatting
+                    </div>
                   </div>
                 </div>
               )}
@@ -318,7 +444,9 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
                 />
                 <Button
                   className="py-10 rounded-r-lg text-white"
-                  size="sm" onClick={handleSendMessage}>
+                  size="sm"
+                  onClick={handleSendMessage}
+                >
                   {/* <CornerDownLeft className="h-4 w-4" /> */}
                   Send
                 </Button>
@@ -353,9 +481,6 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
       </div>
     </div> */
     /* </> */
-
-
-
 
     // <div className="w-3/4 h-full flex flex-col border border-customborder">
     //   <div className="flex items-center justify-between mb-4 m-2">
@@ -424,6 +549,5 @@ const Chat: React.FC<ChatProps> = ({ selectedUser, sessionUser, SetNewMessageFla
     // </div>
   );
 };
-
 
 export default Chat;

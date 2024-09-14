@@ -3,14 +3,12 @@
 import FeedDesktop from "@/components/desktop/FeedDesktop";
 import Navbar from "@/components/desktop/Navbar";
 import RightSidebar from "@/components/rightNav";
-import { useNotifications } from "@/context/NotificationContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { fetchSessionUser } from "@/lib/api";
 
 export default function Home() {
   const router = useRouter();
-  const { notifications, addNotification } = useNotifications();
 
   useEffect(() => {
     const getSessionUser = async () => {
