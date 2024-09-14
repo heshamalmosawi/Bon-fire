@@ -10,6 +10,7 @@ import Navbar from "@/components/desktop/Navbar";
 import { notFound, usePathname, useRouter } from "next/navigation";
 import { fetchProfile, fetchSessionUser, handleClick } from "@/lib/api";
 import { Profile } from "@/lib/interfaces";
+import Banner from "/public/banner.jpg";
 
 const ProfilePage = () => {
   const [sessionUser, setSessionUser] = useState("");
@@ -217,10 +218,11 @@ const ProfilePage = () => {
     <div className="bg-neutral-950 min-h-screen text-gray-200">
       <div className="flex">
         <Navbar />
-        <main className="w-3/4 p-8">
+        <main className="w-screen p-8">
           <div
             className={`h-56 bg-gray-200 rounded-lg flex items-center justify-center my-8`}
           >
+            <img src={Banner.src} className="h-56 w-full object-cover" />
             {/* Placeholder content for background*/}
           </div>
 

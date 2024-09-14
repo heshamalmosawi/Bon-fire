@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -51,7 +52,7 @@ func HandlePosts(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid group ID", http.StatusBadRequest)
 			return
 		}
-		posts, err = models.GetPostsByGroupID(groupID,user.UserID)
+		posts, err = models.GetPostsByGroupID(groupID, user.UserID)
 		if err != nil {
 			http.Error(w, "Error retrieving posts", http.StatusInternalServerError)
 			return
@@ -80,7 +81,7 @@ func HandlePosts(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error retrieving post isLiked", http.StatusInternalServerError)
 			return
 		}
-		
+
 		posts[i] = v
 	}
 
@@ -149,7 +150,7 @@ func HandleCreatePosts(w http.ResponseWriter, r *http.Request) {
 
 	post := models.PostModel{
 		PostID:        postID,
-		PostContent:   postRequest.PostContent,
+		PostContent:   strings.ReplaceAll(postRequest.PostContent, "\\n", "\n"),
 		PostImagePath: postRequest.PostImagePath,
 		PostExposure:  postRequest.PostExposure,
 		GroupID:       groupID,

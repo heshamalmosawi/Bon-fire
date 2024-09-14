@@ -49,7 +49,7 @@ interface Follower {
 const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
   const [sessionUser, setSessionUser] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [postVisibility, setPostVisibility] = useState("public");
+  const [postVisibility, setPostVisibility] = useState("Public");
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [selectedFollowers, setSelectedFollowers] = useState<string[]>([]);
   const [followers, setFollowers] = useState<Follower[]>([]);
@@ -210,9 +210,11 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
                   <FormItem>
                     <FormControl>
                       <Textarea
-                        className="bg-transparent border-0 h-16"
+                        className="bg-transparent border-0 h-16 whitespace-pre-wrap"
                         placeholder="What's on your mind?"
                         {...field}
+                        // required
+                        // style={{ whiteSpace: "pre-wrap" }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -257,13 +259,13 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
                   </SelectTrigger>
                   <SelectContent className="bg-neutral-800 border border-gray-600 rounded-lg mt-2 text-white">
                     <SelectItem
-                      value="public"
+                      value="Public"
                       className="flex items-center gap-2 px-4 py-2"
                     >
                       <div className="ml-3">Public</div>
                     </SelectItem>
                     <SelectItem
-                      value="private"
+                      value="Private"
                       className="flex items-center gap-2 px-4 py-2"
                     >
                       <div className="ml-3">Private</div>

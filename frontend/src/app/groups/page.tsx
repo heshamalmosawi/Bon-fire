@@ -14,7 +14,7 @@ const PeoplePage = () => {
         {/* </aside> */}
         
         {/* Main Content Area */}
-        <main className="w-3/4 p-8">
+        <main className="w-screen p-8">
           <AllGroupList />
         </main>
       </div>

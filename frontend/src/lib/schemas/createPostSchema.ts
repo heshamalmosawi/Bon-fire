@@ -12,7 +12,7 @@ export const HandleCreatePost = async (
   values: z.infer<typeof createPostSchema>
 ) => {
   const payload = {
-    post_content: values.textContent,
+    post_content: values.textContent.replace(/\n/g, '\\n'),
     post_image_path: values.imageContent
       ? await HandleFileUpload(values.imageContent)
       : "",

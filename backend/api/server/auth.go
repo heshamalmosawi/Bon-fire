@@ -101,18 +101,19 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 // Example usage:
 
-// 	POST /signup
-// 	{
-// 	    "user_email": "johndoe@example.com",
-// 	    "user_password": "password123",
-// 	    "user_fname": "John",
-// 	    "user_lname": "Doe",
-// 	    "user_dob": "1990-01-01",
-// 	    "user_avatar_path": "/path/to/avatar",
-// 	    "user_nickname": "johnny",
-// 	    "user_about": "Just a regular John Doe",
-// 	    "profile_exposure": "Public"
-// 	}
+// POST /signup
+//
+//	{
+//	    "user_email": "johndoe@example.com",
+//	    "user_password": "password123",
+//	    "user_fname": "John",
+//	    "user_lname": "Doe",
+//	    "user_dob": "1990-01-01",
+//	    "user_avatar_path": "/path/to/avatar",
+//	    "user_nickname": "johnny",
+//	    "user_about": "Just a regular John Doe",
+//	    "profile_exposure": "Public"
+//	}
 func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	var user models.UserModel
 
@@ -152,7 +153,7 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 	// Assuming the session ID is stored in a cookie named "session_id"
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
-		http.Error(w, "Session not found", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 

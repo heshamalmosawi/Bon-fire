@@ -6,9 +6,7 @@ import Chat from "@/components/desktop/Chat";
 import Navbar from "@/components/desktop/Navbar";
 import { useRouter } from "next/navigation";
 import { User } from "@/components/desktop/UserList";
-import { fetchSessionUser} from '@/lib/api';
-
-
+import { fetchSessionUser } from "@/lib/api";
 
 const MessagesPage = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -22,9 +20,10 @@ const MessagesPage = () => {
     const getSessionUser = async () => {
       const data = await fetchSessionUser();
       if (!data && u_id === undefined) {
-        router.push('/auth');
+        router.push("/auth");
         return;
-      } else if (data.status === 200) { // if user is authenticated and u_id is defined in URL
+      } else if (data.status === 200) {
+        // if user is authenticated and u_id is defined in URL
         // const data = await user.json();
         console.log("authentication data:", data.User.user_id);
         setSessionUser(data.User.user_id);
@@ -39,16 +38,25 @@ const MessagesPage = () => {
     getSessionUser();
   }, []);
 
-  
-
   return (
     <div className="w-screen h-screen flex bg-neutral-950">
       <Navbar />
-      <div className="flex h-full flex-col text-white w-full">
-        <div className="text-xl font-semibold h-[8%] flex items-center pl-10">Messages</div>
-        <div className="flex w-full h-[92%] border border-customborder">
-          <UserList onSelectUser={setSelectedUser} sessionUser={sessionUser} newMessageFlag={newMessageReceived_flag}/>
-          <Chat selectedUser={selectedUser} sessionUser={user} SetNewMessageFlag={setNewMessageReceived_flag} newMessageFlag={newMessageReceived_flag}/>
+      <div className="flex h-full flex-col text-white w-screen p-8">
+        <div className="text-xl font-semibold h-[8%] flex items-start pl-10">
+          Messages
+        </div>
+        <div className="flex w-full h-[92%] border border-customborder rounded-md">
+          <UserList
+            onSelectUser={setSelectedUser}
+            sessionUser={sessionUser}
+            newMessageFlag={newMessageReceived_flag}
+          />
+          <Chat
+            selectedUser={selectedUser}
+            sessionUser={user}
+            SetNewMessageFlag={setNewMessageReceived_flag}
+            newMessageFlag={newMessageReceived_flag}
+          />
         </div>
       </div>
     </div>

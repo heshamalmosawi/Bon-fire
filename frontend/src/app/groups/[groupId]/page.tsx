@@ -241,7 +241,7 @@ const GroupPage = () => {
     <div className="bg-neutral-950 min-h-screen text-gray-200">
       <div className="flex">
         <Navbar />
-        <main className="w-3/4 p-8">
+        <main className="w-screen p-8">
           {/* <div className="h-45 bg-gray-200 rounded-lg flex items-center justify-center my-6">
             {/* Placeholder content for background 
           </div> */}
@@ -262,7 +262,7 @@ const GroupPage = () => {
           />
 
           <div className="space-y-6">
-            {/* Tabs for Posts, Chat, Members, Description, Events, Requests */}
+            {/* Tabs for Posts, Members, Description, Events, Requests */}
             <div className="place-content-center flex space-x-9 border-b border-gray-700 pb-4">
               <button
                 id="posts"
@@ -274,17 +274,6 @@ const GroupPage = () => {
                 }`}
               >
                 Posts
-              </button>
-              <button
-                id="chat"
-                onClick={() => setActiveTab("chat")}
-                className={`p-2 rounded-lg ${
-                  activeTab === "chat"
-                    ? "text-white bg-indigo-500"
-                    : "text-gray-400"
-                }`}
-              >
-                Chat
               </button>
               <button
                 id="members"
@@ -401,7 +390,6 @@ const GroupPage = () => {
                     />
                   </div>
                 ))}
-              {activeTab === "chat" && <p>Chat content will appear here.</p>}
               {activeTab === "members" && (
                 <div className="w-full flex flex-col items-center">
                   <div className="space-y-2 w-full px-4">
