@@ -131,7 +131,9 @@ export const handleClick = async (
 // a function to fetch the profile user
 export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) => void, setLoading: (loading: boolean) => void, setError: (error: string) => void) => {
   try {
-      const response = await fetch(`${Yori}/profile/${u_id}`);
+      const response = await fetch(`${Yori}/profile/${u_id}`, {
+          credentials: 'include'
+      });
       if (response.ok || response.status === 403) {
           const data = await response.json();
           if (data.user) {
