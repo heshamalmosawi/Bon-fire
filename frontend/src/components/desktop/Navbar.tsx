@@ -49,15 +49,15 @@ const Navbar = () => {
       <h3 className="text-lg font-semibold mb-4 text-white">Main Menu</h3>
       <nav className="space-y-4 gap-4">
         <button
-          onClick={() => handleNavigation("/messages", "messages")}
+          onClick={() => handleNavigation("/", "feed")}
           className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
-            activeTab === "messages"
+            activeTab === "feed"
               ? "text-white bg-customGray x-spacings2"
               : "text-gray-400 hover:text-white"
           }`}
         >
-          <MessagesSquare />
-          <span>Messages</span>
+          <House />
+          <span>Feed</span>
         </button>
         <button
           onClick={() => handleNavigation("/people", "people")}
@@ -71,15 +71,15 @@ const Navbar = () => {
           <span>People</span>
         </button>
         <button
-          onClick={() => handleNavigation("/", "feed")}
+          onClick={() => handleNavigation("/messages", "messages")}
           className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
-            activeTab === "feed"
+            activeTab === "messages"
               ? "text-white bg-customGray x-spacings2"
               : "text-gray-400 hover:text-white"
           }`}
         >
-          <House />
-          <span>Feed</span>
+          <MessagesSquare />
+          <span>Messages</span>
         </button>
         <button
           onClick={() => handleNavigation("/profile", "profile")}
