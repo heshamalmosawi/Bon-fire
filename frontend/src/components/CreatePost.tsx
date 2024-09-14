@@ -210,9 +210,11 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
                   <FormItem>
                     <FormControl>
                       <Textarea
-                        className="bg-transparent border-0 h-16"
+                        className="bg-transparent border-0 h-16 whitespace-pre-wrap"
                         placeholder="What's on your mind?"
                         {...field}
+                        // required
+                        // style={{ whiteSpace: "pre-wrap" }}
                       />
                     </FormControl>
                     <FormMessage />
