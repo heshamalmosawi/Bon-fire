@@ -92,7 +92,7 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser, sessionUser, newMessa
     console.log("flag has been changed", newMessageFlag);
     setTimeout(() => {
       setClickCount((prevCount) => prevCount - 1);
-    }, 50);
+    }, 250);
   }, [newMessageFlag]);
 
   const handleClickCount = () => {

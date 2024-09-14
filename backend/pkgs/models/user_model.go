@@ -4,6 +4,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/mattn/go-sqlite3"
 
+	"bonfire/pkgs/storage"
 	"bonfire/pkgs/utils"
 )
 
@@ -20,7 +21,7 @@ type UserModel struct {
 	ProfileExposure string    `json:"profile_exposure"`
 	IsFollowed      bool      `json:"is_followed"`
 	IsReuested      bool      `json:"is_requested"`
-	IsInvited 		bool 	`json:"is_invited"`
+	IsInvited       bool      `json:"is_invited"`
 }
 
 // CRUD Operations
@@ -144,11 +145,36 @@ func GetAllUsers() ([]UserModel, error) {
 	return users, nil
 }
 
-func GetMessagersList(user uuid.UUID) ([]UserModel, error) {
-	columns := []string{"uf.user_id AS other_user_id, u.user_fname, u.user_lname, u.user_avatar_path, u.profile_exposure AS last_chat_timestamp"}
-	joinTable := "user_follow uf JOIN user u ON u.user_id = uf.user_id LEFT JOIN private_message c ON ((c.sender_id = uf.user_id AND c.recipient_id = ?) OR (c.sender_id = ? AND c.recipient_id = uf.user_id))"
-	condition := "uf.follower_id = ? OR uf.user_id = ? GROUP BY uf.user_id, u.user_fname, u.user_lname, u.user_avatar_path ORDER BY COALESCE(MAX(c.message_timestamp), '1970-01-01') DESC;"
-	rows, err := utils.Read(joinTable, columns, condition, user, user, user, user)
+// big GPT query lets go
+func GetMessagedUsers(user uuid.UUID) ([]UserModel, error) {
+	query := `SELECT
+				CASE 
+						WHEN c.sender_id = 'a3bdc5f1-ae6c-436c-a0b8-b1549f0fca61' THEN c.recipient_id
+						ELSE c.sender_id
+					END AS other_user_id, 
+					u.user_fname, 
+					u.user_lname, 
+					u.user_avatar_path,
+					MAX(c.message_timestamp) AS last_chat_timestamp
+				FROM private_message c
+				JOIN user u ON u.user_id = 
+					CASE 
+						WHEN c.sender_id = 'a3bdc5f1-ae6c-436c-a0b8-b1549f0fca61' THEN c.recipient_id
+						ELSE c.sender_id
+					END
+				WHERE c.sender_id = 'a3bdc5f1-ae6c-436c-a0b8-b1549f0fca61'
+				OR c.recipient_id = 'a3bdc5f1-ae6c-436c-a0b8-b1549f0fca61'
+				GROUP BY 
+					CASE 
+						WHEN c.sender_id = 'a3bdc5f1-ae6c-436c-a0b8-b1549f0fca61' THEN c.recipient_id
+						ELSE c.sender_id
+					END,
+					u.user_fname, 
+					u.user_lname, 
+					u.user_avatar_path
+				ORDER BY last_chat_timestamp DESC;
+				`
+	rows, err := storage.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -162,6 +188,21 @@ func GetMessagersList(user uuid.UUID) ([]UserModel, error) {
 			return nil, err
 		}
 		users = append(users, user)
+	}
+
+	// only returned users that are followed or following.
+	for i, thisuser := range users {
+		isFollowed, err := IsFollower(thisuser.UserID, user)
+		if err != nil {
+			return nil, err
+		}
+		d, err := IsFollowing(thisuser.UserID, user)
+		if err != nil {
+			return nil, err
+		}
+		if !d && !isFollowed {
+			users = append(users[:i], users[i+1:]...)
+		}
 	}
 
 	return users, nil

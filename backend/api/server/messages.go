@@ -10,6 +10,8 @@ import (
 	"bonfire/api/middleware"
 	"bonfire/pkgs/models"
 	"bonfire/pkgs/utils"
+
+	"github.com/gofrs/uuid"
 	// "github.com/gofrs/uuid"
 )
 
@@ -156,7 +158,7 @@ func HandleStoreMessages(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-// This API endpoint will return the list of users that they will see in the chat page.
+// This API endpoint will return the list of users that they will see in the chat page. Sorry for over-complicating it lol.
 func MessagerListAPI(w http.ResponseWriter, r *http.Request) {
 	session, err := middleware.Auth(r)
 	if err != nil {
@@ -165,28 +167,53 @@ func MessagerListAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	list, err := models.GetMessagersList(session.User.UserID)
+	followers, err := models.GetFollowersByUserID(session.User.UserID)
 	if err != nil {
 		log.Println("MessagerListAPI: Couldn't get messagers lists: ", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	var notMessaged []models.UserModel
-	var messaged []models.UserModel
-	for _, user := range list {
-		if ok, err := models.IsMessaged(user.UserID, session.User.UserID); !ok || err != nil {
-			notMessaged = append(notMessaged, user)
+	followings, err := models.GetFollowingsByUserID(session.User.UserID)
+	if err != nil {
+		log.Println("MessagerListAPI: Couldn't get messagers lists: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	friends := append(followers, followings...)
+	var list []models.UserModel
+	for _, follow_obj := range friends {
+		var otheruser uuid.UUID
+		if follow_obj.UserID == session.User.UserID {
+			otheruser = follow_obj.FollowerID
 		} else {
-			messaged = append(messaged, user)
+			otheruser = follow_obj.UserID
+		}
+
+		if ok, err := models.IsMessaged(otheruser, session.User.UserID); !ok || err != nil {
+			user, err := models.GetUserByID(otheruser)
+			if err != nil {
+				log.Println("MessagerListAPI: Couldn't get messagers lists: ", err)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			list = append(list, *user)
 		}
 	}
 
-	sort.Slice(notMessaged, func(i, j int) bool {
-		return notMessaged[i].UserFirstName < notMessaged[j].UserFirstName
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].UserFirstName < list[j].UserFirstName
 	})
 
-	list = append(messaged, notMessaged...)
+	messaged, err := models.GetMessagedUsers(session.User.UserID)
+	if err != nil {	
+		log.Println("MessagerListAPI: Couldn't get messagers lists: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	list = append(messaged, list...)
 
 	w.Header().Set("Content-Type", "application/json")
 	utils.EncodeJSON(w, map[string]interface{}{
