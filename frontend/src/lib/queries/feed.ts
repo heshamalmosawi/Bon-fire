@@ -29,7 +29,7 @@ export const getFeed = async (): Promise<PostProps[] | string | undefined> => {
               post_content: item.post.post_content,
               post_image_path: item.post.post_image_path,
               post_likecount: item.post.post_likecount,
-              postCommentNum: 200, //FIXME: serve this in the frontend
+              postCommentNum: Array.isArray(item.post.comments) ? item.post.comments.length : 0,
             })
           )
         : undefined;
