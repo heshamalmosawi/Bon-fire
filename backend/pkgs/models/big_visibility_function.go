@@ -39,6 +39,11 @@ func GetViewablePosts(userID uuid.UUID) ([]PostModel, error) {
 			return nil, err
 		}
 
+		post.Comments, err = GetCommentsByPostID(post.PostID)
+		if err != nil {
+			return nil, err
+		}
+
 		posts = append(posts, post)
 	}
 	return posts, nil
@@ -66,6 +71,11 @@ func GetAllPublicPosts() ([]PostModel, error) {
 			return nil, err
 		}
 		post.Author, err = GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+
+		post.Comments, err = GetCommentsByPostID(post.PostID)
 		if err != nil {
 			return nil, err
 		}
@@ -99,6 +109,11 @@ func GetPostsByGroupID(groupID uuid.UUID,userID uuid.UUID) ([]PostModel, error) 
 		if err != nil {
 			return nil, err
 		}
+
+		post.Comments, err = GetCommentsByPostID(post.PostID)
+ 		if err != nil {
+ 			return nil, err
+ 		}
 		posts = append(posts, post)
 	}
 	return posts, nil

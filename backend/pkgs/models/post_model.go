@@ -18,6 +18,7 @@ type PostModel struct {
 	AuthorID      uuid.UUID  `json:"author_id"`
 	IsLiked       bool       `json:"is_liked"`
 	Author        *UserModel `json:"author"`
+	Comments []Comment `json:"comments"`
 }
 
 // CRUD Operations
