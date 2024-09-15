@@ -31,7 +31,7 @@ export default function Home() {
       <FeedDesktop />
       <div
         id="right-nav"
-        className="w-[20%] h-full flex flex-col items-center justify-evenly"
+        className="w-[20%] h-full flex flex-col items-center justify-evenly overflow-y-scroll"
       >
         <RightSidebar /> {/* Add the RightSidebar component here */}
       </div>

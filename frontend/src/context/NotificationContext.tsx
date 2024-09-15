@@ -31,6 +31,7 @@ import {
 interface NotificationContextType {
   notifications: Notification[];
   addNotification: (message: Notification) => void;
+  removeNotification: (id: string) => void;
 }
 
 /**
@@ -40,6 +41,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType>({
   notifications: [],
   addNotification: (notifications: Notification) => {},
+  removeNotification: (id: string) => {},
 });
 
 interface NotificationProviderProps {
@@ -58,6 +60,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { socket, setOnMessage } = useNotificationWebSocket();
   const { toast } = useToast();
+
+  const removeNotification = (id: string) => {
+    setNotifications((prevNotifications) =>
+      prevNotifications.filter((notification) => notification.notiID !== id)
+    );
+  };
 
   useEffect(() => {
     /**
@@ -250,7 +258,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   };
 
   return (
-    <NotificationContext.Provider value={{ notifications, addNotification }}>
+    <NotificationContext.Provider
+      value={{ notifications, addNotification, removeNotification }}
+    >
       {children}
     </NotificationContext.Provider>
   );

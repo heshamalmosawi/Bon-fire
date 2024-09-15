@@ -436,7 +436,7 @@ export const delNoti = async (notiID: string) => {
 // marks all notifications as read
 export const readAllNotis = async () => {
   try {
-    const res = await axios.put(
+    await axios.put(
       `${Yori}/notis/read-all`,
       {},
       {
