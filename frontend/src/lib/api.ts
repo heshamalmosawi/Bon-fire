@@ -498,7 +498,9 @@ export const getChatList = async (setLoading: (loading: boolean) => void, setErr
 
 export const getFollowers = async (userID: string): Promise<Follower[] | undefined> => {
   try {
-    const response = await fetch(`${Yori}/profile/${userID}?q=followers`);
+    const response = await fetch(`${Yori}/profile/${userID}?q=followers`, {
+      credentials: "include",
+    });
     if (response.ok || response.status === 403) {
       const data = await response.json();
       if (data.response) {
