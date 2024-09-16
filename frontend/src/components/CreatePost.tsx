@@ -56,6 +56,7 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
   const [followers, setFollowers] = useState<Follower[]>([]);
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [submitting, setsubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("posts");
   const router = useRouter();
@@ -147,9 +148,11 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
         visibility: postVisibility,
         selectedFollowers,
       };
+      setsubmitting(true)
       await HandleCreatePost(payload);
 
       setIsDialogOpen(false);
+      setsubmitting(false);
       form.reset();
       onPostCreated();
     } catch (error) {
@@ -304,7 +307,7 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
                     Edit Followers Selection
                   </Button>
                 )}
-                <Button type="submit">Submit</Button>
+                <Button type="submit" disabled={submitting}>Submit</Button>
               </div>
             </form>
           </Form>
