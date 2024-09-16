@@ -48,7 +48,11 @@ const Chat: React.FC<ChatProps> = ({
 
   // Define a function to handle incoming messages
   const handleMessage = (message: Message) => {
-    setChatHistory((prevHistory) => [...(prevHistory || []), message]);
+    if (message.group_id === groupID) {
+      setChatHistory((prevHistory) => [...(prevHistory || []), message]);
+    } else if (message.recipient_id === sessionUser?.user_id) {
+      setChatHistory((prevHistory) => [...(prevHistory || []), message]);
+    }
   };
 
   useWebSocket(
