@@ -9,13 +9,16 @@ export const loginSchema = z.object({
 
 export const HandleLoginSubmission = async (
   values: z.infer<typeof loginSchema>
-) => {
+): Promise<string | undefined> => {
   try {
     const res = await axios.post("http://localhost:8080/login", values, {
       withCredentials: true,
     });
 
     if (res.status !== 200) {
+      if (res.status === 401) {
+        return "unauthorized"
+      }
       throw new Error("backend responded with status " + res.status);
     }
 
