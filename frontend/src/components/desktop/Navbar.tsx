@@ -44,9 +44,9 @@ const Navbar = () => {
   };
 
   return (
-    <aside className="w-1/4 h-screen bg-black p-4 sticky top-0 left-0 navbar">
+    <aside className="w-1/4 h-screen bg-black p-4 sticky top-0 left-0 navbar flex flex-col">
       <DisplayLogo />
-      <h3 className="text-lg font-semibold mb-4 text-white">Main Menu</h3>
+      {/* <h3 className="text-lg font-semibold mb-4 text-white">Main Menu</h3> */}
       <nav className="space-y-4 gap-4">
         <button
           onClick={() => handleNavigation("/", "feed")}
@@ -71,6 +71,17 @@ const Navbar = () => {
           <span>People</span>
         </button>
         <button
+            onClick={() => handleNavigation("/groups", "groups")}
+            className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
+              activeTab === "groups"
+                ? "text-white bg-customGray x-spacings2"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <Boxes />
+            <span>Groups</span>
+          </button>
+        <button
           onClick={() => handleNavigation("/messages", "messages")}
           className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
             activeTab === "messages"
@@ -92,6 +103,11 @@ const Navbar = () => {
           <CircleUser />
           <span>My Profile</span>
         </button>
+
+      </nav>
+      <div className="mt-auto">
+      <hr className="my-8 border-gray-700"></hr>
+        <nav className="space-y-4 gap-4">
         <button
           onClick={() => handleNavigation("/logout", "logout")}
           className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
@@ -103,22 +119,6 @@ const Navbar = () => {
           <LogOut />
           <span>Logout</span>
         </button>
-      </nav>
-      <hr className="my-8 border-gray-700"></hr>
-      <div>
-        <h3 className="text-lg font-semibold mb-4 text-white">Explore</h3>
-        <nav className="space-y-4 gap-4">
-          <button
-            onClick={() => handleNavigation("/groups", "groups")}
-            className={`flex items-center space-x-3 p-2.5 rounded-lg w-full ${
-              activeTab === "groups"
-                ? "text-white bg-customGray x-spacings2"
-                : "text-gray-400 hover:text-white"
-            }`}
-          >
-            <Boxes />
-            <span>Groups</span>
-          </button>
         </nav>
       </div>
     </aside>

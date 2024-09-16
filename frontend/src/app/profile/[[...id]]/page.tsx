@@ -222,7 +222,7 @@ const ProfilePage = () => {
           <div
             className={`h-56 bg-gray-200 rounded-lg flex items-center justify-center my-8`}
           >
-            <img src={Banner.src} className="h-56 w-full object-cover" />
+            <img src={Banner.src} className="h-56 w-full object-cover rounded-lg" />
             {/* Placeholder content for background*/}
           </div>
 

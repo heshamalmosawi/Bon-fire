@@ -39,12 +39,13 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { usePathname, useRouter } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { fetchProfile, fetchSessionUser, handleClick } from "@/lib/api";
-
-interface Follower {
-  id: string;
-  name: string;
-}
+import {
+  fetchProfile,
+  fetchSessionUser,
+  getFollowers,
+  handleClick,
+} from "@/lib/api";
+import { Follower } from "@/lib/interfaces";
 
 const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
   const [sessionUser, setSessionUser] = useState("");
@@ -77,6 +78,16 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
     privacy: "",
   });
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (sessionUser) {
+      getFollowers(sessionUser).then((data) => {
+        if (data) {
+          setFollowers(data);
+        }
+      });
+    }
+  }, [sessionUser]);
 
   useEffect(() => {
     const getSessionUser = async () => {

@@ -87,16 +87,17 @@ export const NotificationWebSocketProvider: React.FC<
           socketRef.current.readyState !== WebSocket.OPEN) &&
         Cookies.get("session_id")
       ) {
+        console.log("no noti ws conn, reconnecting..");
         connect();
       }
     }, 1000); // Poll every 1 second for cookie or WebSocket state
 
-    return () => {
-      clearInterval(interval);
-      if (socketRef.current) {
-        socketRef.current.close();
-      }
-    };
+    // return () => {
+    //   clearInterval(interval);
+    //   if (socketRef.current) {
+    //     socketRef.current.close();
+    //   }
+    // };
   }, []); // Empty dependency array ensures this effect runs once on mount
 
   const setOnMessage = (callback: (event: MessageEvent) => void) => {

@@ -134,3 +134,8 @@ export interface GroupEvent {
   did_respond: boolean;
   attendees: number;
 }
+
+export interface Follower {
+  id: string;
+  name: string;
+}

@@ -21,7 +21,7 @@ import {
 import { Notification } from "@/lib/interfaces";
 
 export default function DarkNotificationPopover() {
-  const { notifications } = useNotifications();
+  const { notifications, removeNotification } = useNotifications();
 
   const hasNewNotifications = notifications?.some((notif) => !notif.notiRead);
 
@@ -31,6 +31,7 @@ export default function DarkNotificationPopover() {
 
   const deleteNotification = async (id: string) => {
     await delNoti(id);
+    removeNotification(id)
   };
 
   const AssociatedAction: FC<Notification> = (message: Notification) => {
@@ -149,7 +150,9 @@ export default function DarkNotificationPopover() {
             variant="outline"
             size="sm"
             className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600 hover:text-neutral-200"
-            onClick={async () => await deleteNotification(message.notiID)}
+            onClick={async () => {
+              await deleteNotification(message.notiID);
+            }}
           >
             Nice!
           </Button>
@@ -181,7 +184,9 @@ export default function DarkNotificationPopover() {
         </div>
         <ScrollArea className="h-[300px]">
           {notifications.length === 0 ? (
-            <div className=" text-neutral-400 w-full h-[250px] flex items-center justify-center">No Notifications :(</div>
+            <div className=" text-neutral-400 w-full h-[250px] flex items-center justify-center">
+              No Notifications :(
+            </div>
           ) : (
             notifications.map((notif) => (
               <div
