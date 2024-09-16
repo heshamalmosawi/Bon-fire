@@ -34,8 +34,8 @@ const AuthDesktop: FC = () => {
       router.push("/"); // redirect to / after login
     } catch (error) {
       toast({
-        title: "Error!",
-        description: "check the logs for more",
+        title: "Invalid Credentials!",
+        description: "Please enter valid credentials",
         variant: "destructive",
       });
     }
