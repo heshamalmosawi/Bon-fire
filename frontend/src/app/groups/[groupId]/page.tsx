@@ -93,7 +93,15 @@ const GroupPage = () => {
     const success = await sendGroupInvite(groupProfile.groupID, userId);
     if (success) {
       console.log("Invitation successfully sent to user:", userId);
-      // Optionally update UI or show a success message
+      setNonMembers((prevNonMembers) =>
+      prevNonMembers.map((user) =>
+        user.user_id === userId ? { ...user, is_invited: true } : user
+      )
+    );
+    toast({
+      title: "Invite Sent",
+      description: "Invitation successfully sent!",
+    });
     } else {
       console.error("Failed to send invitation to user:", userId);
       toast({
