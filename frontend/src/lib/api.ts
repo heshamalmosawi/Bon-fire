@@ -152,9 +152,6 @@ export const fetchProfile = async (u_id: string, setProfile: (profile: Profile) 
           } else {
               console.error("User data is null or undefined", data);
           }
-      } else {
-        console.error("User data is null or undefined", data);
-      }
     } else {
       console.error(`Failed to fetch profile: ${response.status}`);
     }
