@@ -7,6 +7,7 @@ export const createPostSchema = z.object({
   imageContent: z.instanceof(File).optional(),
   groupId: z.string().optional(),
   visibility: z.string().optional(),
+  selectedFollowers: z.array(z.string()).optional(),
 });
 
 export const HandleCreatePost = async (
@@ -20,6 +21,7 @@ export const HandleCreatePost = async (
       : "",
     post_exposure: values.groupId ? "group" : values.visibility?.toLowerCase(), // handle privacy later on
     group_id: values.groupId ? values.groupId : "",
+    selectedFollowers: values.selectedFollowers,
   };
 
   const res = await fetch(`http://localhost:8080/post/create`, {

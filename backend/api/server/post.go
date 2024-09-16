@@ -95,6 +95,7 @@ type PostRequest struct {
 	PostImagePath string `json:"post_image_path"`
 	PostExposure  string `json:"post_exposure"`
 	GroupID       string `json:"group_id"`
+	CustomFollowers []string `json:"selectedFollowers"`
 }
 
 func HandleCreatePosts(w http.ResponseWriter, r *http.Request) {
@@ -164,6 +165,24 @@ func HandleCreatePosts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to save post", http.StatusInternalServerError)
 		return
 	}
+
+	if postRequest.PostExposure == "custom" && len(postRequest.CustomFollowers) > 0 {
+        var userIDs []uuid.UUID
+		fmt.Println(postRequest.CustomFollowers)
+        for _, id := range postRequest.CustomFollowers {
+            userID, err := uuid.FromString(id)
+            if err != nil {
+                log.Printf("Invalid UUID in custom followers: %v", err)
+                continue // Log invalid UUIDs but do not terminate the operation
+            }
+            userIDs = append(userIDs, userID)
+        }
+        // Create views for each follower
+        if err := models.CreatePostViewsForUsers(postID, userIDs); err != nil {
+            http.Error(w, "Failed to save custom views", http.StatusInternalServerError)
+            return
+        }
+    }
 
 	// Respond with a success message
 	w.Header().Set("Content-Type", "application/json")
