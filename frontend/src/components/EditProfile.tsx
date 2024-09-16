@@ -113,7 +113,7 @@ const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, email,
     };
     return (
         <Dialog>
-            <DialogTrigger className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-full w-full py-2 rounded">Edit Profile</DialogTrigger>
+            <DialogTrigger className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-full w-full py-2 rounded hover:bg-indigo-700">Edit Profile</DialogTrigger>
             <DialogContent className="pb-4 bg-neutral-900 text-white border-none">
                 <DialogHeader>
                     <DialogTitle>Edit Profile</DialogTitle>

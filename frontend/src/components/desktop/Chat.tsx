@@ -443,7 +443,7 @@ const Chat: React.FC<ChatProps> = ({
                   onKeyDown={handleKeyDown}
                 />
                 <Button
-                  className="py-10 rounded-r-lg text-white"
+                  className="py-10 rounded-r-lg text-white bg-indigo-500 hover:bg-indigo-700"
                   size="sm"
                   onClick={handleSendMessage}
                 >

@@ -19,10 +19,10 @@ const ConfirmJoinDialog: React.FC<ConfirmJoinDialogProps> = ({ isOpen, onClose, 
         </DialogHeader>
         <p>Are you sure you want to proceed?</p>
         <DialogFooter className="mt-4 flex justify-end gap-4">
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={onClose} className="hover:bg-indigo-500">
             No
           </Button>
-          <Button variant="ghost" onClick={onConfirm}>
+          <Button variant="ghost" onClick={onConfirm} className="hover:bg-indigo-500">
             Yes
           </Button>
         </DialogFooter>

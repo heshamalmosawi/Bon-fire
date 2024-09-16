@@ -260,7 +260,7 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
                 <Select
                   onValueChange={(value) => {
                     setPostVisibility(value);
-                    if (value === "custom") {
+                    if (value === "Custom") {
                       setIsCustomModalOpen(true);
                     }
                   }}
@@ -286,7 +286,7 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
                       value="Custom"
                       className="flex items-center gap-2 px-4 py-2"
                       onClick={() => {
-                        setPostVisibility("custom");
+                        setPostVisibility("Custom");
                         setIsCustomModalOpen(true);
                       }}
                     >
@@ -296,15 +296,15 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
                 </Select>
               </div>
               <div className="w-full flex items-center justify-end gap-5">
-                {postVisibility === "custom" && (
+                {postVisibility === "Custom" && (
                   <Button
-                    className="ml-2 text-white"
+                    className="ml-2 text-white bg-indigo-500 hover:bg-indigo-700"
                     onClick={() => setIsCustomModalOpen(true)}
                   >
                     Edit Followers Selection
                   </Button>
                 )}
-                <Button type="submit">Submit</Button>
+                <Button type="submit" className="bg-indigo-500 hover:bg-indigo-700">Submit</Button>
               </div>
             </form>
           </Form>
