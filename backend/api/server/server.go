@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"bonfire/api/chat"
+	// "bonfire/api/chat"
 	"bonfire/api/middleware"
 	"bonfire/api/notify"
 	"bonfire/pkgs"
@@ -53,7 +53,7 @@ func Routers() {
 	mux.HandleFunc("POST /groupmsg/create", HandleStoreGroupMessages)
 
 	mux.HandleFunc("POST /authenticate", authenticate)
-	mux.HandleFunc("GET /ws", chat.HandleConnections)
+	mux.HandleFunc("GET /ws", handleConnections)
 	mux.HandleFunc("GET /subscribe", notify.HandleSubscription)
 	mux.HandleFunc("DELETE /notis/{id}", notify.DeleteNoti)
 	mux.HandleFunc("PUT /notis/read-all", notify.ReadAllNotis)
@@ -69,7 +69,7 @@ func Routers() {
 	cors_mux := middleware.CORS(mux)
 
 	go pkgs.MainSessionManager.CleanupExpiredSessions()
-	go chat.RemoveExpiredChatClients()
+	// go chat.RemoveExpiredChatClients()
 	go notify.RemoveExpiredSubscriber()
 
 	utils.BonfireLogger.Info("HTTP server is listening on http://localhost:8080")
