@@ -35,13 +35,13 @@ import (
 func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handling profile")
 
-	// Get the session cookie to check if the user is logged in
-	session_id, err := r.Cookie("session_id")
-	// if err != nil || session_id == nil {
-	// 	log.Println("HandleProfile: Error getting session cookie", err)
-	// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
-	// 	return
-	// }
+	// Authenticating user
+	session_id, err := middleware.Auth(r)
+	if err != nil {
+		log.Println("HandleProfile: Error getting session cookie", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	theUrl := r.URL.Path
 
@@ -84,8 +84,8 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 
 	var user *models.UserModel
 	// Retrieve the user based on the session information
-	if err == nil || session_id != nil {
-		session, err1 := pkgs.MainSessionManager.GetSession(session_id.Value)
+	if session_id != nil {
+		session, err1 := pkgs.MainSessionManager.GetSession(session_id.ID)
 		if err1 == nil {
 			user = session.User
 			followrequestcheck, err := models.GetPendingRequest(profileUserIDUUID, user.UserID)
@@ -232,7 +232,6 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
-			
 			// Check if the post already exists, remove the old one so it is a unique and ordered list.
 			for i, existingPost := range posts {
 				if existingPost.PostID == post.PostID {
@@ -244,7 +243,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response = posts
-		
+
 	// Placeholder for posts liked
 	case "post_likes":
 		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
@@ -275,6 +274,26 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			log.Println("HandleProfile: Error getting posts by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
+		}
+		if profileUserIDUUID != session_id.User.UserID {
+			for i, post := range user_posts {
+				// if not public, check if user is authorized to view it. private -> should be following, custom -> should be in the list.
+				if post.PostExposure == "Private" {
+					if ok, _ := models.IsFollower(profileUserIDUUID, session_id.User.UserID); !ok {
+						user_posts = append(user_posts[:i], user_posts[i+1:]...)
+					}
+				} else if post.PostExposure == "Custom" { //TODO: check if akhaled added the same key for visibility
+					flag, err := models.CanUserViewPost(session_id.User.UserID, post.PostID)
+					if err != nil {
+						log.Printf("HandleProfile: Error checking if user can view post ID %v: %v", post.PostID, err)
+						http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+						return
+					}
+					if !flag {
+						user_posts = append(user_posts[:i], user_posts[i+1:]...)
+					}
+				}
+			}
 		}
 
 		response = user_posts

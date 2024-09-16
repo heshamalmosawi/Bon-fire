@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"slices"
 	"sort"
 	"time"
 
@@ -198,7 +199,14 @@ func MessagerListAPI(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
-			list = append(list, *user)
+
+			// only add the user if it doesn't already exists
+			userExists := slices.ContainsFunc(list, func(u models.UserModel) bool {
+				return u.UserID == otheruser
+			})
+			if !userExists {
+				list = append(list, *user)
+			}
 		}
 	}
 
@@ -207,7 +215,7 @@ func MessagerListAPI(w http.ResponseWriter, r *http.Request) {
 	})
 
 	messaged, err := models.GetMessagedUsers(session.User.UserID)
-	if err != nil {	
+	if err != nil {
 		log.Println("MessagerListAPI: Couldn't get messagers lists: ", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return

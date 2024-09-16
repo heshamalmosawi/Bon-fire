@@ -141,6 +141,7 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
 
   const onSubmit = async (values: z.infer<typeof createPostSchema>) => {
     try {
+      console.log("visibility:", postVisibility);
       const payload = {
         ...values,
         visibility: postVisibility,
@@ -282,7 +283,7 @@ const CreatePost = ({ onPostCreated }: { onPostCreated: () => void }) => {
                       <div className="ml-3">Private</div>
                     </SelectItem>
                     <SelectItem
-                      value="custom"
+                      value="Custom"
                       className="flex items-center gap-2 px-4 py-2"
                       onClick={() => {
                         setPostVisibility("custom");
