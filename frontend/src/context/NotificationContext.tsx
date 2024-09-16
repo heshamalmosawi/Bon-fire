@@ -110,6 +110,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
                 onClick={async () => {
                   await joinGroup(message.group_id, message.receiver_id, true);
                   await delNoti(message.noti_id);
+                  removeNotification(message.noti_id)
                 }}
               >
                 Accept
@@ -119,6 +120,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
                 onClick={async () => {
                   await joinGroup(message.group_id, message.receiver_id, false);
                   await delNoti(message.noti_id);
+                  removeNotification(message.noti_id);
                 }}
               >
                 Reject
@@ -138,6 +140,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
                 onClick={async () => {
                   await joinGroup(message.group_id, message.user_id, true);
                   await delNoti(message.noti_id);
+                  removeNotification(message.noti_id);
                 }}
               >
                 Accept
@@ -147,6 +150,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
                 onClick={async () => {
                   await joinGroup(message.group_id, message.user_id, false);
                   await delNoti(message.noti_id);
+                  removeNotification(message.noti_id);
                 }}
               >
                 Reject
@@ -172,6 +176,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
                 onClick={async () => {
                   await handleFollowReq(message.user_id, true);
                   await delNoti(message.noti_id);
+                  removeNotification(message.noti_id);
                 }}
               >
                 Accept
@@ -181,6 +186,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
                 onClick={async () => {
                   await handleFollowReq(message.user_id, false);
                   await delNoti(message.noti_id);
+                  removeNotification(message.noti_id);
                 }}
               >
                 Reject
@@ -212,6 +218,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
                 onClick={async () => {
                   await sendEventResponse(message.event_id, true);
                   await delNoti(message.noti_id);
+                  removeNotification(message.noti_id);
                 }}
               >
                 Going
@@ -221,6 +228,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
                 onClick={async () => {
                   await sendEventResponse(message.event_id, false);
                   await delNoti(message.noti_id);
+                  removeNotification(message.noti_id);
                 }}
               >
                 Not Going
