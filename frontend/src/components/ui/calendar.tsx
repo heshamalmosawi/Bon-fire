@@ -69,12 +69,20 @@ function Calendar({
     <DayPicker
       month={month}
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={`p-4 border border-gray-200 rounded-lg shadow ${className}`}
       onMonthChange={setMonth}
-      fromMonth={new Date(minYear, 0)} // January of minYear
-      toMonth={new Date(maxYear, 11)} // December of maxYear
+      fromMonth={new Date(minYear, 0)}
+      toMonth={new Date(maxYear, 11)}
       components={{
         Caption: CustomCaption,
+      }}
+      modifiersStyles={{
+        outside: { color: '#aaa' }, // Styles for days outside the current month
+        today: { color: 'red' },     // Styles for today's date
+      }}
+      classNames={{
+        day: 'p-2 hover:bg-blue-100',       // Tailwind classes for day cells
+
       }}
       {...props}
     />
