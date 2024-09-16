@@ -37,13 +37,13 @@ const GroupCard: React.FC<GroupCardProps> = ({
       <p className="text-gray-400">Members: {members}</p>
       
       {isMine || isMember ? (
-        <Button variant="secondary" className="mt-4" onClick={handleEnterClick}>
+        <Button variant="secondary" className="mt-4 bg-indigo-500 hover:bg-indigo-700" onClick={handleEnterClick}>
           Enter
         </Button>
       ) : (
         <Button
           variant="secondary"
-          className="mt-4"
+          className="mt-4 bg-indigo-500 hover:bg-indigo-700"
           onClick={onJoinClick}
           disabled={isRequested} // Disable button if the request is pending
         >

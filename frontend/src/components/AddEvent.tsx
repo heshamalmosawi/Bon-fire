@@ -84,7 +84,7 @@ export default function EventDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="secondary">Add New Event</Button>
+                <Button variant="secondary" className="bg-indigo-500 hover:bg-indigo-700">Add New Event</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-black">
                 <DialogHeader>

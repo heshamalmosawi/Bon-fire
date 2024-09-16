@@ -85,6 +85,7 @@ export interface GroupProps {
   description: string;
   session_user: string;
   groupID: string;
+  ownerFullName: string;
   total_members: number;
 }
 

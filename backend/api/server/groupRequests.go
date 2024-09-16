@@ -115,7 +115,7 @@ func HandleGroupJoin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := models.DeleteGroupInteraction(group.GroupID, userID, true); err != nil {
+	if err := models.DeleteGroupInteraction(group.GroupID, userID); err != nil {
 		http.Error(w, "Failed to clean up group interaction", http.StatusInternalServerError)
 		return
 	}

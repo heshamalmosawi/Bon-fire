@@ -8,19 +8,20 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 function Calendar({
   className,
-  showOutsideDays = true,
+  showOutsideDays = false,
   ...props
 }: CalendarProps) {
-  const currentYear = new Date().getFullYear();
+  // Define the initial and constraining years
   const minYear = 1940;
-  const maxYear = currentYear - 18; // Ensures the person is at least 18 years old
+  const maxYear = new Date().getFullYear() - 18; // Ensures the person is at least 18 years old
 
-  // Initial month cannot be in the future or before 1940
-  const initialMonth = new Date(Math.min(Math.max(new Date().getFullYear(), minYear), maxYear), new Date().getMonth(), 1);
 
-  const [month, setMonth] = useState(initialMonth);
+  const initialDate = new Date(2000, 8, 1); 
 
-  // Change month forward or backward
+  // Set initial month state
+  const [month, setMonth] = useState(initialDate);
+
+  // Adjust month navigation to ensure it stays within bounds
   const changeMonth = (offset: number) => {
     let newMonth = new Date(month.getFullYear(), month.getMonth() + offset, 1);
     if (newMonth.getFullYear() > maxYear || newMonth.getFullYear() < minYear) {
@@ -29,7 +30,7 @@ function Calendar({
     setMonth(newMonth);
   };
 
-  // Change year forward or backward
+  // Adjust year navigation to ensure it stays within bounds
   const changeYear = (offset: number) => {
     let newYear = month.getFullYear() + offset;
     if (newYear > maxYear || newYear < minYear) {
@@ -38,14 +39,14 @@ function Calendar({
     setMonth(new Date(newYear, month.getMonth(), 1));
   };
 
-  // Formatting month and year for display
+  // Format the display of month and year in the caption
   const formatMonthYear = (date: Date) => {
     const months = ["January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"];
     return `${months[date.getMonth()]} ${date.getFullYear()}`;
   };
 
-  // Custom caption component
+  // Custom caption component for navigation
   const CustomCaption = () => (
     <div className="flex justify-between items-center p-1">
       <button onClick={() => changeYear(-1)} className="px-1">
@@ -68,12 +69,20 @@ function Calendar({
     <DayPicker
       month={month}
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={`p-4 border border-gray-200 rounded-lg shadow ${className}`}
       onMonthChange={setMonth}
-      fromMonth={new Date(minYear, 0)} // January of minYear
-      toMonth={new Date(maxYear, 11)} // December of maxYear
+      fromMonth={new Date(minYear, 0)}
+      toMonth={new Date(maxYear, 11)}
       components={{
         Caption: CustomCaption,
+      }}
+      modifiersStyles={{
+        outside: { color: '#aaa' }, // Styles for days outside the current month
+        today: { color: 'red' },     // Styles for today's date
+      }}
+      classNames={{
+        day: 'p-2 hover:bg-blue-100',       // Tailwind classes for day cells
+
       }}
       {...props}
     />

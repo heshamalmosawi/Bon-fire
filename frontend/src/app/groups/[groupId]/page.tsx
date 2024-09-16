@@ -47,6 +47,7 @@ const GroupPage = () => {
     description: "",
     session_user: "",
     groupID: "",
+    ownerFullName: "",
     total_members: 0,
   });
   const [handledRequests, setHandledRequests] = useState<Set<string>>(
@@ -93,7 +94,15 @@ const GroupPage = () => {
     const success = await sendGroupInvite(groupProfile.groupID, userId);
     if (success) {
       console.log("Invitation successfully sent to user:", userId);
-      // Optionally update UI or show a success message
+      setNonMembers((prevNonMembers) =>
+      prevNonMembers.map((user) =>
+        user.user_id === userId ? { ...user, is_invited: true } : user
+      )
+    );
+    toast({
+      title: "Invite Sent",
+      description: "Invitation successfully sent!",
+    });
     } else {
       console.error("Failed to send invitation to user:", userId);
       toast({
@@ -210,12 +219,13 @@ const GroupPage = () => {
       if (data.group_info) {
         setGroupProfile({
           groupName: data.group_info.group_name,
-          ownerName: data.group_info.owner_name || data.group_info.owner_id,
+          ownerName: data.group_info.owner_id,
           owner: data.group_info.owner.user_nickname,
           ownerEmail: data.group_info.owner.user_email,
           description: data.group_info.group_desc,
           session_user: sessionUser,
           groupID: data.group_info.group_id,
+          ownerFullName: data.group_info.owner.user_fname + " " +  data.group_info.owner.user_lname || "",
           total_members: data.group_info.total_members,
         });
 
@@ -406,7 +416,7 @@ const GroupPage = () => {
                             {groupProfile.owner}
                           </h3>
                           <p className="text-gray-600 pl-6">
-                            {groupProfile.ownerEmail}
+                            {groupProfile.ownerFullName}
                           </p>
                         </div>
                       </div>
@@ -432,7 +442,7 @@ const GroupPage = () => {
                               {member.user_nickname}
                             </h3>
                             <p className="text-gray-600 pl-6">
-                              {member.user_email}
+                              {member.user_fname +" " + member.user_lname}
                             </p>
                           </div>
                         </div>

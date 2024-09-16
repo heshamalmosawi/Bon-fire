@@ -142,7 +142,7 @@ const handleConfirmJoin = async () => {
               </SelectContent>
             </Select>
             <Button
-              className="ml-4 bg-blue-600 text-white hover:bg-blue-800 rounded-md px-4 py-2"
+              className="ml-4 bg-indigo-500 text-white hover:bg-indigo-700 rounded-md px-4 py-2"
               onClick={openDialog}
             >
               Create Group

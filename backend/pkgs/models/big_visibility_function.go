@@ -14,14 +14,15 @@ func GetViewablePosts(userID uuid.UUID) ([]PostModel, error) {
     FROM post
     WHERE 
     (
-        post_exposure = 'public'
-        OR (post_exposure = 'private' AND (author_id = ? OR author_id IN (SELECT user_id FROM user_follow WHERE follower_id = ?)))
-        OR (post_exposure = 'custom' AND post_id IN (SELECT post_id FROM post_view WHERE user_id = ?))
+        author_id = ?
+        OR post_exposure = 'public'
+        OR (post_exposure = 'private' AND author_id IN (SELECT user_id FROM user_follow WHERE follower_id = ?))
+        OR (post_exposure = 'custom' AND (post_id IN (SELECT post_id FROM post_view WHERE user_id = ?) OR author_id = ?))
     )
     AND (group_id IS NULL OR group_id = ?)
     ORDER BY created_at DESC`
 
-    rows, err := storage.DB.Query(query, userID, userID, userID, uuid.Nil)
+    rows, err := storage.DB.Query(query, userID, userID, userID, userID, uuid.Nil)
     if err != nil {
         return nil, err
     }
@@ -48,6 +49,7 @@ func GetViewablePosts(userID uuid.UUID) ([]PostModel, error) {
     }
     return posts, nil
 }
+
 
 // Function to get all public posts
 func GetAllPublicPosts() ([]PostModel, error) {

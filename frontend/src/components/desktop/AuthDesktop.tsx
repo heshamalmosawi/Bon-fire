@@ -35,10 +35,10 @@ const AuthDesktop: FC = () => {
     } catch (error) {
       if (typeof error === 'string') {
         toast({
-          title: "Unauthorized!",
-          description: "Your credentials are incorrect",
-          variant: "destructive",
-        });
+        title: "Invalid Credentials!",
+        description: "Please enter valid credentials",
+        variant: "destructive",
+      });
       } else {
         toast({
           title: "Error!",

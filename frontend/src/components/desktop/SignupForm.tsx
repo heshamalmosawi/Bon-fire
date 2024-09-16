@@ -41,7 +41,7 @@ const SignupForm: FC = () => {
       confirmPassword: "",
       user_fname: "",
       user_lname: "",
-      user_dob: new Date(),
+      user_dob: new Date(2000, 8, 1), 
       avatar: undefined,
       user_nickname: "",
       user_about: "",
