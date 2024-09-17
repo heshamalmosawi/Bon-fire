@@ -8,6 +8,7 @@ import React, {
 } from "react";
 
 import Cookies from "js-cookie";
+import { usePathname, useRouter } from "next/navigation";
 
 interface WebSocketContextType {
   socket: WebSocket | null;
@@ -27,6 +28,7 @@ export const NotificationWebSocketProvider: React.FC<
 > = ({ children }) => {
   const socketRef = useRef<WebSocket | null>(null); // Use ref to avoid re-rendering
   const onMessageCallbackRef = useRef<(event: MessageEvent) => void>(() => {});
+  const pathname = usePathname();
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
@@ -99,6 +101,15 @@ export const NotificationWebSocketProvider: React.FC<
     //   }
     // };
   }, []); // Empty dependency array ensures this effect runs once on mount
+
+  useEffect(() => {
+    if (pathname === "/auth") {
+      if (socketRef.current) {
+        socketRef.current.close();
+        console.log("WebSocket connection closed due to /auth route.");
+      }
+    }
+  }, [pathname]);
 
   const setOnMessage = (callback: (event: MessageEvent) => void) => {
     onMessageCallbackRef.current = callback;

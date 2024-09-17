@@ -23,6 +23,7 @@ import {
   joinGroup,
   sendEventResponse,
 } from "@/lib/api";
+import { usePathname } from "next/navigation";
 
 /**
  * NotificationContextType defines the shape of the notification context.
@@ -59,6 +60,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { socket, setOnMessage } = useNotificationWebSocket();
+  const pathname = usePathname();
   const { toast } = useToast();
 
   const removeNotification = (id: string) => {
@@ -66,6 +68,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       prevNotifications.filter((notification) => notification.notiID !== id)
     );
   };
+
+  useEffect(() => {
+    if (pathname === "/auth") {
+      setNotifications([]);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     /**

@@ -327,7 +327,7 @@ const SignupForm: FC = () => {
                     Back
                   </Button>
                   <Button
-                    className="bg-blue-400 text-white rounded-md py-2 hover:bg-blue-800"
+                    className="bg-indigo-500 text-white rounded-md py-2 hover:bg-indigo-700"
                     type="submit"
                     disabled={loading}
                   >

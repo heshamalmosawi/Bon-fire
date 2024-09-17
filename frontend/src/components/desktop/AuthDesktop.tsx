@@ -121,7 +121,7 @@ const AuthDesktop: FC = () => {
               )}
             />
             <Button
-              className="w-full bg-blue-400 hover:bg-blue-800"
+              className="w-full bg-indigo-500 hover:bg-indigo-700"
               type="submit"
             >
               Login
