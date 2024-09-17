@@ -9,6 +9,7 @@ interface ChatInputProps {
   onKeyDown?: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
+  maxLength?: number; 
 }
 
 const ChatInput = React.forwardRef<HTMLTextAreaElement, ChatInputProps>(

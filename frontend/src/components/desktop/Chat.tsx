@@ -295,7 +295,7 @@ const Chat: React.FC<ChatProps> = ({
                           ? "You"
                           : mem?.find(
                               (member) => member.user_id === message.sender_id
-                            ).user_nickname ?? "Unknown"}
+                            )?.user_nickname ?? "Unknown"}
                       </h6>
                       <ChatBubbleAvatar
                         src={
@@ -341,6 +341,7 @@ const Chat: React.FC<ChatProps> = ({
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={handleKeyDown}
+              maxLength={180}
             />
           </ExpandableChatFooter>
         </ExpandableChat>
@@ -462,6 +463,7 @@ const Chat: React.FC<ChatProps> = ({
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  maxLength={180}
                 />
                 <Button
                   className="py-10 rounded-r-lg text-white bg-indigo-500 hover:bg-indigo-700"
