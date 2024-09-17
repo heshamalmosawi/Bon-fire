@@ -116,12 +116,18 @@ const ProfilePage = () => {
         return data.response ? (
           data.response.map((post: any) => (
             <PostComponent
-              key={post.post_id}
-              {...post}
-              id={post.post_id}
-              firstName={data.user.user_fname}
-              lastName={data.user.user_lname}
-              username={data.user.user_nickname}
+              key={post.Post.post_id}
+              id={post.Post.post_id}
+              firstName={post.Author.user_fname}
+              lastName={post.Author.user_lname}
+              username={post.Author.user_nickname}
+              avatarUrl={post.Author.user_avatar_path}
+              created_at={post.Post.created_at}
+              post_content={post.Post.post_content}
+              post_image_path={post.Post.post_image_path}
+              post_likecount={post.Post.post_likecount}
+              postIsLiked={post.Post.is_liked}
+              postCommentNum={post.Post.comments ? post.Post.comments.length : 0}
             />
           ))
         ) : (
@@ -131,11 +137,18 @@ const ProfilePage = () => {
         return data.response ? (
           data.response.map((post: any) => (
             <PostComponent
-              key={post.id}
-              {...post}
-              firstName={data.user.user_fname}
-              lastName={data.user.user_lname}
-              username={data.user.user_nickname}
+              key={post.Post.post_id}
+              id={post.Post.post_id}
+              firstName={post.Author.user_fname}
+              lastName={post.Author.user_lname}
+              username={post.Author.user_nickname}
+              avatarUrl={post.Author.user_avatar_path}
+              created_at={post.Post.created_at}
+              post_content={post.Post.post_content}
+              post_image_path={post.Post.post_image_path}
+              post_likecount={post.Post.post_likecount}
+              postIsLiked={post.Post.is_liked}
+              postCommentNum={post.Post.comments ? post.Post.comments.length : 0}
             />
           ))
         ) : (
@@ -145,11 +158,18 @@ const ProfilePage = () => {
         return data.response ? (
           data.response.map((post: any) => (
             <PostComponent
-              key={post.id}
-              {...post}
-              firstName={data.user.user_fname}
-              lastName={data.user.user_lname}
-              username={data.user.user_nickname}
+              key={post.Post.post_id}
+              id={post.Post.post_id}
+              firstName={post.Author.user_fname}
+              lastName={post.Author.user_lname}
+              username={post.Author.user_nickname}
+              avatarUrl={post.Author.user_avatar_path}
+              created_at={post.Post.created_at}
+              post_content={post.Post.post_content}
+              post_image_path={post.Post.post_image_path}
+              post_likecount={post.Post.post_likecount}
+              postIsLiked={post.Post.is_liked}
+              postCommentNum={post.Post.comments ? post.Post.comments.length : 0}
             />
           ))
         ) : (

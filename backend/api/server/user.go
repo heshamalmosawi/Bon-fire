@@ -133,6 +133,11 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 	// Retrieve user-related data based on the query parameter
 	var response any
 
+	type PostWithAuthor struct {
+		Post   *models.PostModel
+		Author *models.UserModel
+	}
+
 	switch r.URL.Query().Get("q") {
 
 	// Placeholder for followers
@@ -224,7 +229,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var posts []models.PostModel
+		var posts []PostWithAuthor
 		for _, comment := range user_comments {
 			post, err := models.GetPostByPostID(comment.PostID)
 			if err != nil {
@@ -234,18 +239,38 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			}
 			// Check if the post already exists, remove the old one so it is a unique and ordered list.
 			for i, existingPost := range posts {
-				if existingPost.PostID == post.PostID {
+				if existingPost.Post.PostID == post.PostID {
 					posts = append(posts[:i], posts[i+1:]...)
 					break
 				}
 			}
-			posts = append(posts, *post)
+			author, err := models.GetUserByID(post.AuthorID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting user by ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			post.Comments, err = models.GetCommentsByPostID(post.PostID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting comments by post ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			post.IsLiked, err = models.GetIsPostLiked(post.PostID, profileUserIDUUID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting likes by post ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			pa := PostWithAuthor{Post: post, Author: author}
+			posts = append(posts, pa)
 		}
-
+		// print posts in blue
+		log.Println("\033[34m", posts, "\033[0m")
 		response = posts
 
 	// Placeholder for posts liked
-	case "post_likes":
+	case "likes":
 		user_posts_likes, err := models.GetPostLikesByUserID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting likes by user ID", err)
@@ -253,7 +278,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var posts []models.PostModel
+		var posts []PostWithAuthor
 
 		for _, like := range user_posts_likes {
 			post, err := models.GetPostByPostID(like.PostID)
@@ -262,25 +287,44 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
-			posts = append(posts, *post)
+			author, err := models.GetUserByID(post.AuthorID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting user by ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			post.Comments, err = models.GetCommentsByPostID(post.PostID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting comments by post ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			post.IsLiked = true // no need to check, model will return only liked posts
+			pa := PostWithAuthor{Post: post, Author: author}
+
+			posts = append(posts, pa)
 		}
 
 		response = posts
 
 	// Placeholder for posts
 	default:
+		var posts []PostWithAuthor
+
 		user_posts, err := models.GetPostsByAuthorID(profileUserIDUUID)
 		if err != nil {
 			log.Println("HandleProfile: Error getting posts by user ID", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		if profileUserIDUUID != session_id.User.UserID {
-			for i, post := range user_posts {
+		for i, p := range user_posts {
+			post := p //
+			if profileUserIDUUID != session_id.User.UserID {
 				// if not public, check if user is authorized to view it. private -> should be following, custom -> should be in the list.
 				if post.PostExposure == "Private" {
 					if ok, _ := models.IsFollower(profileUserIDUUID, session_id.User.UserID); !ok {
 						user_posts = append(user_posts[:i], user_posts[i+1:]...)
+						continue
 					}
 				} else if post.PostExposure == "Custom" { //TODO: check if akhaled added the same key for visibility
 					flag, err := models.CanUserViewPost(session_id.User.UserID, post.PostID)
@@ -291,12 +335,28 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 					}
 					if !flag {
 						user_posts = append(user_posts[:i], user_posts[i+1:]...)
+						continue
 					}
 				}
 			}
+			post.Comments, err = models.GetCommentsByPostID(post.PostID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting comments by post ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			post.IsLiked, err = models.GetIsPostLiked(post.PostID, profileUserIDUUID)
+			if err != nil {
+				log.Println("HandleProfile: Error getting likes by post ID", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+
+			posts = append(posts, PostWithAuthor{Post: &post, Author: profileUser})
+
 		}
 
-		response = user_posts
+		response = posts
 	}
 
 	// if profile is public it is not getting it, so we need to check if the user is following the profile user
@@ -480,7 +540,7 @@ func HandleFollow(w http.ResponseWriter, r *http.Request) {
 
 	notification := models.NotificationModel{
 		ReceiverID:  uid,
-		UserID: session.User.UserID,
+		UserID:      session.User.UserID,
 		NotiType:    notiType,
 		NotiContent: noti,
 		NotiTime:    time.Now(),
