@@ -13,6 +13,6 @@ export const config = {
          * - /auth
          * - Static files (/_next, /favicon.ico, etc.)
          */
-        '/((?!auth|_next|favicon.ico|public).*)'
+        '/((?!auth|_next|favicon.ico|public|api).*)'
     ]
 }
