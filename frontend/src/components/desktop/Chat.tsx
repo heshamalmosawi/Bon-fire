@@ -50,6 +50,8 @@ const Chat: React.FC<ChatProps> = ({
 
   // Define a function to handle incoming messages
   const handleMessage = (message: Message) => {
+    message.message_timestamp = message.message_timestamp ? message.message_timestamp : new Date().toLocaleTimeString();
+    
     if (message.group_id === groupID) {
       setChatHistory((prevHistory) => [...(prevHistory || []), message]);
     } else if (message.recipient_id === sessionUser?.user_id) {
@@ -180,8 +182,11 @@ const Chat: React.FC<ChatProps> = ({
         ws.send(messageString);
       };
 
+      var tempMessage = newChatMessage;
+      tempMessage.message_timestamp  = tempMessage.message_timestamp ? tempMessage.message_timestamp : new Date().toLocaleTimeString();
+
       // Update chat history only here
-      setChatHistory((prevHistory) => [...(prevHistory || []), newChatMessage]);
+      setChatHistory((prevHistory) => [...(prevHistory || []), tempMessage]);
       setNewMessage("");
 
       console.log("Chat history:", chatHistory);
@@ -322,11 +327,8 @@ const Chat: React.FC<ChatProps> = ({
                       {message.message_content}
                       <ChatBubbleTimestamp
                         timestamp={
-                          message.message_timestamp
-                            ? new Date(
-                                message.message_timestamp
-                              ).toLocaleTimeString()
-                            : ""
+                          message.message_timestamp?.toString() ||
+                          new Date().toLocaleTimeString()
                         }
                       />
                     </ChatBubbleMessage>
