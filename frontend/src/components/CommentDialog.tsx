@@ -1,5 +1,5 @@
 import React, { ChangeEvent, ReactNode, useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -100,6 +100,7 @@ export const CommentDialog: React.FC<CommentDialogProps> = ({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="bg-black rounded-lg p-0 max-w-6xl mx-auto flex overflow-hidden h-[90vh]">
         {/* Left Section - Placeholder or Image */}
+        <DialogTitle>{/* Empty because it used to give error in console of no dialog title??*/}</DialogTitle>
         <div className="flex-1 bg-black flex items-center justify-center">
           <Image
             src={post.post_image_path ? post.post_image_path : "/landing.jpg"}

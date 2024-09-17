@@ -83,7 +83,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       } else if (Array.isArray(message)) {
         // deal with initial updates
         setNotifications(
-          message.map((m) => ({
+          message.reverse().map((m) => ({
             notiID: m.noti_id,
             recieverID: m.receiver_id,
             userID: m.user_id ? m.user_id : "",

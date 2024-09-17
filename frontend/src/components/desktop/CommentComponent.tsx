@@ -55,8 +55,7 @@ const CommentComponent = (item: CommentModel) => {
             alt="comment image"
             width={70}
             height={70}
-            className="object-cover h-[200px] w-[150px] rounded-lg"
-          />
+            className="object-cover w-auto h-auto max-w-[300px] rounded-lg"          />
         )}
         <div className="flex items-center gap-4 text-xs text-[#ffffff66] mt-2">
           <div

@@ -75,10 +75,10 @@ const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, email,
         e.preventDefault();
 
         const userData = {
-            UserFirstName: profileData.fname,
-            UserLastName: profileData.lname,
-            UserNickname: profileData.username,
-            UserBio: profileData.bio,
+            UserFirstName: profileData.fname.trim(),
+            UserLastName: profileData.lname.trim(),
+            UserNickname: profileData.username.trim(),
+            UserBio: profileData.bio.trim(),
             ProfileExposure: profileData.privacy ? "Private" : "Public"
         };
         
@@ -96,12 +96,12 @@ const EditProfile: React.FC<ProfileFormData> = ({ fname, lname, username, email,
             }
             const result = await response.json();
             onEdit({
-                fname: profileData.fname,
-                lname: profileData.lname,
-                nickname: profileData.username,
+                fname: profileData.fname.trim(),
+                lname: profileData.lname.trim(),
+                nickname: profileData.username.trim(),
                 email: email,
                 dob: dob,
-                bio: profileData.bio,
+                bio: profileData.bio.trim(),
                 privacy: profileData.privacy ? 'Private' : 'Public'
             });
             console.log('Profile updated:', result);

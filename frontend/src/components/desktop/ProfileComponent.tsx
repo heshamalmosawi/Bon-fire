@@ -98,15 +98,15 @@ export const ProfileComponent: React.FC<ProfileProps> = ({
         <Avatar className="w-32 h-32 rounded-full mx-auto">
           <AvatarImage src={avatarUrl} />
           <AvatarFallback>
-            {nickname || fname.charAt(0) + lname.charAt(0)}
+            {nickname.trim() || fname.charAt(0) + lname.charAt(0)}
           </AvatarFallback>
         </Avatar>
         <div className="text-center mt-4">
           <h2 className="text-2xl font-semibold">
-            {fname} {lname}
+            {fname.trim()} {lname.trim()}
           </h2>
           <p className="text-gray-400 font-medium">
-            {nickname !== "" ? `@${nickname}` : "Nickname? Who needs one!"}
+            {nickname.trim() !== "" ? `@${nickname.trim()}` : "Nickname? Who needs one!"}
           </p>
           {session_user && session_user === u_id && (
             <EditProfile

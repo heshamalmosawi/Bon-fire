@@ -70,7 +70,7 @@ const PostComponent = (props: PostProps) => {
             <h6 className="text-[#ffffff66]">| {getAgo(props.created_at)}</h6>
           </div>
           <h6 className="text-[#ffffff66]">
-            {props.username ? `@${props.username}` : ""}
+            {props.username.trim() ? `@${props.username}` : "too-cool-for-usernames"}
           </h6>
         </div>
       </div>
