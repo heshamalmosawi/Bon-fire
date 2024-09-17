@@ -398,7 +398,7 @@ const GroupPage = () => {
                       post_content={post.post_content}
                       post_image_path={post.post_image_path}
                       post_likecount={post.post_likecount}
-                      postCommentNum={post.comment_count}
+                      postCommentNum={Array.isArray(post.comments) ? post.comments.length : 0}
                       postIsLiked={post.is_liked}
                     />
                   </div>
