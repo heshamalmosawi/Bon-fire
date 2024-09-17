@@ -1,5 +1,5 @@
 import { z } from "zod";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import Cookies from "js-cookie";
 
 export const loginSchema = z.object({
@@ -15,17 +15,15 @@ export const HandleLoginSubmission = async (
       withCredentials: true,
     });
 
-    if (res.status !== 200) {
-      if (res.status === 401) {
-        return "unauthorized"
-      }
-      throw new Error("backend responded with status " + res.status);
-    }
-
     // save the incoming cookie
     Cookies.set("session_id", res.data.session_id);
   } catch (error) {
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 401) {
+        return "unauthorized"
+      }
+      return "backend responded with status " + error.code;
+    }
     console.error(error);
-    throw error;
   }
 };

@@ -18,6 +18,7 @@ import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
 import TypingAnimation from "../TypingAnimation";
 import SignupForm from "./SignupForm";
+import { ToastAction } from "@radix-ui/react-toast";
 
 const AuthDesktop: FC = () => {
   const { toast } = useToast();
@@ -28,25 +29,31 @@ const AuthDesktop: FC = () => {
 
   //* we wrap submission handlers around this for UI friendly errors, and redirection handling
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
-    try {
-      await HandleLoginSubmission(values);
-
-      router.push("/"); // redirect to / after login
-    } catch (error) {
-      if (typeof error === 'string') {
+    const res = await HandleLoginSubmission(values);
+    if (res) {
+      if (res === "unauthorized") {
         toast({
-        title: "Invalid Credentials!",
-        description: "Please enter valid credentials",
-        variant: "destructive",
-      });
+          title: "Invalid credentials!",
+          description:
+            "Check your login details, or signup if you have no account!",
+          variant: "destructive",
+          action: (
+            <ToastAction altText="signup" onClick={handleNoAccountClick} className="text-sm w-[65%] border-white font-bold">
+              Sign Up instead
+            </ToastAction>
+          ),
+        });
       } else {
         toast({
-          title: "Error!",
-          description: "check the logs for more",
+          title: "Internal Server Error",
+          description:
+            "Apologies for the inconvenience!, check the console logs",
           variant: "destructive",
         });
       }
+      return
     }
+    router.push("/"); // redirect to / after login
   };
 
   const handleNoAccountClick = () => {
