@@ -110,7 +110,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
                 onClick={async () => {
                   await joinGroup(message.group_id, message.receiver_id, true);
                   await delNoti(message.noti_id);
-                  removeNotification(message.noti_id)
+                  removeNotification(message.noti_id);
                 }}
               >
                 Accept

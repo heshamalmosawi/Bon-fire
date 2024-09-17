@@ -95,14 +95,14 @@ const GroupPage = () => {
     if (success) {
       console.log("Invitation successfully sent to user:", userId);
       setNonMembers((prevNonMembers) =>
-      prevNonMembers.map((user) =>
-        user.user_id === userId ? { ...user, is_invited: true } : user
-      )
-    );
-    toast({
-      title: "Invite Sent",
-      description: "Invitation successfully sent!",
-    });
+        prevNonMembers.map((user) =>
+          user.user_id === userId ? { ...user, is_invited: true } : user
+        )
+      );
+      toast({
+        title: "Invite Sent",
+        description: "Invitation successfully sent!",
+      });
     } else {
       console.error("Failed to send invitation to user:", userId);
       toast({
@@ -225,7 +225,10 @@ const GroupPage = () => {
           description: data.group_info.group_desc,
           session_user: sessionUser,
           groupID: data.group_info.group_id,
-          ownerFullName: data.group_info.owner.user_fname + " " +  data.group_info.owner.user_lname || "",
+          ownerFullName:
+            data.group_info.owner.user_fname +
+              " " +
+              data.group_info.owner.user_lname || "",
           total_members: data.group_info.total_members,
         });
 
@@ -442,7 +445,7 @@ const GroupPage = () => {
                               {member.user_nickname}
                             </h3>
                             <p className="text-gray-600 pl-6">
-                              {member.user_fname +" " + member.user_lname}
+                              {member.user_fname + " " + member.user_lname}
                             </p>
                           </div>
                         </div>
@@ -549,14 +552,15 @@ const GroupPage = () => {
           </div>
         </main>
       </div>
-       <Chat
-          sessionUser={user}
-          groupID={groupID}
-          group={groupProfile}
-          selectedUser={null}
-          SetNewMessageFlag={() => {}}
-          newMessageFlag={false}
-        />
+      <Chat
+        sessionUser={user}
+        groupID={groupID}
+        group={groupProfile}
+        mem={members}
+        selectedUser={null}
+        SetNewMessageFlag={() => {}}
+        newMessageFlag={false}
+      />
     </div>
   );
 };
