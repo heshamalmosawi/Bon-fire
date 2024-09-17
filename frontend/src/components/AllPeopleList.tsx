@@ -72,9 +72,6 @@ const AllPeopleList = () => {
     let resp = await handleFollow(person.user_id);
     if (resp.success) {
       let follow = person.is_followed;
-      if (person.user_fname === "Larry"){
-        console.log("hello");
-      }
       if (person.profile_exposure === "Public") {
         person.is_followed = !follow;
         person.is_requested = false;
@@ -87,6 +84,10 @@ const AllPeopleList = () => {
         setPeople(updatedPeople);
       } else {
         person.is_requested = !person.is_requested;
+        if (person.is_followed) { // converting it arbitary cause why not
+          person.is_followed = false;
+          person.is_requested = false;
+        }
         const updatedPeople = people.map((p) => {
           if (p.user_id === person.user_id) {
             return person;
