@@ -52,3 +52,20 @@ export const debounce = (func: Function, delay = 300) => {
     }, delay);
   };
 };
+
+
+export const genRandomUsername = (): string => {
+  const adjectives = [
+    'quick', 'lazy', 'sleepy', 'noisy', 'brave', 'sneaky', 'happy', 'sad', 'cool', 'shy'
+  ];
+  const animals = [
+    'panda', 'lion', 'fox', 'tiger', 'eagle', 'bear', 'wolf', 'whale', 'owl', 'rabbit'
+  ];
+
+  const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randomAnimal = animals[Math.floor(Math.random() * animals.length)];
+  const randomNumber = Math.floor(100 + Math.random() * 900); // Generates a random 3-digit number
+
+  return `${randomAdjective}${randomAnimal}${randomNumber}`;
+}
+

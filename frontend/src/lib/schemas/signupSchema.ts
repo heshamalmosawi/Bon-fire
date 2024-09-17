@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CheckMimeType } from "../utils";
+import { CheckMimeType, genRandomUsername } from "../utils";
 import { HandleFileUpload } from "../handleFileUpload";
 import axios from "axios";
 
@@ -51,7 +51,7 @@ export const HandleSignupSubmission = async (
       user_lname: values.user_lname,
       user_dob: values.user_dob.toISOString(),
       user_avatar_path: avatarUrl,
-      user_nickname: values.user_nickname,
+      user_nickname: values.user_nickname ? values.user_nickname : genRandomUsername(),
       user_about: values.user_about,
       profile_exposure: "Public",
     };
