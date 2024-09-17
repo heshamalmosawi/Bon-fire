@@ -30,6 +30,7 @@ interface ChatProps {
   newMessageFlag: boolean;
   groupID?: string;
   group?: GroupProps;
+  mem?: any[];
 }
 
 const Chat: React.FC<ChatProps> = ({
@@ -39,6 +40,7 @@ const Chat: React.FC<ChatProps> = ({
   newMessageFlag,
   groupID,
   group,
+  mem,
 }) => {
   const [newMessage, setNewMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
@@ -70,6 +72,8 @@ const Chat: React.FC<ChatProps> = ({
       loadInitialChatHistory(); // Load initial chat history when a user is selected
     }
   }, [selectedUser, groupID]);
+
+  console.warn("group members:", mem);
 
   useEffect(() => {
     // Scroll to the bottom whenever chatHistory changes
@@ -278,26 +282,36 @@ const Chat: React.FC<ChatProps> = ({
                 chatHistory.map((message, index) => (
                   <ChatBubble
                     key={index}
+                    className="flex items-start"
                     variant={
                       message.sender_id === sessionUser?.user_id
                         ? "sent"
                         : "received"
                     }
                   >
-                    <ChatBubbleAvatar
-                      src={
-                        message.sender_id === sessionUser?.user_id
-                          ? sessionUser?.user_profile_pic ||
-                            "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"
-                          : selectedUser?.user_profile_pic ||
-                            "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"
-                      }
-                      fallback={
-                        message.sender_id === sessionUser?.user_id
-                          ? sessionUser?.user_nickname
-                          : selectedUser?.user_nickname
-                      }
-                    />
+                    <div className="flex flex-col items-center">
+                      <h6 className="text-xs font-bold gap-1">
+                        {message.sender_id === sessionUser?.user_id
+                          ? "You"
+                          : mem?.find(
+                              (member) => member.user_id === message.sender_id
+                            ).user_nickname ?? "Unknown"}
+                      </h6>
+                      <ChatBubbleAvatar
+                        src={
+                          message.sender_id === sessionUser?.user_id
+                            ? sessionUser?.user_profile_pic ||
+                              "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"
+                            : selectedUser?.user_profile_pic ||
+                              "https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3467.jpg"
+                        }
+                        fallback={
+                          message.sender_id === sessionUser?.user_id
+                            ? sessionUser?.user_nickname
+                            : selectedUser?.user_nickname
+                        }
+                      />
+                    </div>
                     <ChatBubbleMessage
                       variant={
                         message.sender_id === sessionUser?.user_id
@@ -306,13 +320,16 @@ const Chat: React.FC<ChatProps> = ({
                       }
                     >
                       {message.message_content}
+                      <ChatBubbleTimestamp
+                        timestamp={
+                          message.message_timestamp
+                            ? new Date(
+                                message.message_timestamp
+                              ).toLocaleTimeString()
+                            : ""
+                        }
+                      />
                     </ChatBubbleMessage>
-                    <ChatBubbleTimestamp
-                      timestamp={
-                        message.message_timestamp?.toString() ||
-                        new Date().toLocaleTimeString()
-                      }
-                    />
                   </ChatBubble>
                 ))}
             </ChatMessageList>
