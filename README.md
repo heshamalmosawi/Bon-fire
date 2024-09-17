@@ -1,4 +1,4 @@
-# The Bonfire
+# Bonfire
 <p align=center><img src="https://github.com/user-attachments/assets/e701ead0-7182-4036-a2db-285bb98b2d7e" alt="Bonfire Logo" width=400></p>
 
 ## Description
@@ -33,6 +33,6 @@ Or you can take the long route and navigate to the `backend/` dir and run it usi
 ## Team
 - [Hashem Alzaki](https://github.com/SnakeSees)
 - [Abdulrahman Idrees](https://github.com/akhaled01)
+- [Fatima Abbas](https://github.com/xlvk)
 - [Noora Wael](https://github.com/NooraWael)
 - [Sayed Hesham Al-Mosawi](https://github.com/heshamalmosawi)
-- [Fatima Abbas](https://github.com/xlvk)
