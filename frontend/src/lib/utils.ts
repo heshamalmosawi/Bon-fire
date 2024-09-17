@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export const CheckMimeType = (file: File) => {
   const validMimeTypes = ["image/png", "image/jpeg", "image/gif"];
   console.log(validMimeTypes.includes(file.type));
-  return validMimeTypes.includes(file.type);
+  return validMimeTypes.includes(file.type) && file.size <= 1000000;
 };
 
 export const getAgo = (isoDate: string): string => {

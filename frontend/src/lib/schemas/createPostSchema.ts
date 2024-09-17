@@ -1,10 +1,13 @@
 import { z } from "zod";
 import { HandleFileUpload } from "../handleFileUpload";
 import axios from "axios";
+import { CheckMimeType } from "../utils";
 
 export const createPostSchema = z.object({
   textContent: z.string().min(5).max(180,"Post must be between 5 and 180 characters"),
-  imageContent: z.instanceof(File).optional(),
+  imageContent: z.instanceof(File).refine((file) => CheckMimeType(file), {
+    message: `Mime type of file unacceptable`,
+  }).optional(),
   groupId: z.string().optional(),
   visibility: z.string().optional(),
   selectedFollowers: z.array(z.string()).optional(),
