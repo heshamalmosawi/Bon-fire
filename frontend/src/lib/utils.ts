@@ -41,3 +41,14 @@ export const getAgo = (isoDate: string): string => {
     return `${diffSeconds} second${diffSeconds > 1 ? "s" : ""} ago`;
   }
 };
+
+// Debounce function to limit the number of times a function is called. Default delay is 300ms.
+export const debounce = (func: Function, delay = 300) => {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return function (this: any, ...args: any[]) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
+};

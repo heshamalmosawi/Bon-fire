@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useRouter } from 'next/navigation';
 import { handleFollow, fetchSessionUser, fetchPeople } from '../lib/api';
 import Link from "next/link";
+import { debounce } from "@/lib/utils";
 
 interface Person {
   user_id: string;
@@ -124,7 +125,7 @@ const AllPeopleList = () => {
               </Link>
               <button
                 className={`mt-4 w-full py-2 rounded-full ${person.user_id === sessionUser ? 'text-indigo-400 font-semibold text-lg border-solid border-2 border-indigo-400' : 'bg-indigo-500 text-white'}`}
-                onClick={() => updateFollow(person)}
+                onClick={debounce(() => updateFollow(person))}
                 disabled={person.user_id === sessionUser}
               >
                 {buttonText[person.user_id]}

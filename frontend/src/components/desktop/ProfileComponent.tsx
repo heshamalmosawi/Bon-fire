@@ -4,6 +4,7 @@ import EditProfile from "../EditProfile";
 import { handleFollow } from "@/lib/api";
 import { Profile } from "@/lib/interfaces";
 import Link from "next/link";
+import { debounce } from "@/lib/utils";
 
 interface ProfileProps extends Profile {
   session_user: string;
@@ -122,7 +123,7 @@ export const ProfileComponent: React.FC<ProfileProps> = ({
           )}
           {session_user && session_user !== u_id && (
             <button
-              onClick={() => updateFollow()}
+              onClick={debounce(() => updateFollow())}
               className="mt-4 bg-indigo-500 text-white w-full py-2 rounded-full "
             >
               {followbtn_message}
