@@ -54,6 +54,7 @@ const GroupPage = () => {
     new Set()
   );
   const [members, setMembers] = useState<any[]>([]);
+  const [members2, setMembers2] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [groups, setGroups] = useState<any[]>([]); // State for groups
   const [user, setUser] = useState<any>();
@@ -232,7 +233,10 @@ const GroupPage = () => {
           total_members: data.group_info.total_members,
         });
 
-        if (data.members) setMembers(data.members);
+        if (data.members){
+          setMembers(data.members);
+          setMembers2([...data.members, data.group_info.owner]);
+        } 
         if (data.posts) setPosts(data.posts);
       }
     } catch (error) {
@@ -556,7 +560,7 @@ const GroupPage = () => {
         sessionUser={user}
         groupID={groupID}
         group={groupProfile}
-        mem={members}
+        mem={members2}
         selectedUser={null}
         SetNewMessageFlag={() => {}}
         newMessageFlag={false}
