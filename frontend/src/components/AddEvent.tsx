@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createEventSchema, handleCreateEvent } from "@/lib/schemas/createEventSchema";
 import { useState, useEffect } from "react";
 import { fetchSessionUser } from "@/lib/api";
+import { useToast } from "./ui/use-toast";
 
 export default function EventDialog() {
     const [open, setOpen] = useState(false);
@@ -24,6 +25,7 @@ export default function EventDialog() {
     const [groupId, setGroupId] = useState("");
     const [creatorId, setCreatorId] = useState("");
     const [minDate, setMinDate] = useState("");
+    const { toast } = useToast();
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -60,6 +62,18 @@ export default function EventDialog() {
             console.error("Invalid input: Fields cannot be empty.");
             return;
         }
+
+        const eventDateTime = new Date(dateTime);
+    const now = new Date();
+
+    if (eventDateTime < now) {
+        toast({
+            variant: "destructive",
+            title: "Error creating event",
+            description: "Event date and time must be in the future.",
+          });
+        return;
+    }
 
         try {
             const formData = createEventSchema.parse({
