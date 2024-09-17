@@ -206,7 +206,7 @@ const GroupPage = () => {
       }
       if (response.status === 400) {
         // No data found for the group
-        router.push("/404"); // Redirect to an unauthorized page
+        router.push("/groups"); // Redirect to an unauthorized page
         return;
       }
       if (!response.ok) {

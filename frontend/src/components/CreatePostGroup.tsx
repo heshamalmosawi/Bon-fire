@@ -61,6 +61,7 @@ const CreatePostForGroup = ({
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Authenticate and fetch user data
   useEffect(() => {
@@ -88,21 +89,24 @@ const CreatePostForGroup = ({
   const form = useForm<z.infer<typeof createPostSchema>>({
     resolver: zodResolver(createPostSchema),
     defaultValues: {
-      groupId: groupID
-    }
+      groupId: groupID,
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof createPostSchema>) => {
     console.log("Form Submitted", values);
     try {
-       const payload = {
-         ...values,
-         post_exposure: "group", // Privacy is automatically set to "group"
-         groupId: groupID, // Group ID passed from the props
-       };
+      const payload = {
+        ...values,
+        post_exposure: "group", // Privacy is automatically set to "group"
+        groupId: groupID, // Group ID passed from the props
+      };
+
+      setSubmitting(true);
       await HandleCreatePost(values);
 
       setIsDialogOpen(false);
+      setSubmitting(false);
       onPostCreated();
     } catch (error) {
       console.error("Error creating post:", error);
@@ -202,7 +206,7 @@ const CreatePostForGroup = ({
                 />
               </div>
               <div className="w-full flex items-center justify-end gap-5">
-                <Button type="submit">Submit</Button>
+                <Button type="submit" disabled={submitting}>Submit</Button>
               </div>
             </form>
           </Form>
