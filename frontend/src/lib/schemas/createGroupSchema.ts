@@ -2,8 +2,8 @@ import { z } from "zod";
 
 // Schema for group creation
 export const groupCreateSchema = z.object({
-  groupName: z.string().trim().min(1, "Group name is required"),
-  groupDescrip: z.string().trim().min(1, "Group description is required"),
+  groupName: z.string().trim().min(1, "Group name is required").max(25, "Group name is too long"),
+  groupDescrip: z.string().trim().min(1, "Group description is required").max(255, "Group description is too long"),
 });
 
 export const HandleCreateGroup = async (
