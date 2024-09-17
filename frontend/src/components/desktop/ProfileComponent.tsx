@@ -53,9 +53,9 @@ export const ProfileComponent: React.FC<ProfileProps> = ({
     let resp = await handleFollow(u_id);
     let follow = is_followed;
     if (resp.success) {
-      follow = !follow;
       // setFollowbtn_message(follow ? "Unfollow" : "Follow");
       if (privacy === "Public") {
+        follow = !follow;
         save_changes({
           fname: fname,
           lname: lname,
@@ -73,9 +73,8 @@ export const ProfileComponent: React.FC<ProfileProps> = ({
         if (follow) {
           follow = !follow;
           x = false;
-        }
-        if (!x) {
-          x = true;
+        } else {
+          x = !x;
         }
         save_changes({
           fname: fname,
