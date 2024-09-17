@@ -36,3 +36,4 @@ Or you can take the long route and navigate to the `backend/` dir and run it usi
 - [Fatima Abbas](https://github.com/xlvk)
 - [Noora Wael](https://github.com/NooraWael)
 - [Sayed Hesham Al-Mosawi](https://github.com/heshamalmosawi)
+- [Fares Alashkar](https://github.com/Exortix)
