@@ -3,7 +3,7 @@ import { HandleFileUpload } from "../handleFileUpload";
 import axios from "axios";
 
 export const createPostSchema = z.object({
-  textContent: z.string().min(5),
+  textContent: z.string().min(5).max(180,"Post must be between 5 and 180 characters"),
   imageContent: z.instanceof(File).optional(),
   groupId: z.string().optional(),
   visibility: z.string().optional(),

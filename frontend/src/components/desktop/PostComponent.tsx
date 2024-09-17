@@ -15,6 +15,17 @@ const PostComponent = (props: PostProps) => {
   const [liked, setliked] = useState(props.postIsLiked);
   const { toast } = useToast();
 
+  const getTextPreview = (content: string) => {
+    const lines = content.split(/\r?\n/); // Split content into lines
+    const firstTwoLines = lines.slice(0, 2).join('\n'); // Join the first two lines
+  
+    if (lines.length > 2) {
+      return `${firstTwoLines}...`;
+    }
+    return firstTwoLines;
+  };
+
+  
   const togglePostLike = async () => {
     // Optimistically update the like state
     const newLikedState = !liked;
@@ -82,11 +93,8 @@ const PostComponent = (props: PostProps) => {
           <div
             id="post-text-content"
             className="text-white text-sm w-full break-all"
-            dangerouslySetInnerHTML={{
-              __html: props.post_content.replace(/\n/g, "<br/>"),
-            }}
           >
-            {/* {props.post_content} */}
+            {getTextPreview(props.post_content)}
           </div>
           {props.post_image_path ? (
             <Image

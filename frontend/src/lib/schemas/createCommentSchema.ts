@@ -4,7 +4,7 @@ import { CheckMimeType } from "../utils";
 
 export const CommentCreationSchema = z.object({
   post_id: z.string().uuid(),
-  comment_content: z.string().min(1, "Comment content cannot be empty"),
+  comment_content: z.string().min(1, "Comment content cannot be empty").max(180, "Comment content cannot exceed 180 characters"),
   comment_image_path: z
     .instanceof(File)
     .refine((file) => CheckMimeType(file), {
