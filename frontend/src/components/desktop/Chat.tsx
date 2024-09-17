@@ -182,15 +182,13 @@ const Chat: React.FC<ChatProps> = ({
         ws.send(messageString);
       };
 
-      var tempMessage = newChatMessage;
-      tempMessage.message_timestamp  = tempMessage.message_timestamp ? tempMessage.message_timestamp : new Date().toLocaleTimeString();
 
       // Update chat history only here
-      setChatHistory((prevHistory) => [...(prevHistory || []), tempMessage]);
-      setNewMessage("");
+ 
 
       console.log("Chat history:", chatHistory);
 
+      console.log("msg:", newChatMessage);
       // Store the message in the database
       if (groupID && groupID != "") {
         try {
@@ -244,6 +242,11 @@ const Chat: React.FC<ChatProps> = ({
           console.error("Error storing message:", error);
         }
       }
+      var tempMessage = newChatMessage;
+      tempMessage.message_timestamp  = tempMessage.message_timestamp ? tempMessage.message_timestamp : new Date().toLocaleTimeString();
+
+      setChatHistory((prevHistory) => [...(prevHistory || []), newChatMessage]);
+      setNewMessage("");
     }
   };
 
