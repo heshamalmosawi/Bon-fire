@@ -334,7 +334,12 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					if !flag {
-						user_posts = append(user_posts[:i], user_posts[i+1:]...)
+						if i < len(user_posts) {
+							// if the post is not visible, remove it and continue
+							user_posts = append(user_posts[:i], user_posts[i+1:]...)
+						} else {
+							user_posts = user_posts[:i]
+						}
 						continue
 					}
 				}

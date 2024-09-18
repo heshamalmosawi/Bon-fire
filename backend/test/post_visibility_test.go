@@ -100,7 +100,7 @@ func TestPostVisibility(t *testing.T) {
 		PostID:        post3ID,
 		PostContent:   "Custom post by user3",
 		PostImagePath: "/path/to/image3",
-		PostExposure:  "custom",
+		PostExposure:  "Custom",
 		GroupID:       uuid.Nil,
 		PostLikeCount: 0,
 		CreatedAt:     "2024-01-03T00:00:00Z",

@@ -97,7 +97,7 @@ func TestHandleProfileUpdate(t *testing.T) {
 	if new_user.UserID != user.UserID {
 		t.Fatal("FAIL: new user has different UserID")
 	} else if new_user.ProfileExposure != "Public" {
-		t.Fatalf("FAIL: unexpected profile exposure: got %v want 'public'", new_user.ProfileExposure)
+		t.Fatalf("FAIL: unexpected profile exposure: got %v want 'Public'", new_user.ProfileExposure)
 	}
 
 	if err := os.Remove("test.db"); err != nil {

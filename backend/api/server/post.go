@@ -166,20 +166,20 @@ func HandleCreatePosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if postRequest.PostExposure == "custom" && len(postRequest.CustomFollowers) > 0 {
+	if postRequest.PostExposure == "Custom" && len(postRequest.CustomFollowers) > 0 {
         var userIDs []uuid.UUID
 		fmt.Println(postRequest.CustomFollowers)
         for _, id := range postRequest.CustomFollowers {
             userID, err := uuid.FromString(id)
             if err != nil {
-                log.Printf("Invalid UUID in custom followers: %v", err)
+                log.Printf("Invalid UUID in Custom followers: %v", err)
                 continue // Log invalid UUIDs but do not terminate the operation
             }
             userIDs = append(userIDs, userID)
         }
         // Create views for each follower
         if err := models.CreatePostViewsForUsers(postID, userIDs); err != nil {
-            http.Error(w, "Failed to save custom views", http.StatusInternalServerError)
+            http.Error(w, "Failed to save Custom views", http.StatusInternalServerError)
             return
         }
     }

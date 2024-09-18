@@ -22,7 +22,7 @@ export const HandleCreatePost = async (
     post_image_path: values.imageContent
       ? await HandleFileUpload(values.imageContent)
       : "",
-    post_exposure: values.groupId ? "group" : values.visibility?.toLowerCase(), // handle privacy later on
+    post_exposure: values.groupId ? "group" : values.visibility,
     group_id: values.groupId ? values.groupId : "",
     selectedFollowers: values.selectedFollowers,
   };
