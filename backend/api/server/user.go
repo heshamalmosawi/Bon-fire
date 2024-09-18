@@ -281,6 +281,9 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		var posts []PostWithAuthor
 
 		for _, like := range user_posts_likes {
+			if like.PostID == uuid.Nil {
+				continue
+			}
 			post, err := models.GetPostByPostID(like.PostID)
 			if err != nil {
 				log.Println("HandleProfile: Error getting post by ID", err)
